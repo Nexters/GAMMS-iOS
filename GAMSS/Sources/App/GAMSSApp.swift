@@ -11,7 +11,7 @@ import SwiftUI
 struct GAMSSApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LoginView()
         }
     }
 }
