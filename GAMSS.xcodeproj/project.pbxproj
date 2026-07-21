@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		70248D85300794C800857369 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 70248D84300794C800857369 /* FirebaseCrashlytics */; };
+		70248DCD300D429100857369 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 70248DCC300D429100857369 /* FirebaseAuth */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				70248D85300794C800857369 /* FirebaseCrashlytics in Frameworks */,
+				70248DCD300D429100857369 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +87,7 @@
 			name = GAMSS;
 			packageProductDependencies = (
 				70248D84300794C800857369 /* FirebaseCrashlytics */,
+				70248DCC300D429100857369 /* FirebaseAuth */,
 			);
 			productName = GAMSS;
 			productReference = 708F57F33003C651008DF433 /* GAMSS.app */;
@@ -402,6 +405,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 70248D83300794C800857369 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
+		};
+		70248DCC300D429100857369 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 70248D83300794C800857369 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
