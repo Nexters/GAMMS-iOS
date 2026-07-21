@@ -23,7 +23,7 @@ struct GAMSSApp: App {
     
     var body: some Scene {
         WindowGroup {
-            LoginView()
+            LoginView(viewModel: LoginViewModel(loginUseCase: DefaultLoginUseCase(authRepository: DefaultAuthRepository(networkManager: NetworkManager.shared))))
         }
     }
 }
