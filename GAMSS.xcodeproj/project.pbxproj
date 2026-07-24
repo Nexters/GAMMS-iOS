@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		16FD4F6D002D9911BCDA46DD /* GAMSSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */; };
+		24EED49AAB4C574B02E9C077 /* EmotionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */; };
 		26A84A0255BB5BB7139414C5 /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = 4F92A4F86371ED0E8E85D78F /* Tokenizers */; };
 		70248D85300794C800857369 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 70248D84300794C800857369 /* FirebaseCrashlytics */; };
 		70248DCD300D429100857369 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 70248DCC300D429100857369 /* FirebaseAuth */; };
@@ -30,6 +31,7 @@
 		5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GAMSSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		708F57F33003C651008DF433 /* GAMSS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GAMSS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GAMSSTests.swift; sourceTree = "<group>"; };
+		CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -80,8 +82,8 @@
 			isa = PBXGroup;
 			children = (
 				7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */,
+				EFFEB6B04B94488D8B385CA9 /* Domain */,
 			);
-			name = GAMSSTests;
 			path = GAMSSTests;
 			sourceTree = "<group>";
 		};
@@ -112,12 +114,30 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		DC46D39DE9FC00DCA99B4FFD /* Entity */ = {
+			isa = PBXGroup;
+			children = (
+				CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */,
+			);
+			name = Entity;
+			path = Entity;
+			sourceTree = "<group>";
+		};
 		E70DADCC4AFBBF2F51563C31 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
 				316EA002FAC5D3328796EF90 /* Foundation.framework */,
 			);
 			name = iOS;
+			sourceTree = "<group>";
+		};
+		EFFEB6B04B94488D8B385CA9 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				DC46D39DE9FC00DCA99B4FFD /* Entity */,
+			);
+			name = Domain;
+			path = Domain;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -265,6 +285,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				16FD4F6D002D9911BCDA46DD /* GAMSSTests.swift in Sources */,
+				24EED49AAB4C574B02E9C077 /* EmotionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
