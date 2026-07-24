@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06BCF4ADC30405F292D7B64C /* EmotionTestViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */; };
 		10B076C4CBD5237ECB6B305D /* DefaultAnalyzeEmotionUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */; };
 		16FD4F6D002D9911BCDA46DD /* GAMSSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */; };
 		24EED49AAB4C574B02E9C077 /* EmotionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */; };
@@ -34,6 +35,7 @@
 		5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GAMSSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		708F57F33003C651008DF433 /* GAMSS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GAMSS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GAMSSTests.swift; sourceTree = "<group>"; };
+		79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTestViewModelTests.swift; sourceTree = "<group>"; };
 		B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultEmotionAnalysisRepositoryTests.swift; sourceTree = "<group>"; };
 		C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultAnalyzeEmotionUseCaseTests.swift; sourceTree = "<group>"; };
 		CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTests.swift; sourceTree = "<group>"; };
@@ -99,6 +101,7 @@
 				EFFEB6B04B94488D8B385CA9 /* Domain */,
 				EAEA5FB8FF3DB8F303B34C67 /* Data */,
 				086A8E92FA56831BF52BA539 /* Fixtures */,
+				BD2BFF058A8076B74B1722D5 /* Presentation */,
 			);
 			path = GAMSSTests;
 			sourceTree = "<group>";
@@ -144,6 +147,14 @@
 				E70DADCC4AFBBF2F51563C31 /* iOS */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BD2BFF058A8076B74B1722D5 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */,
+			);
+			path = Presentation;
 			sourceTree = "<group>";
 		};
 		DC46D39DE9FC00DCA99B4FFD /* Entity */ = {
@@ -328,6 +339,7 @@
 				24EED49AAB4C574B02E9C077 /* EmotionTests.swift in Sources */,
 				10B076C4CBD5237ECB6B305D /* DefaultAnalyzeEmotionUseCaseTests.swift in Sources */,
 				E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */,
+				06BCF4ADC30405F292D7B64C /* EmotionTestViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
