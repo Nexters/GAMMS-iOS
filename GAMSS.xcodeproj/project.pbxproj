@@ -14,7 +14,9 @@
 		70248D85300794C800857369 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 70248D84300794C800857369 /* FirebaseCrashlytics */; };
 		70248DCD300D429100857369 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 70248DCC300D429100857369 /* FirebaseAuth */; };
 		8F4E518B79C7B76223B098BA /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = 8E8487F478AF703D394C5EB6 /* Tokenizers */; };
+		94A526BCCCD9DF730A39BF97 /* sample_sentences.json in Resources */ = {isa = PBXBuildFile; fileRef = D4BE9D664889F13369325DC9 /* sample_sentences.json */; };
 		B32ACCF04698A89364EDDECE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 316EA002FAC5D3328796EF90 /* Foundation.framework */; };
+		E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,8 +34,10 @@
 		5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GAMSSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		708F57F33003C651008DF433 /* GAMSS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GAMSS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GAMSSTests.swift; sourceTree = "<group>"; };
+		B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultEmotionAnalysisRepositoryTests.swift; sourceTree = "<group>"; };
 		C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultAnalyzeEmotionUseCaseTests.swift; sourceTree = "<group>"; };
 		CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTests.swift; sourceTree = "<group>"; };
+		D4BE9D664889F13369325DC9 /* sample_sentences.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = sample_sentences.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -80,11 +84,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		086A8E92FA56831BF52BA539 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				D4BE9D664889F13369325DC9 /* sample_sentences.json */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
 		26D7D48BE358528B948582FD /* GAMSSTests */ = {
 			isa = PBXGroup;
 			children = (
 				7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */,
 				EFFEB6B04B94488D8B385CA9 /* Domain */,
+				EAEA5FB8FF3DB8F303B34C67 /* Data */,
+				086A8E92FA56831BF52BA539 /* Fixtures */,
 			);
 			path = GAMSSTests;
 			sourceTree = "<group>";
@@ -94,7 +108,6 @@
 			children = (
 				C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */,
 			);
-			name = UseCase;
 			path = UseCase;
 			sourceTree = "<group>";
 		};
@@ -115,6 +128,14 @@
 				5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		7A27C7CF1F9DFCE4338AD7FC /* Repository */ = {
+			isa = PBXGroup;
+			children = (
+				B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */,
+			);
+			path = Repository;
 			sourceTree = "<group>";
 		};
 		AB3A61B1A4856A2545D527E7 /* Frameworks */ = {
@@ -139,6 +160,14 @@
 				316EA002FAC5D3328796EF90 /* Foundation.framework */,
 			);
 			name = iOS;
+			sourceTree = "<group>";
+		};
+		EAEA5FB8FF3DB8F303B34C67 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				7A27C7CF1F9DFCE4338AD7FC /* Repository */,
+			);
+			path = Data;
 			sourceTree = "<group>";
 		};
 		EFFEB6B04B94488D8B385CA9 /* Domain */ = {
@@ -251,6 +280,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94A526BCCCD9DF730A39BF97 /* sample_sentences.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,6 +327,7 @@
 				16FD4F6D002D9911BCDA46DD /* GAMSSTests.swift in Sources */,
 				24EED49AAB4C574B02E9C077 /* EmotionTests.swift in Sources */,
 				10B076C4CBD5237ECB6B305D /* DefaultAnalyzeEmotionUseCaseTests.swift in Sources */,
+				E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
