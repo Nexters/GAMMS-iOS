@@ -138,3 +138,6 @@ iOSInjectionProject/
 # !*.xcworkspace/contents.xcworkspacedata
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
+
+Tools/EmotionModelConversion/.venv/
+Tools/EmotionModelConversion/output/
