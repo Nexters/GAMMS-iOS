@@ -7,12 +7,27 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		16FD4F6D002D9911BCDA46DD /* GAMSSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */; };
 		70248D85300794C800857369 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 70248D84300794C800857369 /* FirebaseCrashlytics */; };
 		70248DCD300D429100857369 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 70248DCC300D429100857369 /* FirebaseAuth */; };
+		B32ACCF04698A89364EDDECE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 316EA002FAC5D3328796EF90 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		424D7ADC07675A052A1CD8C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 708F57EB3003C651008DF433 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 708F57F23003C651008DF433;
+			remoteInfo = GAMSS;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		316EA002FAC5D3328796EF90 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GAMSSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		708F57F33003C651008DF433 /* GAMSS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GAMSS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GAMSSTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -37,6 +52,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		2B86EF9DA3E10D62075F2B31 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B32ACCF04698A89364EDDECE /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		708F57F03003C651008DF433 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -49,11 +72,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		26D7D48BE358528B948582FD /* GAMSSTests */ = {
+			isa = PBXGroup;
+			children = (
+				7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */,
+			);
+			name = GAMSSTests;
+			path = GAMSSTests;
+			sourceTree = "<group>";
+		};
 		708F57EA3003C651008DF433 = {
 			isa = PBXGroup;
 			children = (
 				708F57F53003C651008DF433 /* GAMSS */,
 				708F57F43003C651008DF433 /* Products */,
+				AB3A61B1A4856A2545D527E7 /* Frameworks */,
+				26D7D48BE358528B948582FD /* GAMSSTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -61,8 +95,25 @@
 			isa = PBXGroup;
 			children = (
 				708F57F33003C651008DF433 /* GAMSS.app */,
+				5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		AB3A61B1A4856A2545D527E7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E70DADCC4AFBBF2F51563C31 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E70DADCC4AFBBF2F51563C31 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				316EA002FAC5D3328796EF90 /* Foundation.framework */,
+			);
+			name = iOS;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -92,6 +143,24 @@
 			productName = GAMSS;
 			productReference = 708F57F33003C651008DF433 /* GAMSS.app */;
 			productType = "com.apple.product-type.application";
+		};
+		B597DF103CB9CB5340EDE673 /* GAMSSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 559AE3680766F85989277C9D /* Build configuration list for PBXNativeTarget "GAMSSTests" */;
+			buildPhases = (
+				77502DB6DB316C20BD2EBF7C /* Sources */,
+				2B86EF9DA3E10D62075F2B31 /* Frameworks */,
+				F038DD8C7598ACB88347B63D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				43DF82701E2030B30DAB9EBF /* PBXTargetDependency */,
+			);
+			name = GAMSSTests;
+			productName = GAMSSTests;
+			productReference = 5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -126,12 +195,20 @@
 			projectRoot = "";
 			targets = (
 				708F57F23003C651008DF433 /* GAMSS */,
+				B597DF103CB9CB5340EDE673 /* GAMSSTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		708F57F13003C651008DF433 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F038DD8C7598ACB88347B63D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -174,7 +251,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		77502DB6DB316C20BD2EBF7C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				16FD4F6D002D9911BCDA46DD /* GAMSSTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		43DF82701E2030B30DAB9EBF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = GAMSS;
+			target = 708F57F23003C651008DF433 /* GAMSS */;
+			targetProxy = 424D7ADC07675A052A1CD8C2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		708F57FC3003C653008DF433 /* Debug */ = {
@@ -368,9 +462,49 @@
 			};
 			name = Release;
 		};
+		8A305D6E137D5FF38853FE59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexters.gamss.Tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GAMSS.app/GAMSS";
+			};
+			name = Debug;
+		};
+		AE0A9E514EEAD6687005E404 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexters.gamss.Tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GAMSS.app/GAMSS";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		559AE3680766F85989277C9D /* Build configuration list for PBXNativeTarget "GAMSSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AE0A9E514EEAD6687005E404 /* Release */,
+				8A305D6E137D5FF38853FE59 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		708F57EE3003C651008DF433 /* Build configuration list for PBXProject "GAMSS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
