@@ -28,6 +28,16 @@ final class DefaultEmotionAnalysisRepositoryTests: XCTestCase {
         return try JSONDecoder().decode([Sample].self, from: data)
     }
 
+    // fixture의 token_ids는 이미 Python 쪽에서 truncation된 값이므로,
+    // Swift raw encode 결과도 동일하게 잘라야 긴 문장도 비교가 맞는다.
+    private static let maxLength = 128
+    private static let sepTokenId = 3
+
+    private static func pythonTruncated(_ ids: [Int]) -> [Int] {
+        guard ids.count > maxLength else { return ids }
+        return Array(ids.prefix(maxLength - 1)) + [sepTokenId]
+    }
+
     func test_encode_sampleSentences_matchPythonTokenIds() async throws {
         let tokenizerFolder = Bundle.main.url(forResource: "tokenizer", withExtension: "json")!
             .deletingLastPathComponent()
@@ -35,7 +45,7 @@ final class DefaultEmotionAnalysisRepositoryTests: XCTestCase {
         let samples = try loadSamples()
 
         for sample in samples {
-            let ids = tokenizer.encode(text: sample.text)
+            let ids = Self.pythonTruncated(tokenizer.encode(text: sample.text))
             XCTAssertEqual(
                 ids,
                 sample.tokenIds,

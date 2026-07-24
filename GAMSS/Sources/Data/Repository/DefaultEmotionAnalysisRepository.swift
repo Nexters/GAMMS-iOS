@@ -11,6 +11,7 @@ import Tokenizers
 final class DefaultEmotionAnalysisRepository: EmotionAnalysisRepository {
     private static let maxLength = 128
     private static let padTokenId = 0
+    private static let sepTokenId = 3
 
     private let model: EmotionClassifier
     private let tokenizer: Tokenizer
@@ -63,7 +64,15 @@ final class DefaultEmotionAnalysisRepository: EmotionAnalysisRepository {
     private static func buildModelInputs(
         from tokenIds: [Int]
     ) throws -> (MLMultiArray, MLMultiArray, MLMultiArray) {
-        let truncated = Array(tokenIds.prefix(maxLength))
+        // Python은 truncation 시 마지막 [SEP]를 항상 보존한다. 단순히 앞에서
+        // maxLength개만 자르면 [SEP]가 잘려나가 학습 때와 다른 시퀀스가 되므로,
+        // 여기서도 앞 maxLength-1개 + [SEP]로 동일하게 맞춘다.
+        let truncated: [Int]
+        if tokenIds.count > maxLength {
+            truncated = Array(tokenIds.prefix(maxLength - 1)) + [sepTokenId]
+        } else {
+            truncated = tokenIds
+        }
         let realCount = truncated.count
         let padCount = maxLength - realCount
 

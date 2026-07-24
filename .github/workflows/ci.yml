@@ -58,10 +58,34 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO
 
+      - name: Resolve simulator UDID
+        id: simulator
+        run: |
+          UDID=$(xcrun simctl list devices available --json | jq -r '
+            .devices
+            | to_entries
+            | map(select(.key | test("^com\\.apple\\.CoreSimulator\\.SimRuntime\\.iOS-")))
+            | map(select(.key | capture("iOS-(?<maj>[0-9]+)-(?<min>[0-9]+)") as $v
+                | ($v.maj | tonumber) > 18 or (($v.maj | tonumber) == 18 and ($v.min | tonumber) >= 1)))
+            | map(.value[])
+            | map(select(.isAvailable == true and (.name | startswith("iPhone"))))
+            | (map(select(.name == "iPhone 16")) + .)
+            | .[0].udid // empty
+          ')
+
+          if [ -z "$UDID" ]; then
+            echo "No iOS 18.1+ iPhone simulator found (preferring 'iPhone 16')." >&2
+            xcrun simctl list devices available >&2
+            exit 1
+          fi
+
+          echo "Resolved simulator UDID: $UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
       - name: Test
         run: |
           xcodebuild test \
             -project GAMSS.xcodeproj \
             -scheme GAMSS \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination "id=${{ steps.simulator.outputs.udid }}" \
             CODE_SIGNING_ALLOWED=NO
