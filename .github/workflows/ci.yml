@@ -39,6 +39,17 @@ jobs:
       - name: Pull LFS files
         run: git lfs pull
 
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install CocoaPods dependencies
+        run: pod install
+
       - name: Cache Swift Package dependencies
         uses: actions/cache@v4
         with:
@@ -48,12 +59,12 @@ jobs:
             ${{ runner.os }}-spm-
 
       - name: Resolve Swift Package dependencies
-        run: xcodebuild -resolvePackageDependencies -project GAMSS.xcodeproj -scheme GAMSS
+        run: xcodebuild -resolvePackageDependencies -workspace GAMSS.xcworkspace -scheme GAMSS
 
       - name: Build
         run: |
           xcodebuild build \
-            -project GAMSS.xcodeproj \
+            -workspace GAMSS.xcworkspace \
             -scheme GAMSS \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO
@@ -85,7 +96,7 @@ jobs:
       - name: Test
         run: |
           xcodebuild test \
-            -project GAMSS.xcodeproj \
+            -workspace GAMSS.xcworkspace \
             -scheme GAMSS \
             -destination "id=${{ steps.simulator.outputs.udid }}" \
             CODE_SIGNING_ALLOWED=NO

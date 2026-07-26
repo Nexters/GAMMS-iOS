@@ -16,6 +16,7 @@
 		70248DCD300D429100857369 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 70248DCC300D429100857369 /* FirebaseAuth */; };
 		8F4E518B79C7B76223B098BA /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = 8E8487F478AF703D394C5EB6 /* Tokenizers */; };
 		94A526BCCCD9DF730A39BF97 /* sample_sentences.json in Resources */ = {isa = PBXBuildFile; fileRef = D4BE9D664889F13369325DC9 /* sample_sentences.json */; };
+		A8948FBCA4DF4E43F2C582EA /* Pods_GAMSS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */; };
 		B32ACCF04698A89364EDDECE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 316EA002FAC5D3328796EF90 /* Foundation.framework */; };
 		E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */; };
 /* End PBXBuildFile section */
@@ -37,9 +38,12 @@
 		7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GAMSSTests.swift; sourceTree = "<group>"; };
 		79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTestViewModelTests.swift; sourceTree = "<group>"; };
 		B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultEmotionAnalysisRepositoryTests.swift; sourceTree = "<group>"; };
+		BECB25622D5F9ADA8FA5E5B6 /* Pods-GAMSS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSS.release.xcconfig"; path = "Target Support Files/Pods-GAMSS/Pods-GAMSS.release.xcconfig"; sourceTree = "<group>"; };
 		C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultAnalyzeEmotionUseCaseTests.swift; sourceTree = "<group>"; };
 		CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTests.swift; sourceTree = "<group>"; };
 		D4BE9D664889F13369325DC9 /* sample_sentences.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = sample_sentences.json; sourceTree = "<group>"; };
+		EAD22D6FD3BB2E8E689A52BE /* Pods-GAMSS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSS.debug.xcconfig"; path = "Target Support Files/Pods-GAMSS/Pods-GAMSS.debug.xcconfig"; sourceTree = "<group>"; };
+		EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GAMSS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -80,6 +84,7 @@
 				70248D85300794C800857369 /* FirebaseCrashlytics in Frameworks */,
 				70248DCD300D429100857369 /* FirebaseAuth in Frameworks */,
 				26A84A0255BB5BB7139414C5 /* Tokenizers in Frameworks */,
+				A8948FBCA4DF4E43F2C582EA /* Pods_GAMSS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,6 +97,16 @@
 				D4BE9D664889F13369325DC9 /* sample_sentences.json */,
 			);
 			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		0D3A37EABFFD3944C613D506 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				EAD22D6FD3BB2E8E689A52BE /* Pods-GAMSS.debug.xcconfig */,
+				BECB25622D5F9ADA8FA5E5B6 /* Pods-GAMSS.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
 			sourceTree = "<group>";
 		};
 		26D7D48BE358528B948582FD /* GAMSSTests */ = {
@@ -121,6 +136,7 @@
 				708F57F43003C651008DF433 /* Products */,
 				AB3A61B1A4856A2545D527E7 /* Frameworks */,
 				26D7D48BE358528B948582FD /* GAMSSTests */,
+				0D3A37EABFFD3944C613D506 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -145,6 +161,7 @@
 			isa = PBXGroup;
 			children = (
 				E70DADCC4AFBBF2F51563C31 /* iOS */,
+				EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -197,10 +214,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 708F57FE3003C653008DF433 /* Build configuration list for PBXNativeTarget "GAMSS" */;
 			buildPhases = (
+				873B7F497312802FC8BE0638 /* [CP] Check Pods Manifest.lock */,
 				708F57EF3003C651008DF433 /* Sources */,
 				708F57F03003C651008DF433 /* Frameworks */,
 				708F57F13003C651008DF433 /* Resources */,
 				70248D8830094BE000857369 /* ShellScript */,
+				E43EA2512EC8CFDD0BA36711 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -320,6 +339,45 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
+		873B7F497312802FC8BE0638 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-GAMSS-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E43EA2512EC8CFDD0BA36711 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-GAMSS/Pods-GAMSS-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-GAMSS/Pods-GAMSS-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GAMSS/Pods-GAMSS-resources.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -476,6 +534,7 @@
 		};
 		708F57FF3003C653008DF433 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EAD22D6FD3BB2E8E689A52BE /* Pods-GAMSS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -484,6 +543,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2KAH6SCW4S;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GAMSS/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -512,6 +572,7 @@
 		};
 		708F58003003C653008DF433 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BECB25622D5F9ADA8FA5E5B6 /* Pods-GAMSS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -520,6 +581,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2KAH6SCW4S;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GAMSS/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
