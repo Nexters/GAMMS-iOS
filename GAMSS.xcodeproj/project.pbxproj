@@ -18,6 +18,7 @@
 		94A526BCCCD9DF730A39BF97 /* sample_sentences.json in Resources */ = {isa = PBXBuildFile; fileRef = D4BE9D664889F13369325DC9 /* sample_sentences.json */; };
 		A8948FBCA4DF4E43F2C582EA /* Pods_GAMSS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */; };
 		B32ACCF04698A89364EDDECE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 316EA002FAC5D3328796EF90 /* Foundation.framework */; };
+		BA7748118B0D2759E0F6A207 /* Pods_GAMSSTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1CC8FA289575E4B98C41539 /* Pods_GAMSSTests.framework */; };
 		E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -32,6 +33,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1A8F630A15A80F5FAB52F2C1 /* Pods-GAMSSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSSTests.debug.xcconfig"; path = "Target Support Files/Pods-GAMSSTests/Pods-GAMSSTests.debug.xcconfig"; sourceTree = "<group>"; };
 		316EA002FAC5D3328796EF90 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GAMSSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		708F57F33003C651008DF433 /* GAMSS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GAMSS.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -42,8 +44,10 @@
 		C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultAnalyzeEmotionUseCaseTests.swift; sourceTree = "<group>"; };
 		CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTests.swift; sourceTree = "<group>"; };
 		D4BE9D664889F13369325DC9 /* sample_sentences.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = sample_sentences.json; sourceTree = "<group>"; };
+		E7BE3E28AC7871B572DD4B7E /* Pods-GAMSSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSSTests.release.xcconfig"; path = "Target Support Files/Pods-GAMSSTests/Pods-GAMSSTests.release.xcconfig"; sourceTree = "<group>"; };
 		EAD22D6FD3BB2E8E689A52BE /* Pods-GAMSS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSS.debug.xcconfig"; path = "Target Support Files/Pods-GAMSS/Pods-GAMSS.debug.xcconfig"; sourceTree = "<group>"; };
 		EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GAMSS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1CC8FA289575E4B98C41539 /* Pods_GAMSSTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GAMSSTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -74,6 +78,7 @@
 			files = (
 				B32ACCF04698A89364EDDECE /* Foundation.framework in Frameworks */,
 				8F4E518B79C7B76223B098BA /* Tokenizers in Frameworks */,
+				BA7748118B0D2759E0F6A207 /* Pods_GAMSSTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -104,6 +109,8 @@
 			children = (
 				EAD22D6FD3BB2E8E689A52BE /* Pods-GAMSS.debug.xcconfig */,
 				BECB25622D5F9ADA8FA5E5B6 /* Pods-GAMSS.release.xcconfig */,
+				E7BE3E28AC7871B572DD4B7E /* Pods-GAMSSTests.release.xcconfig */,
+				1A8F630A15A80F5FAB52F2C1 /* Pods-GAMSSTests.debug.xcconfig */,
 			);
 			name = Pods;
 			path = Pods;
@@ -162,6 +169,7 @@
 			children = (
 				E70DADCC4AFBBF2F51563C31 /* iOS */,
 				EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */,
+				F1CC8FA289575E4B98C41539 /* Pods_GAMSSTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -242,6 +250,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 559AE3680766F85989277C9D /* Build configuration list for PBXNativeTarget "GAMSSTests" */;
 			buildPhases = (
+				EABD51A19CAD662AAF4003DA /* [CP] Check Pods Manifest.lock */,
 				77502DB6DB316C20BD2EBF7C /* Sources */,
 				2B86EF9DA3E10D62075F2B31 /* Frameworks */,
 				F038DD8C7598ACB88347B63D /* Resources */,
@@ -377,6 +386,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GAMSS/Pods-GAMSS-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		EABD51A19CAD662AAF4003DA /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-GAMSSTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -557,7 +588,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				OTHER_LDFLAGS = "-Objc";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-Objc",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.nexters.gamss;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -595,7 +629,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				OTHER_LDFLAGS = "-Objc";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-Objc",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.nexters.gamss;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -610,6 +647,7 @@
 		};
 		8A305D6E137D5FF38853FE59 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1A8F630A15A80F5FAB52F2C1 /* Pods-GAMSSTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -625,6 +663,7 @@
 		};
 		AE0A9E514EEAD6687005E404 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E7BE3E28AC7871B572DD4B7E /* Pods-GAMSSTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
