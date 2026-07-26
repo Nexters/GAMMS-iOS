@@ -5,7 +5,7 @@
 //  Created by cchanmi on 7/24/26.
 //
 
-import CoreML
+import TensorFlowLite
 import Tokenizers
 
 final class DefaultEmotionAnalysisRepository: EmotionAnalysisRepository {
@@ -13,19 +13,48 @@ final class DefaultEmotionAnalysisRepository: EmotionAnalysisRepository {
     private static let padTokenId = 0
     private static let sepTokenId = 3
 
-    private let model: EmotionClassifier
-    private let tokenizer: Tokenizer
+    private enum InputRole {
+        case ids
+        case mask
+        case tokenType
+    }
 
-    private init(model: EmotionClassifier, tokenizer: Tokenizer) {
-        self.model = model
+    private let interpreter: Interpreter
+    private let tokenizer: Tokenizer
+    private let inputRoles: [InputRole]
+    private let inputDataTypes: [Tensor.DataType]
+
+    private init(
+        interpreter: Interpreter,
+        tokenizer: Tokenizer,
+        inputRoles: [InputRole],
+        inputDataTypes: [Tensor.DataType]
+    ) {
+        self.interpreter = interpreter
         self.tokenizer = tokenizer
+        self.inputRoles = inputRoles
+        self.inputDataTypes = inputDataTypes
     }
 
     static func make() async throws -> DefaultEmotionAnalysisRepository {
-        let configuration = MLModelConfiguration()
-        configuration.computeUnits = .all
+        guard let modelPath = Bundle.main.path(forResource: "emotion_int8", ofType: "tflite") else {
+            throw EmotionAnalysisError.modelLoadFailed
+        }
 
-        guard let model = try? EmotionClassifier(configuration: configuration) else {
+        var options = Interpreter.Options()
+        options.threadCount = 4
+
+        // GPU/Metal/CoreML 델리게이트는 의도적으로 사용하지 않는다.
+        // int8 양자화된 gather/embedding 연산이 CoreML 델리게이트 컴파일 경로에서
+        // 크래시하는 문제가 이 프로젝트의 Core ML int8 실험에서도 관측된 바 있다.
+        guard let interpreter = try? Interpreter(modelPath: modelPath, options: options) else {
+            throw EmotionAnalysisError.modelLoadFailed
+        }
+        guard (try? interpreter.allocateTensors()) != nil else {
+            throw EmotionAnalysisError.modelLoadFailed
+        }
+
+        guard let (roles, dataTypes) = try? Self.resolveInputSpecs(interpreter) else {
             throw EmotionAnalysisError.modelLoadFailed
         }
 
@@ -38,7 +67,35 @@ final class DefaultEmotionAnalysisRepository: EmotionAnalysisRepository {
             throw EmotionAnalysisError.modelLoadFailed
         }
 
-        return DefaultEmotionAnalysisRepository(model: model, tokenizer: tokenizer)
+        return DefaultEmotionAnalysisRepository(
+            interpreter: interpreter,
+            tokenizer: tokenizer,
+            inputRoles: roles,
+            inputDataTypes: dataTypes
+        )
+    }
+
+    // 입력 텐서 이름 → role, dtype을 로드 시점에 한 번 resolve해 캐싱한다.
+    // 모델 재export로 텐서 순서/이름이 바뀌면 로드 시점에 곧바로 실패하게 한다.
+    private static func resolveInputSpecs(
+        _ interpreter: Interpreter
+    ) throws -> ([InputRole], [Tensor.DataType]) {
+        var roles: [InputRole] = []
+        var dataTypes: [Tensor.DataType] = []
+        for index in 0..<interpreter.inputTensorCount {
+            let tensor = try interpreter.input(at: index)
+            if tensor.name.contains("input_ids") {
+                roles.append(.ids)
+            } else if tensor.name.contains("attention_mask") {
+                roles.append(.mask)
+            } else if tensor.name.contains("token_type") {
+                roles.append(.tokenType)
+            } else {
+                throw EmotionAnalysisError.modelLoadFailed
+            }
+            dataTypes.append(tensor.dataType)
+        }
+        return (roles, dataTypes)
     }
 
     func analyze(text: String) async throws -> EmotionAnalysisResult {
@@ -48,22 +105,54 @@ final class DefaultEmotionAnalysisRepository: EmotionAnalysisRepository {
         }
 
         let tokenIds = tokenizer.encode(text: trimmed)
-        let (inputIds, attentionMask, tokenTypeIds) = try Self.buildModelInputs(from: tokenIds)
+        let (inputIds, attentionMask, tokenTypeIds) = Self.buildModelInputs(from: tokenIds)
 
-        guard let output = try? model.prediction(
-            input_ids: inputIds,
-            attention_mask: attentionMask,
-            token_type_ids: tokenTypeIds
-        ) else {
+        guard (try? writeInputs(inputIds: inputIds, attentionMask: attentionMask, tokenTypeIds: tokenTypeIds)) != nil else {
+            throw EmotionAnalysisError.inferenceFailed
+        }
+        guard (try? interpreter.invoke()) != nil else {
+            throw EmotionAnalysisError.inferenceFailed
+        }
+        guard let outputTensor = try? interpreter.output(at: 0) else {
             throw EmotionAnalysisError.inferenceFailed
         }
 
-        return Self.mapToResult(probabilities: output.probabilities)
+        return Self.mapToResult(outputData: outputTensor.data)
+    }
+
+    private func writeInputs(inputIds: [Int], attentionMask: [Int], tokenTypeIds: [Int]) throws {
+        for index in 0..<inputRoles.count {
+            let values: [Int]
+            switch inputRoles[index] {
+            case .ids: values = inputIds
+            case .mask: values = attentionMask
+            case .tokenType: values = tokenTypeIds
+            }
+            let data = Self.serialize(values, as: inputDataTypes[index])
+            try interpreter.copy(data, toInputAt: index)
+        }
+    }
+
+    private static func serialize(_ values: [Int], as dataType: Tensor.DataType) -> Data {
+        if dataType == .int64 {
+            var data = Data(capacity: values.count * MemoryLayout<Int64>.size)
+            for value in values {
+                var int64Value = Int64(value)
+                withUnsafeBytes(of: &int64Value) { data.append(contentsOf: $0) }
+            }
+            return data
+        }
+        var data = Data(capacity: values.count * MemoryLayout<Int32>.size)
+        for value in values {
+            var int32Value = Int32(value)
+            withUnsafeBytes(of: &int32Value) { data.append(contentsOf: $0) }
+        }
+        return data
     }
 
     private static func buildModelInputs(
         from tokenIds: [Int]
-    ) throws -> (MLMultiArray, MLMultiArray, MLMultiArray) {
+    ) -> (ids: [Int], mask: [Int], tokenType: [Int]) {
         // Python은 truncation 시 마지막 [SEP]를 항상 보존한다. 단순히 앞에서
         // maxLength개만 자르면 [SEP]가 잘려나가 학습 때와 다른 시퀀스가 되므로,
         // 여기서도 앞 maxLength-1개 + [SEP]로 동일하게 맞춘다.
@@ -80,35 +169,29 @@ final class DefaultEmotionAnalysisRepository: EmotionAnalysisRepository {
         let mask = Array(repeating: 1, count: realCount) + Array(repeating: 0, count: padCount)
         let tokenTypeIds = Array(repeating: 0, count: maxLength)
 
-        let shape: [NSNumber] = [1, NSNumber(value: maxLength)]
-        let inputIdsArray = try MLMultiArray(shape: shape, dataType: .int32)
-        let attentionMaskArray = try MLMultiArray(shape: shape, dataType: .int32)
-        let tokenTypeIdsArray = try MLMultiArray(shape: shape, dataType: .int32)
-
-        for i in 0..<maxLength {
-            inputIdsArray[i] = NSNumber(value: paddedIds[i])
-            attentionMaskArray[i] = NSNumber(value: mask[i])
-            tokenTypeIdsArray[i] = NSNumber(value: tokenTypeIds[i])
-        }
-
-        return (inputIdsArray, attentionMaskArray, tokenTypeIdsArray)
+        return (paddedIds, mask, tokenTypeIds)
     }
 
-    private static func mapToResult(probabilities: MLMultiArray) -> EmotionAnalysisResult {
-        var bestIndex = 0
-        var bestProbability = 0.0
+    private static func mapToResult(outputData: Data) -> EmotionAnalysisResult {
+        let classCount = Emotion.orderedByModelIndex.count
+        var logits = [Float](repeating: 0, count: classCount)
+        _ = logits.withUnsafeMutableBytes { outputData.copyBytes(to: $0) }
 
-        for index in 0..<Emotion.orderedByModelIndex.count {
-            let probability = probabilities[index].doubleValue
-            if probability > bestProbability {
-                bestProbability = probability
-                bestIndex = index
-            }
+        let maxLogit = logits.max() ?? 0
+        let exponentials = logits.map { expf($0 - maxLogit) }
+        let sumOfExponentials = exponentials.reduce(0, +)
+        let probabilities = exponentials.map { $0 / sumOfExponentials }
+
+        var bestIndex = 0
+        var bestProbability: Float = 0
+        for (index, probability) in probabilities.enumerated() where probability > bestProbability {
+            bestProbability = probability
+            bestIndex = index
         }
 
         return EmotionAnalysisResult(
             emotion: Emotion.orderedByModelIndex[bestIndex],
-            confidence: bestProbability
+            confidence: Double(bestProbability)
         )
     }
 }
