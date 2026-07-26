@@ -8,7 +8,10 @@
 import TensorFlowLite
 import Tokenizers
 
-final class DefaultEmotionAnalysisRepository: EmotionAnalysisRepository {
+// actor로 선언해 interpreter/tokenizer에 대한 동시 접근을 직렬화한다.
+// TFLite Interpreter는 스레드 세이프하지 않아서, analyze가 여러 곳에서
+// 동시에 호출되면 copy/invoke/output 호출이 서로 레이스할 수 있다.
+actor DefaultEmotionAnalysisRepository: EmotionAnalysisRepository {
     private static let maxLength = 128
     private static let padTokenId = 0
     private static let sepTokenId = 3
