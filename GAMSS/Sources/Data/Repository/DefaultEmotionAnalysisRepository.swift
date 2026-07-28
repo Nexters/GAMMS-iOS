@@ -5,6 +5,7 @@
 //  Created by cchanmi on 7/24/26.
 //
 
+import Foundation
 import TensorFlowLite
 import Tokenizers
 
@@ -45,7 +46,9 @@ actor DefaultEmotionAnalysisRepository: EmotionAnalysisRepository {
         }
 
         var options = Interpreter.Options()
-        options.threadCount = 4
+        // 기기 성능 코어 수에 맞춰 스레드 수를 조정한다. 4는 상한일 뿐,
+        // 저사양 기기에서 코어 수 이상으로 스레드를 띄워 컨텍스트 스위칭 비용 절감.
+        options.threadCount = min(4, ProcessInfo.processInfo.activeProcessorCount)
 
         // GPU/Metal/CoreML 델리게이트는 의도적으로 사용하지 않는다.
         // int8 양자화된 gather/embedding 연산이 CoreML 델리게이트 컴파일 경로에서
@@ -87,13 +90,14 @@ actor DefaultEmotionAnalysisRepository: EmotionAnalysisRepository {
         var dataTypes: [Tensor.DataType] = []
         for index in 0..<interpreter.inputTensorCount {
             let tensor = try interpreter.input(at: index)
-            if tensor.name.contains("input_ids") {
+            switch tensor.name {
+            case "serving_default_input_ids:0":
                 roles.append(.ids)
-            } else if tensor.name.contains("attention_mask") {
+            case "serving_default_attention_mask:0":
                 roles.append(.mask)
-            } else if tensor.name.contains("token_type") {
+            case "serving_default_token_type_ids:0":
                 roles.append(.tokenType)
-            } else {
+            default:
                 throw EmotionAnalysisError.modelLoadFailed
             }
             dataTypes.append(tensor.dataType)
@@ -110,17 +114,15 @@ actor DefaultEmotionAnalysisRepository: EmotionAnalysisRepository {
         let tokenIds = tokenizer.encode(text: trimmed)
         let (inputIds, attentionMask, tokenTypeIds) = Self.buildModelInputs(from: tokenIds)
 
-        guard (try? writeInputs(inputIds: inputIds, attentionMask: attentionMask, tokenTypeIds: tokenTypeIds)) != nil else {
+        do {
+            try writeInputs(inputIds: inputIds, attentionMask: attentionMask, tokenTypeIds: tokenTypeIds)
+            try interpreter.invoke()
+            let outputTensor = try interpreter.output(at: 0)
+            return Self.mapToResult(outputData: outputTensor.data)
+        } catch {
+            Log.error("감정 분석 추론 실패: \(error)")
             throw EmotionAnalysisError.inferenceFailed
         }
-        guard (try? interpreter.invoke()) != nil else {
-            throw EmotionAnalysisError.inferenceFailed
-        }
-        guard let outputTensor = try? interpreter.output(at: 0) else {
-            throw EmotionAnalysisError.inferenceFailed
-        }
-
-        return Self.mapToResult(outputData: outputTensor.data)
     }
 
     private func writeInputs(inputIds: [Int], attentionMask: [Int], tokenTypeIds: [Int]) throws {
