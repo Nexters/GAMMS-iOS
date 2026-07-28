@@ -78,6 +78,7 @@ DerivedData/
 ## Playgrounds
 timeline.xctimeline
 playground.xcworkspace
+*.xcworkspace/
 
 # Swift Package Manager
 # Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
@@ -138,3 +139,6 @@ iOSInjectionProject/
 # !*.xcworkspace/contents.xcworkspacedata
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
+
+Tools/EmotionModelConversion/.venv/
+Tools/EmotionModelConversion/output/

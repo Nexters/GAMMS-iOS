@@ -17,11 +17,38 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          lfs: false
 
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: "26.2"
+
+      - name: Compute LFS cache key
+        run: |
+          git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+
+      - name: Restore LFS cache
+        uses: actions/cache@v4
+        id: lfs-cache
+        with:
+          path: .git/lfs
+          key: lfs-${{ hashFiles('.lfs-assets-id') }}
+
+      - name: Pull LFS files
+        run: git lfs pull
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install CocoaPods dependencies
+        run: pod install
 
       - name: Cache Swift Package dependencies
         uses: actions/cache@v4
@@ -32,12 +59,44 @@ jobs:
             ${{ runner.os }}-spm-
 
       - name: Resolve Swift Package dependencies
-        run: xcodebuild -resolvePackageDependencies -project GAMSS.xcodeproj -scheme GAMSS
+        run: xcodebuild -resolvePackageDependencies -workspace GAMSS.xcworkspace -scheme GAMSS
 
       - name: Build
         run: |
           xcodebuild build \
-            -project GAMSS.xcodeproj \
+            -workspace GAMSS.xcworkspace \
             -scheme GAMSS \
             -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Resolve simulator UDID
+        id: simulator
+        run: |
+          UDID=$(xcrun simctl list devices available --json | jq -r '
+            .devices
+            | to_entries
+            | map(select(.key | test("^com\\.apple\\.CoreSimulator\\.SimRuntime\\.iOS-")))
+            | map(select(.key | capture("iOS-(?<maj>[0-9]+)-(?<min>[0-9]+)") as $v
+                | ($v.maj | tonumber) > 18 or (($v.maj | tonumber) == 18 and ($v.min | tonumber) >= 1)))
+            | map(.value[])
+            | map(select(.isAvailable == true and (.name | startswith("iPhone"))))
+            | (map(select(.name == "iPhone 16")) + .)
+            | .[0].udid // empty
+          ')
+
+          if [ -z "$UDID" ]; then
+            echo "No iOS 18.1+ iPhone simulator found (preferring 'iPhone 16')." >&2
+            xcrun simctl list devices available >&2
+            exit 1
+          fi
+
+          echo "Resolved simulator UDID: $UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Test
+        run: |
+          xcodebuild test \
+            -workspace GAMSS.xcworkspace \
+            -scheme GAMSS \
+            -destination "id=${{ steps.simulator.outputs.udid }}" \
             CODE_SIGNING_ALLOWED=NO

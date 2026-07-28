@@ -7,12 +7,47 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06BCF4ADC30405F292D7B64C /* EmotionTestViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */; };
+		10B076C4CBD5237ECB6B305D /* DefaultAnalyzeEmotionUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */; };
+		16FD4F6D002D9911BCDA46DD /* GAMSSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */; };
+		24EED49AAB4C574B02E9C077 /* EmotionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */; };
+		26A84A0255BB5BB7139414C5 /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = 4F92A4F86371ED0E8E85D78F /* Tokenizers */; };
 		70248D85300794C800857369 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 70248D84300794C800857369 /* FirebaseCrashlytics */; };
 		70248DCD300D429100857369 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 70248DCC300D429100857369 /* FirebaseAuth */; };
+		8F4E518B79C7B76223B098BA /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = 8E8487F478AF703D394C5EB6 /* Tokenizers */; };
+		94A526BCCCD9DF730A39BF97 /* sample_sentences.json in Resources */ = {isa = PBXBuildFile; fileRef = D4BE9D664889F13369325DC9 /* sample_sentences.json */; };
+		A8948FBCA4DF4E43F2C582EA /* Pods_GAMSS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */; };
+		B32ACCF04698A89364EDDECE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 316EA002FAC5D3328796EF90 /* Foundation.framework */; };
+		BA7748118B0D2759E0F6A207 /* Pods_GAMSSTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1CC8FA289575E4B98C41539 /* Pods_GAMSSTests.framework */; };
+		E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		424D7ADC07675A052A1CD8C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 708F57EB3003C651008DF433 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 708F57F23003C651008DF433;
+			remoteInfo = GAMSS;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		1A8F630A15A80F5FAB52F2C1 /* Pods-GAMSSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSSTests.debug.xcconfig"; path = "Target Support Files/Pods-GAMSSTests/Pods-GAMSSTests.debug.xcconfig"; sourceTree = "<group>"; };
+		316EA002FAC5D3328796EF90 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GAMSSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		708F57F33003C651008DF433 /* GAMSS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GAMSS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GAMSSTests.swift; sourceTree = "<group>"; };
+		79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTestViewModelTests.swift; sourceTree = "<group>"; };
+		B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultEmotionAnalysisRepositoryTests.swift; sourceTree = "<group>"; };
+		BECB25622D5F9ADA8FA5E5B6 /* Pods-GAMSS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSS.release.xcconfig"; path = "Target Support Files/Pods-GAMSS/Pods-GAMSS.release.xcconfig"; sourceTree = "<group>"; };
+		C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultAnalyzeEmotionUseCaseTests.swift; sourceTree = "<group>"; };
+		CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTests.swift; sourceTree = "<group>"; };
+		D4BE9D664889F13369325DC9 /* sample_sentences.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = sample_sentences.json; sourceTree = "<group>"; };
+		E7BE3E28AC7871B572DD4B7E /* Pods-GAMSSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSSTests.release.xcconfig"; path = "Target Support Files/Pods-GAMSSTests/Pods-GAMSSTests.release.xcconfig"; sourceTree = "<group>"; };
+		EAD22D6FD3BB2E8E689A52BE /* Pods-GAMSS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSS.debug.xcconfig"; path = "Target Support Files/Pods-GAMSS/Pods-GAMSS.debug.xcconfig"; sourceTree = "<group>"; };
+		EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GAMSS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1CC8FA289575E4B98C41539 /* Pods_GAMSSTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GAMSSTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -37,23 +72,78 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		2B86EF9DA3E10D62075F2B31 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B32ACCF04698A89364EDDECE /* Foundation.framework in Frameworks */,
+				8F4E518B79C7B76223B098BA /* Tokenizers in Frameworks */,
+				BA7748118B0D2759E0F6A207 /* Pods_GAMSSTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		708F57F03003C651008DF433 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				70248D85300794C800857369 /* FirebaseCrashlytics in Frameworks */,
 				70248DCD300D429100857369 /* FirebaseAuth in Frameworks */,
+				26A84A0255BB5BB7139414C5 /* Tokenizers in Frameworks */,
+				A8948FBCA4DF4E43F2C582EA /* Pods_GAMSS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		086A8E92FA56831BF52BA539 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				D4BE9D664889F13369325DC9 /* sample_sentences.json */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		0D3A37EABFFD3944C613D506 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				EAD22D6FD3BB2E8E689A52BE /* Pods-GAMSS.debug.xcconfig */,
+				BECB25622D5F9ADA8FA5E5B6 /* Pods-GAMSS.release.xcconfig */,
+				E7BE3E28AC7871B572DD4B7E /* Pods-GAMSSTests.release.xcconfig */,
+				1A8F630A15A80F5FAB52F2C1 /* Pods-GAMSSTests.debug.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		26D7D48BE358528B948582FD /* GAMSSTests */ = {
+			isa = PBXGroup;
+			children = (
+				7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */,
+				EFFEB6B04B94488D8B385CA9 /* Domain */,
+				EAEA5FB8FF3DB8F303B34C67 /* Data */,
+				086A8E92FA56831BF52BA539 /* Fixtures */,
+				BD2BFF058A8076B74B1722D5 /* Presentation */,
+			);
+			path = GAMSSTests;
+			sourceTree = "<group>";
+		};
+		314DAF5013EE9BEFD1FC9A6B /* UseCase */ = {
+			isa = PBXGroup;
+			children = (
+				C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */,
+			);
+			path = UseCase;
+			sourceTree = "<group>";
+		};
 		708F57EA3003C651008DF433 = {
 			isa = PBXGroup;
 			children = (
 				708F57F53003C651008DF433 /* GAMSS */,
 				708F57F43003C651008DF433 /* Products */,
+				AB3A61B1A4856A2545D527E7 /* Frameworks */,
+				26D7D48BE358528B948582FD /* GAMSSTests */,
+				0D3A37EABFFD3944C613D506 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -61,8 +151,68 @@
 			isa = PBXGroup;
 			children = (
 				708F57F33003C651008DF433 /* GAMSS.app */,
+				5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		7A27C7CF1F9DFCE4338AD7FC /* Repository */ = {
+			isa = PBXGroup;
+			children = (
+				B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */,
+			);
+			path = Repository;
+			sourceTree = "<group>";
+		};
+		AB3A61B1A4856A2545D527E7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E70DADCC4AFBBF2F51563C31 /* iOS */,
+				EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */,
+				F1CC8FA289575E4B98C41539 /* Pods_GAMSSTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BD2BFF058A8076B74B1722D5 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		DC46D39DE9FC00DCA99B4FFD /* Entity */ = {
+			isa = PBXGroup;
+			children = (
+				CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */,
+			);
+			path = Entity;
+			sourceTree = "<group>";
+		};
+		E70DADCC4AFBBF2F51563C31 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				316EA002FAC5D3328796EF90 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		EAEA5FB8FF3DB8F303B34C67 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				7A27C7CF1F9DFCE4338AD7FC /* Repository */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		EFFEB6B04B94488D8B385CA9 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				DC46D39DE9FC00DCA99B4FFD /* Entity */,
+				314DAF5013EE9BEFD1FC9A6B /* UseCase */,
+			);
+			path = Domain;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -72,10 +222,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 708F57FE3003C653008DF433 /* Build configuration list for PBXNativeTarget "GAMSS" */;
 			buildPhases = (
+				873B7F497312802FC8BE0638 /* [CP] Check Pods Manifest.lock */,
 				708F57EF3003C651008DF433 /* Sources */,
 				708F57F03003C651008DF433 /* Frameworks */,
 				708F57F13003C651008DF433 /* Resources */,
 				70248D8830094BE000857369 /* ShellScript */,
+				E43EA2512EC8CFDD0BA36711 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -88,10 +240,33 @@
 			packageProductDependencies = (
 				70248D84300794C800857369 /* FirebaseCrashlytics */,
 				70248DCC300D429100857369 /* FirebaseAuth */,
+				4F92A4F86371ED0E8E85D78F /* Tokenizers */,
 			);
 			productName = GAMSS;
 			productReference = 708F57F33003C651008DF433 /* GAMSS.app */;
 			productType = "com.apple.product-type.application";
+		};
+		B597DF103CB9CB5340EDE673 /* GAMSSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 559AE3680766F85989277C9D /* Build configuration list for PBXNativeTarget "GAMSSTests" */;
+			buildPhases = (
+				EABD51A19CAD662AAF4003DA /* [CP] Check Pods Manifest.lock */,
+				77502DB6DB316C20BD2EBF7C /* Sources */,
+				2B86EF9DA3E10D62075F2B31 /* Frameworks */,
+				F038DD8C7598ACB88347B63D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				43DF82701E2030B30DAB9EBF /* PBXTargetDependency */,
+			);
+			name = GAMSSTests;
+			packageProductDependencies = (
+				8E8487F478AF703D394C5EB6 /* Tokenizers */,
+			);
+			productName = GAMSSTests;
+			productReference = 5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -119,6 +294,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				70248D83300794C800857369 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				1D962D6FF84B1C7ED5A40445 /* XCRemoteSwiftPackageReference "swift-transformers" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 708F57F43003C651008DF433 /* Products */;
@@ -126,6 +302,7 @@
 			projectRoot = "";
 			targets = (
 				708F57F23003C651008DF433 /* GAMSS */,
+				B597DF103CB9CB5340EDE673 /* GAMSSTests */,
 			);
 		};
 /* End PBXProject section */
@@ -135,6 +312,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F038DD8C7598ACB88347B63D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				94A526BCCCD9DF730A39BF97 /* sample_sentences.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,6 +349,67 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
 		};
+		873B7F497312802FC8BE0638 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-GAMSS-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E43EA2512EC8CFDD0BA36711 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-GAMSS/Pods-GAMSS-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-GAMSS/Pods-GAMSS-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GAMSS/Pods-GAMSS-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		EABD51A19CAD662AAF4003DA /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-GAMSSTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -174,7 +420,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		77502DB6DB316C20BD2EBF7C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				16FD4F6D002D9911BCDA46DD /* GAMSSTests.swift in Sources */,
+				24EED49AAB4C574B02E9C077 /* EmotionTests.swift in Sources */,
+				10B076C4CBD5237ECB6B305D /* DefaultAnalyzeEmotionUseCaseTests.swift in Sources */,
+				E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */,
+				06BCF4ADC30405F292D7B64C /* EmotionTestViewModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		43DF82701E2030B30DAB9EBF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = GAMSS;
+			target = 708F57F23003C651008DF433 /* GAMSS */;
+			targetProxy = 424D7ADC07675A052A1CD8C2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		708F57FC3003C653008DF433 /* Debug */ = {
@@ -298,6 +565,7 @@
 		};
 		708F57FF3003C653008DF433 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EAD22D6FD3BB2E8E689A52BE /* Pods-GAMSS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -306,6 +574,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2KAH6SCW4S;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GAMSS/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -319,7 +588,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				OTHER_LDFLAGS = "-Objc";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-Objc",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.nexters.gamss;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -334,6 +606,7 @@
 		};
 		708F58003003C653008DF433 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BECB25622D5F9ADA8FA5E5B6 /* Pods-GAMSS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -342,6 +615,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2KAH6SCW4S;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GAMSS/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -355,7 +629,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				OTHER_LDFLAGS = "-Objc";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-Objc",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.nexters.gamss;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -368,9 +645,51 @@
 			};
 			name = Release;
 		};
+		8A305D6E137D5FF38853FE59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1A8F630A15A80F5FAB52F2C1 /* Pods-GAMSSTests.debug.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexters.gamss.Tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GAMSS.app/GAMSS";
+			};
+			name = Debug;
+		};
+		AE0A9E514EEAD6687005E404 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E7BE3E28AC7871B572DD4B7E /* Pods-GAMSSTests.release.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexters.gamss.Tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GAMSS.app/GAMSS";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		559AE3680766F85989277C9D /* Build configuration list for PBXNativeTarget "GAMSSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AE0A9E514EEAD6687005E404 /* Release */,
+				8A305D6E137D5FF38853FE59 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		708F57EE3003C651008DF433 /* Build configuration list for PBXProject "GAMSS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -392,6 +711,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		1D962D6FF84B1C7ED5A40445 /* XCRemoteSwiftPackageReference "swift-transformers" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/huggingface/swift-transformers";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
 		70248D83300794C800857369 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -403,6 +730,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4F92A4F86371ED0E8E85D78F /* Tokenizers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D962D6FF84B1C7ED5A40445 /* XCRemoteSwiftPackageReference "swift-transformers" */;
+			productName = Tokenizers;
+		};
 		70248D84300794C800857369 /* FirebaseCrashlytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 70248D83300794C800857369 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
@@ -412,6 +744,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 70248D83300794C800857369 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		8E8487F478AF703D394C5EB6 /* Tokenizers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D962D6FF84B1C7ED5A40445 /* XCRemoteSwiftPackageReference "swift-transformers" */;
+			productName = Tokenizers;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
