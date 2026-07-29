@@ -11,12 +11,16 @@ import FirebaseAuth
 
 final class DefaultAuthRepository: AuthRepository {
     private let networkManager: NetworkRequesting
+    private let tokenStorage: TokenStorage
     
-    init(networkManager: NetworkRequesting) {
+    init(
+        networkManager: NetworkRequesting,
+        tokenStorage: TokenStorage
+    ) {
         self.networkManager = networkManager
+        self.tokenStorage = tokenStorage
     }
     
-    // FIXME: - 로그인 시 올바른 응답값으로 수정 필요
     func login(
         with socialType: SocialType,
         credential: ASAuthorizationAppleIDCredential,
@@ -24,7 +28,10 @@ final class DefaultAuthRepository: AuthRepository {
     ) async throws {
         switch socialType {
         case .apple:
-            try await loginWithApple(credential: credential, nonce: nonce)
+            try await loginWithApple(
+                credential: credential,
+                nonce: nonce
+            )
         }
     }
     
@@ -32,18 +39,63 @@ final class DefaultAuthRepository: AuthRepository {
         credential: ASAuthorizationAppleIDCredential,
         nonce: String
     ) async throws {
-        guard let identityToken = credential.identityToken,
-              let idToken = String(
-                data: identityToken,
-                encoding: .utf8
-              )
-        else { return }
+        let firebaseIdToken = try await signInFirebase(
+            credential: credential,
+            nonce: nonce
+        )
+        
+        try await login(firebaseIdToken: firebaseIdToken)
+    }
+    
+    
+    private func signInFirebase(
+        credential: ASAuthorizationAppleIDCredential,
+        nonce: String
+    ) async throws -> String {
+        guard let identityToken = credential.identityToken else {
+            throw AuthError.missingIdentityToken
+        }
+        
+        guard let idToken = String(
+            data: identityToken,
+            encoding: .utf8
+        ) else {
+            throw AuthError.invalidIdentityToken
+        }
         
         let firebaseCredential = OAuthProvider.appleCredential(
             withIDToken: idToken,
             rawNonce: nonce,
             fullName: credential.fullName
         )
-        Log.debug("토큰: \(idToken), 이름: \(credential.fullName), 암호: \(nonce)")
+        
+        do {
+            let authResult = try await Auth.auth().signIn(
+                with: firebaseCredential
+            )
+            
+            return try await authResult.user.getIDToken()
+            
+        } catch {
+            throw AuthError.firebaseSignInFailed(error)
+        }
+    }
+    
+    private func login(
+        firebaseIdToken: String
+    ) async throws {
+        do {
+            let response = try await networkManager.request(
+                AuthEndpoint.login(.init(idToken: firebaseIdToken)),
+                responseType: APIResponse<LoginResponseDTO>.self
+            )
+            
+            tokenStorage.createTokens(
+                accessToken: response.data.accessToken,
+                refreshToken: response.data.refreshToken
+            )
+        } catch {
+            throw AuthError.serverLoginFailed(error)
+        }
     }
 }
