@@ -39,11 +39,18 @@ final class DefaultDiarySummaryRepositoryTests: XCTestCase {
         let useCase = DefaultSummarizeDiaryUseCase(diarySummaryRepository: repository)
         let diaries = try loadDiaries()
 
-        let short = try await useCase.execute(text: "오늘 억울한 일이 있었어")
+        await useCase.addUtterance("오늘 억울한 일이 있었어")
+        let short = try await useCase.finalize()
         XCTAssertEqual(short, "오늘 억울한 일이 있었어")
 
-        let long = try await useCase.execute(text: diaries[0])
+        // 반복 추가로 140자 이상 만들어서 모델 호출을 트리거함
+        for _ in 0..<3 {
+            await useCase.addUtterance(diaries[0])
+        }
+        let long = try await useCase.finalize()
         XCTAssertNotNil(long)
-        XCTAssertNotEqual(long, diaries[0])
+        // 3개를 모두 합쳐서 140자 이상이 되므로 요약되어야 함
+        let combined = String(repeating: diaries[0] + "\n", count: 3).dropLast()
+        XCTAssertNotEqual(long, String(combined))
     }
 }

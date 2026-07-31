@@ -18,15 +18,36 @@ struct SummaryTestView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             TextEditor(text: $inputText)
-                .frame(height: 150)
+                .frame(height: 100)
                 .border(Color.gray.opacity(0.3))
 
-            Button("일기 요약") {
-                Task {
-                    await viewModel.summarize(text: inputText)
+            HStack {
+                Button("전송") {
+                    Task {
+                        await viewModel.addUtterance(inputText)
+                        inputText = ""
+                    }
+                }
+                .disabled(viewModel.isLoading || inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                Button("대화 종료") {
+                    Task {
+                        await viewModel.finalizeSession()
+                    }
+                }
+                .disabled(viewModel.isLoading)
+            }
+
+            if !viewModel.utterances.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("누적된 발화")
+                        .font(.subheadline)
+                        .bold()
+                    ForEach(Array(viewModel.utterances.enumerated()), id: \.offset) { _, utterance in
+                        Text("- \(utterance)")
+                    }
                 }
             }
-            .disabled(viewModel.isLoading)
 
             if viewModel.isLoading {
                 ProgressView()

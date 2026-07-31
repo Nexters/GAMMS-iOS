@@ -7,21 +7,30 @@
 
 import Foundation
 
-final class DefaultSummarizeDiaryUseCase: SummarizeDiaryUseCase {
-    // 학습 분포(긴 문서)를 벗어난 짧은 캐주얼 입력은 모델에서 반복/할루시네이션을 유발하므로
-    // 이 미만이면 모델을 호출하지 않고 원문을 그대로 쓴다.
-    private static let minCharsForSummary = 50
+actor DefaultSummarizeDiaryUseCase: SummarizeDiaryUseCase {
+    // 누적된 USER 발화가 이 미만이면 요약해도 원문과 큰 차이가 없어 의미가 없으므로,
+    // 모델을 호출하지 않고 누적 원문을 그대로 사용한다.
+    private static let minCharsForSummary = 140
 
     private let diarySummaryRepository: DiarySummaryRepository
+    private var utterances: [String] = []
 
     init(diarySummaryRepository: DiarySummaryRepository) {
         self.diarySummaryRepository = diarySummaryRepository
     }
 
-    func execute(text: String) async throws -> String? {
+    func addUtterance(_ text: String) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-        guard trimmed.count >= Self.minCharsForSummary else { return trimmed }
-        return try await diarySummaryRepository.summarize(text: trimmed)
+        guard !trimmed.isEmpty else { return }
+        utterances.append(trimmed)
+    }
+
+    func finalize() async throws -> String? {
+        let combined = utterances.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+        utterances = []
+
+        guard !combined.isEmpty else { return nil }
+        guard combined.count >= Self.minCharsForSummary else { return combined }
+        return try await diarySummaryRepository.summarize(text: combined)
     }
 }

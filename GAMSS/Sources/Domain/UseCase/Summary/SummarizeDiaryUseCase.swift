@@ -6,5 +6,6 @@
 //
 
 protocol SummarizeDiaryUseCase {
-    func execute(text: String) async throws -> String?
+    func addUtterance(_ text: String) async
+    func finalize() async throws -> String?
 }
