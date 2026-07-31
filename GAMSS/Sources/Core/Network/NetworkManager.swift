@@ -44,9 +44,19 @@ final class NetworkManager: NetworkRequesting {
         }
         
         guard 200..<300 ~= response.statusCode else {
-            throw NetworkError.httpError(
-                statusCode: response.statusCode
-            )
+            let apiError = try? decoder.decode(
+                APIResponse<EmptyResponseDTO>.self,
+                from: data
+            ).error
+            
+            Log.error("""
+                    ❌ API Error
+                    StatusCode: \(response.statusCode)
+                    Code: \(apiError?.code ?? "UNKNOWN")
+                    Message: \(apiError?.message ?? "No error message")
+                    """)
+            
+            throw NetworkError.httpError(statusCode: response.statusCode)
         }
         
         do {

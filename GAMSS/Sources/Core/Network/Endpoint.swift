@@ -11,15 +11,20 @@ protocol Endpoint {
     var baseURLString: String { get }
     var path: String { get }
     var method: HTTPMethod { get }
+    var body: Encodable? { get }
 }
 
 extension Endpoint {
+    /// FIXME: - xcconfig로 변환 예정
     var baseURLString: String {
         return ""
     }
     
     var headers: [String: String] {
-        return [:]
+        return [
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        ]
     }
     
     func asURLRequest() throws -> URLRequest {
@@ -37,6 +42,10 @@ extension Endpoint {
                 $1,
                 forHTTPHeaderField: $0
             )
+        }
+        
+        if let body {
+            request.httpBody = try JSONEncoder().encode(body)
         }
         
         return request
