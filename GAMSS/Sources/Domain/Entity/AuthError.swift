@@ -20,4 +20,5 @@ enum AuthError: Error {
     
     /// 서버 로그인 실패
     case serverLoginFailed(Error)
+    case tokenStorageFailed(Error)
 }

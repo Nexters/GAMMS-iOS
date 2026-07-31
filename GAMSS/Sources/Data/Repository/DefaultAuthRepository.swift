@@ -84,18 +84,18 @@ final class DefaultAuthRepository: AuthRepository {
     private func login(
         firebaseIdToken: String
     ) async throws {
+        let response = try await networkManager.request(
+            AuthEndpoint.login(.init(idToken: firebaseIdToken)),
+            responseType: APIResponse<LoginResponseDTO>.self
+        )
+        
         do {
-            let response = try await networkManager.request(
-                AuthEndpoint.login(.init(idToken: firebaseIdToken)),
-                responseType: APIResponse<LoginResponseDTO>.self
-            )
-            
-            tokenStorage.createTokens(
+            try tokenStorage.createTokens(
                 accessToken: response.data.accessToken,
                 refreshToken: response.data.refreshToken
             )
         } catch {
-            throw AuthError.serverLoginFailed(error)
+            throw AuthError.tokenStorageFailed(error)
         }
     }
 }

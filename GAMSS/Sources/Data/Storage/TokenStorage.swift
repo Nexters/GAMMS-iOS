@@ -12,31 +12,23 @@ final class TokenStorage {
     
     private init() {}
     
-    func reissueToken() {
+    func reissueToken() throws {
         guard LoginState.current != .notLoggedIn else {
-            TokenStorage.shared.deleteTokens()
+            try TokenStorage.shared.deleteTokens()
             return
         }
         
         /// TODO: - accessToken, refreshToken 재발행 로직 필요
     }
     
-    func createTokens(accessToken: String, refreshToken: String) {
-        do {
-            try KeyChainManager.shared.create(account: .accessToken, data: accessToken)
-            try KeyChainManager.shared.create(account: .refreshToken, data: refreshToken)
-            Log.info("[Token updated]\naccessToken: \(accessToken)\nrefreshToken: \(refreshToken)", privacy: .privacy)
-        } catch {
-            Log.error("\(error.localizedDescription): \(error)")
-        }
+    func createTokens(accessToken: String, refreshToken: String) throws {
+        try KeyChainManager.shared.create(account: .accessToken, data: accessToken)
+        try KeyChainManager.shared.create(account: .refreshToken, data: refreshToken)
+        Log.info("[Token updated]\naccessToken: \(accessToken)\nrefreshToken: \(refreshToken)", privacy: .privacy)
     }
     
-    func setToken(_ token: String, for account: KeyChainAccount) {
-        do {
-            try KeyChainManager.shared.create(account: account, data: token)
-        } catch {
-            Log.error("\(error.localizedDescription): \(error)")
-        }
+    func setToken(_ token: String, for account: KeyChainAccount) throws {
+        try KeyChainManager.shared.create(account: account, data: token)
     }
     
     func readToken(_ account: KeyChainAccount) -> String? {
@@ -49,14 +41,10 @@ final class TokenStorage {
         }
     }
     
-    func deleteTokens() {
-        do {
-            try KeyChainManager.shared.delete(account: .accessToken)
-            try KeyChainManager.shared.delete(account: .refreshToken)
-            Log.info("[Token Deleted]")
-        } catch {
-            Log.error("\(error.localizedDescription): \(error)")
-        }
+    func deleteTokens() throws {
+        try KeyChainManager.shared.delete(account: .accessToken)
+        try KeyChainManager.shared.delete(account: .refreshToken)
+        Log.info("[Token Deleted]")
     }
 }
 
