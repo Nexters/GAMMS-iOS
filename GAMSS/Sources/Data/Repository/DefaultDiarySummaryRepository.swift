@@ -160,8 +160,7 @@ actor DefaultDiarySummaryRepository: DiarySummaryRepository {
     }
 
     // swift-transformers의 Tokenizer.encode()는 truncation을 적용하지 않으므로(post-processor로
-    // <s>/</s>만 붙임), 여기서 직접 자른다. Python truncation과 동일하게 마지막 </s>(eos=1)를
-    // 보존하도록 앞 511개 + eos로 자른다.
+    // <s>/</s>만 붙임), 여기서 직접 자른다. 마지막 </s>(eos=1)를 보존하도록 앞 511개 + eos로 자른다.
     private static func buildEncoderInputs(from tokenIds: [Int]) -> (ids: [Int], mask: [Int]) {
         let truncated: [Int]
         if tokenIds.count > maxInputTokens {
