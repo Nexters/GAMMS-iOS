@@ -25,7 +25,7 @@ final class TokenStorage {
         do {
             try KeyChainManager.shared.create(account: .accessToken, data: accessToken)
             try KeyChainManager.shared.create(account: .refreshToken, data: refreshToken)
-            Log.info("[Token updated]\naccessToken: \(accessToken)\nrefreshToken: \(refreshToken)")
+            Log.info("[Token updated]\naccessToken: \(accessToken)\nrefreshToken: \(refreshToken)", privacy: .privacy)
         } catch {
             Log.error("\(error.localizedDescription): \(error)")
         }
