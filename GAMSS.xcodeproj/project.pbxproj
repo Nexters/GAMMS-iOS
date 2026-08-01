@@ -10,15 +10,20 @@
 		06BCF4ADC30405F292D7B64C /* EmotionTestViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */; };
 		10B076C4CBD5237ECB6B305D /* DefaultAnalyzeEmotionUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */; };
 		16FD4F6D002D9911BCDA46DD /* GAMSSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */; };
+		1D8DF6DFC7E7383B9B8C5850 /* DefaultDiarySummaryRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17C099A15F7D9B1481998D0 /* DefaultDiarySummaryRepositoryTests.swift */; };
 		24EED49AAB4C574B02E9C077 /* EmotionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */; };
 		26A84A0255BB5BB7139414C5 /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = 4F92A4F86371ED0E8E85D78F /* Tokenizers */; };
+		3EF2F6DB34A2276C2C9FD746 /* diary_samples.json in Resources */ = {isa = PBXBuildFile; fileRef = ED231F0A80BD3A4AF9E50BBC /* diary_samples.json */; };
+		44668B62F14343DDBC28C579 /* SummaryTestViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D9F903541DFC66E33484B0E /* SummaryTestViewModelTests.swift */; };
 		70248D85300794C800857369 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 70248D84300794C800857369 /* FirebaseCrashlytics */; };
 		70248DCD300D429100857369 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 70248DCC300D429100857369 /* FirebaseAuth */; };
+		7171BAFFE141BFB241321110 /* DefaultSummarizeDiaryUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEBF9C5ED345443E4A4BED7 /* DefaultSummarizeDiaryUseCaseTests.swift */; };
 		8F4E518B79C7B76223B098BA /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = 8E8487F478AF703D394C5EB6 /* Tokenizers */; };
 		94A526BCCCD9DF730A39BF97 /* sample_sentences.json in Resources */ = {isa = PBXBuildFile; fileRef = D4BE9D664889F13369325DC9 /* sample_sentences.json */; };
 		A8948FBCA4DF4E43F2C582EA /* Pods_GAMSS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */; };
 		B32ACCF04698A89364EDDECE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 316EA002FAC5D3328796EF90 /* Foundation.framework */; };
 		BA7748118B0D2759E0F6A207 /* Pods_GAMSSTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1CC8FA289575E4B98C41539 /* Pods_GAMSSTests.framework */; };
+		C63AB33F1424E4237FF76F6B /* DiarySummaryErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162D28B313B7D3B6D79FE039 /* DiarySummaryErrorTests.swift */; };
 		E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -33,13 +38,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0D9F903541DFC66E33484B0E /* SummaryTestViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SummaryTestViewModelTests.swift; sourceTree = "<group>"; };
+		162D28B313B7D3B6D79FE039 /* DiarySummaryErrorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiarySummaryErrorTests.swift; sourceTree = "<group>"; };
 		1A8F630A15A80F5FAB52F2C1 /* Pods-GAMSSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSSTests.debug.xcconfig"; path = "Target Support Files/Pods-GAMSSTests/Pods-GAMSSTests.debug.xcconfig"; sourceTree = "<group>"; };
 		316EA002FAC5D3328796EF90 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GAMSSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		708F57F33003C651008DF433 /* GAMSS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GAMSS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GAMSSTests.swift; sourceTree = "<group>"; };
 		79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTestViewModelTests.swift; sourceTree = "<group>"; };
+		A17C099A15F7D9B1481998D0 /* DefaultDiarySummaryRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultDiarySummaryRepositoryTests.swift; sourceTree = "<group>"; };
 		B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultEmotionAnalysisRepositoryTests.swift; sourceTree = "<group>"; };
+		BAEBF9C5ED345443E4A4BED7 /* DefaultSummarizeDiaryUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultSummarizeDiaryUseCaseTests.swift; sourceTree = "<group>"; };
 		BECB25622D5F9ADA8FA5E5B6 /* Pods-GAMSS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSS.release.xcconfig"; path = "Target Support Files/Pods-GAMSS/Pods-GAMSS.release.xcconfig"; sourceTree = "<group>"; };
 		C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultAnalyzeEmotionUseCaseTests.swift; sourceTree = "<group>"; };
 		CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTests.swift; sourceTree = "<group>"; };
@@ -47,6 +56,7 @@
 		E7BE3E28AC7871B572DD4B7E /* Pods-GAMSSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSSTests.release.xcconfig"; path = "Target Support Files/Pods-GAMSSTests/Pods-GAMSSTests.release.xcconfig"; sourceTree = "<group>"; };
 		EAD22D6FD3BB2E8E689A52BE /* Pods-GAMSS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSS.debug.xcconfig"; path = "Target Support Files/Pods-GAMSS/Pods-GAMSS.debug.xcconfig"; sourceTree = "<group>"; };
 		EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GAMSS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED231F0A80BD3A4AF9E50BBC /* diary_samples.json */ = {isa = PBXFileReference; includeInIndex = 1; path = diary_samples.json; sourceTree = "<group>"; };
 		F1CC8FA289575E4B98C41539 /* Pods_GAMSSTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GAMSSTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -96,10 +106,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		01F0B560E9B57E72D3F1E993 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				BDB764DCBC7D87BF279D6217 /* Presentation */,
+			);
+			name = Sources;
+			path = Sources;
+			sourceTree = "<group>";
+		};
 		086A8E92FA56831BF52BA539 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
 				D4BE9D664889F13369325DC9 /* sample_sentences.json */,
+				ED231F0A80BD3A4AF9E50BBC /* diary_samples.json */,
 			);
 			path = Fixtures;
 			sourceTree = "<group>";
@@ -132,6 +152,7 @@
 			isa = PBXGroup;
 			children = (
 				C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */,
+				BAEBF9C5ED345443E4A4BED7 /* DefaultSummarizeDiaryUseCaseTests.swift */,
 			);
 			path = UseCase;
 			sourceTree = "<group>";
@@ -144,6 +165,7 @@
 				AB3A61B1A4856A2545D527E7 /* Frameworks */,
 				26D7D48BE358528B948582FD /* GAMSSTests */,
 				0D3A37EABFFD3944C613D506 /* Pods */,
+				E9FD2F8E84DE170E838F99BD /* GAMSS */,
 			);
 			sourceTree = "<group>";
 		};
@@ -160,6 +182,7 @@
 			isa = PBXGroup;
 			children = (
 				B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */,
+				A17C099A15F7D9B1481998D0 /* DefaultDiarySummaryRepositoryTests.swift */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -178,14 +201,33 @@
 			isa = PBXGroup;
 			children = (
 				79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */,
+				0D9F903541DFC66E33484B0E /* SummaryTestViewModelTests.swift */,
 			);
 			path = Presentation;
+			sourceTree = "<group>";
+		};
+		BDB764DCBC7D87BF279D6217 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				CB9AE75706598ED9A27BB0AF /* SummaryTest */,
+			);
+			name = Presentation;
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		CB9AE75706598ED9A27BB0AF /* SummaryTest */ = {
+			isa = PBXGroup;
+			children = (
+							);
+			name = SummaryTest;
+			path = SummaryTest;
 			sourceTree = "<group>";
 		};
 		DC46D39DE9FC00DCA99B4FFD /* Entity */ = {
 			isa = PBXGroup;
 			children = (
 				CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */,
+				162D28B313B7D3B6D79FE039 /* DiarySummaryErrorTests.swift */,
 			);
 			path = Entity;
 			sourceTree = "<group>";
@@ -196,6 +238,15 @@
 				316EA002FAC5D3328796EF90 /* Foundation.framework */,
 			);
 			name = iOS;
+			sourceTree = "<group>";
+		};
+		E9FD2F8E84DE170E838F99BD /* GAMSS */ = {
+			isa = PBXGroup;
+			children = (
+				01F0B560E9B57E72D3F1E993 /* Sources */,
+			);
+			name = GAMSS;
+			path = GAMSS;
 			sourceTree = "<group>";
 		};
 		EAEA5FB8FF3DB8F303B34C67 /* Data */ = {
@@ -320,6 +371,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				94A526BCCCD9DF730A39BF97 /* sample_sentences.json in Resources */,
+				3EF2F6DB34A2276C2C9FD746 /* diary_samples.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -417,7 +469,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
+							);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		77502DB6DB316C20BD2EBF7C /* Sources */ = {
@@ -429,6 +481,10 @@
 				10B076C4CBD5237ECB6B305D /* DefaultAnalyzeEmotionUseCaseTests.swift in Sources */,
 				E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */,
 				06BCF4ADC30405F292D7B64C /* EmotionTestViewModelTests.swift in Sources */,
+				C63AB33F1424E4237FF76F6B /* DiarySummaryErrorTests.swift in Sources */,
+				7171BAFFE141BFB241321110 /* DefaultSummarizeDiaryUseCaseTests.swift in Sources */,
+				1D8DF6DFC7E7383B9B8C5850 /* DefaultDiarySummaryRepositoryTests.swift in Sources */,
+				44668B62F14343DDBC28C579 /* SummaryTestViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
