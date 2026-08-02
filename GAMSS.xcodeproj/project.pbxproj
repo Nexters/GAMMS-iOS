@@ -27,6 +27,7 @@
 		E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */; };
 		F1D4E5A20F2B3C4D5E6F7A8B /* SpacingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D4E5A30F2B3C4D5E6F7A8C /* SpacingTests.swift */; };
 		F2D4E5A40F2B3C4D5E6F7A9D /* RadiusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5A50F2B3C4D5E6F7A9E /* RadiusTests.swift */; };
+		DC1369FEAE93D794107D5373 /* Color_GAMSSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596EE0F239D37460A7BA389D /* Color_GAMSSTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultAnalyzeEmotionUseCaseTests.swift; sourceTree = "<group>"; };
 		C2D4E5A30F2B3C4D5E6F7A8C /* SpacingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpacingTests.swift; sourceTree = "<group>"; };
 		C3D4E5A50F2B3C4D5E6F7A9E /* RadiusTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadiusTests.swift; sourceTree = "<group>"; };
+		596EE0F239D37460A7BA389D /* Color_GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Color_GAMSSTests.swift; sourceTree = "<group>"; };
 		CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTests.swift; sourceTree = "<group>"; };
 		D4BE9D664889F13369325DC9 /* sample_sentences.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = sample_sentences.json; sourceTree = "<group>"; };
 		E7BE3E28AC7871B572DD4B7E /* Pods-GAMSSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSSTests.release.xcconfig"; path = "Target Support Files/Pods-GAMSSTests/Pods-GAMSSTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -123,8 +125,17 @@
 			children = (
 				C2D4E5A30F2B3C4D5E6F7A8C /* SpacingTests.swift */,
 				C3D4E5A50F2B3C4D5E6F7A9E /* RadiusTests.swift */,
+				AA3FCF8B76B94F07F0F84F64 /* Colors */,
 			);
 			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		AA3FCF8B76B94F07F0F84F64 /* Colors */ = {
+			isa = PBXGroup;
+			children = (
+				596EE0F239D37460A7BA389D /* Color_GAMSSTests.swift */,
+			);
+			path = Colors;
 			sourceTree = "<group>";
 		};
 		01F0B560E9B57E72D3F1E993 /* Sources */ = {
@@ -509,6 +520,7 @@
 				44668B62F14343DDBC28C579 /* SummaryTestViewModelTests.swift in Sources */,
 				F1D4E5A20F2B3C4D5E6F7A8B /* SpacingTests.swift in Sources */,
 				F2D4E5A40F2B3C4D5E6F7A9D /* RadiusTests.swift in Sources */,
+				DC1369FEAE93D794107D5373 /* Color_GAMSSTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -528,7 +540,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -591,7 +603,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
