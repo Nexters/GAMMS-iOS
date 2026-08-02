@@ -28,6 +28,7 @@
 		F1D4E5A20F2B3C4D5E6F7A8B /* SpacingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D4E5A30F2B3C4D5E6F7A8C /* SpacingTests.swift */; };
 		F2D4E5A40F2B3C4D5E6F7A9D /* RadiusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5A50F2B3C4D5E6F7A9E /* RadiusTests.swift */; };
 		DC1369FEAE93D794107D5373 /* Color_GAMSSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596EE0F239D37460A7BA389D /* Color_GAMSSTests.swift */; };
+		CC3333333333333333333333 /* FontWeightTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2222222222222222222222 /* FontWeightTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 		C2D4E5A30F2B3C4D5E6F7A8C /* SpacingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpacingTests.swift; sourceTree = "<group>"; };
 		C3D4E5A50F2B3C4D5E6F7A9E /* RadiusTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadiusTests.swift; sourceTree = "<group>"; };
 		596EE0F239D37460A7BA389D /* Color_GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Color_GAMSSTests.swift; sourceTree = "<group>"; };
+		BB2222222222222222222222 /* FontWeightTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FontWeightTests.swift; sourceTree = "<group>"; };
 		CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTests.swift; sourceTree = "<group>"; };
 		D4BE9D664889F13369325DC9 /* sample_sentences.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = sample_sentences.json; sourceTree = "<group>"; };
 		E7BE3E28AC7871B572DD4B7E /* Pods-GAMSSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSSTests.release.xcconfig"; path = "Target Support Files/Pods-GAMSSTests/Pods-GAMSSTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 				C2D4E5A30F2B3C4D5E6F7A8C /* SpacingTests.swift */,
 				C3D4E5A50F2B3C4D5E6F7A9E /* RadiusTests.swift */,
 				AA3FCF8B76B94F07F0F84F64 /* Colors */,
+				AA1111111111111111111111 /* Typography */,
 			);
 			path = DesignSystem;
 			sourceTree = "<group>";
@@ -136,6 +139,14 @@
 				596EE0F239D37460A7BA389D /* Color_GAMSSTests.swift */,
 			);
 			path = Colors;
+			sourceTree = "<group>";
+		};
+		AA1111111111111111111111 /* Typography */ = {
+			isa = PBXGroup;
+			children = (
+				BB2222222222222222222222 /* FontWeightTests.swift */,
+			);
+			path = Typography;
 			sourceTree = "<group>";
 		};
 		01F0B560E9B57E72D3F1E993 /* Sources */ = {
@@ -521,6 +532,7 @@
 				F1D4E5A20F2B3C4D5E6F7A8B /* SpacingTests.swift in Sources */,
 				F2D4E5A40F2B3C4D5E6F7A9D /* RadiusTests.swift in Sources */,
 				DC1369FEAE93D794107D5373 /* Color_GAMSSTests.swift in Sources */,
+				CC3333333333333333333333 /* FontWeightTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
