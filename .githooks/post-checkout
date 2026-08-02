@@ -1,0 +1,14 @@
+#!/bin/sh
+# Podfile.lock이 브랜치 전환으로 바뀌었으면 pod install을 자동 실행한다.
+# 활성화(팀원 각자 최초 1회): git config core.hooksPath .githooks
+
+prev_head=$1
+new_head=$2
+is_branch_checkout=$3
+
+[ "$is_branch_checkout" = "1" ] || exit 0
+
+if ! git diff --quiet "$prev_head" "$new_head" -- Podfile.lock 2>/dev/null; then
+  echo "Podfile.lock 변경 감지 → pod install 실행"
+  pod install
+fi
