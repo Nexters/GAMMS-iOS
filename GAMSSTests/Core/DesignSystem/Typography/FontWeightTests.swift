@@ -12,8 +12,8 @@ final class FontWeightTests: XCTestCase {
             "Pretendard-Bold",
         ]
         for (weight, expectedName) in zip(weights, expectedNames) {
-            XCTAssertEqual(weight.postScriptName, expectedName)
-            XCTAssertNotNil(UIFont(name: weight.postScriptName, size: 16), "\(weight.postScriptName) is not registered — check Info.plist UIAppFonts")
+            XCTAssertEqual(weight.postScriptName(), expectedName)
+            XCTAssertNotNil(UIFont(name: weight.postScriptName(), size: 16), "\(weight.postScriptName()) is not registered — check Info.plist UIAppFonts")
         }
     }
 }

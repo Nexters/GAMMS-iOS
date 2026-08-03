@@ -1,12 +1,16 @@
 enum FontWeight: Hashable {
     case regular, medium, semiBold, bold
 
-    var postScriptName: String {
+    private var suffix: String {
         switch self {
-        case .regular: "Pretendard-Regular"
-        case .medium: "Pretendard-Medium"
-        case .semiBold: "Pretendard-SemiBold"
-        case .bold: "Pretendard-Bold"
+        case .regular: "Regular"
+        case .medium: "Medium"
+        case .semiBold: "SemiBold"
+        case .bold: "Bold"
         }
+    }
+
+    func postScriptName(family: FontFamily = .pretendard) -> String {
+        "\(family.name)-\(suffix)"
     }
 }

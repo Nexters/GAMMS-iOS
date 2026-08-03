@@ -6,7 +6,7 @@ struct TypographyModifier: ViewModifier {
     func body(content: Content) -> some View {
         let metrics = scale.metrics
         content
-            .font(.custom(metrics.weight.postScriptName, size: metrics.fontSize))
+            .font(.custom(metrics.weight.postScriptName(), size: metrics.fontSize))
             .tracking(metrics.letterSpacing)
             .lineSpacing(metrics.lineSpacing)
     }
