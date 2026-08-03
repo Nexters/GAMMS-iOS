@@ -8,7 +8,7 @@ struct TypographyModifier: ViewModifier {
         content
             .font(.custom(metrics.weight.postScriptName, size: metrics.fontSize))
             .tracking(metrics.letterSpacing)
-            .lineSpacing(metrics.lineHeight - metrics.fontSize)
+            .lineSpacing(metrics.lineSpacing)
     }
 }
 

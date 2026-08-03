@@ -14,6 +14,10 @@ enum Typography: CaseIterable, Hashable {
         let letterSpacing: CGFloat
         let lineHeight: CGFloat
         let weight: FontWeight
+
+        var lineSpacing: CGFloat {
+            lineHeight - fontSize
+        }
     }
 
     var metrics: Metrics {
