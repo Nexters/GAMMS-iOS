@@ -25,8 +25,7 @@ struct ModalContainerView<Content: View>: View {
     
     var body: some View {
         ZStack {
-            /// FIXME: - 추후 DesignSystem 색상 변경
-            Color.black
+            Color.colorBlack
                 .opacity(0.3)
                 .ignoresSafeArea()
                 .onTapGesture {
