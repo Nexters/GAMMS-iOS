@@ -50,6 +50,8 @@
 		596EE0F239D37460A7BA389D /* Color_GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Color_GAMSSTests.swift; sourceTree = "<group>"; };
 		5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GAMSSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		708F57F33003C651008DF433 /* GAMSS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GAMSS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		70A259383022EBB100043BC0 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = /Users/igeonjun/Desktop/GAMSS/GAMSS/Config/Debug.xcconfig; sourceTree = "<absolute>"; };
+		70A259393022EBB100043BC0 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = /Users/igeonjun/Desktop/GAMSS/GAMSS/Config/Release.xcconfig; sourceTree = "<absolute>"; };
 		7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GAMSSTests.swift; sourceTree = "<group>"; };
 		79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTestViewModelTests.swift; sourceTree = "<group>"; };
 		A17C099A15F7D9B1481998D0 /* DefaultDiarySummaryRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultDiarySummaryRepositoryTests.swift; sourceTree = "<group>"; };
