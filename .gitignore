@@ -145,3 +145,6 @@ Tools/EmotionModelConversion/output/
 
 # git-lfs가 core.hooksPath(.githooks)에 로컬로 자동 생성하는 훅 (git lfs install 실행 시 생성, 버전관리 대상 아님)
 .githooks/pre-push
+
+GAMSS/Config/Debug.xcconfig
+GAMSS/Config/Release.xcconfig
