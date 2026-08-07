@@ -19,6 +19,16 @@ public enum Environment {
     static let bundleID: String = {
         return Bundle.main.bundleIdentifier ?? "undefined"
     }()
+    
+    /// 앱 이름
+    static let appName: String = {
+        return value(key: "APP_NAME")
+    }()
+    
+    /// 서버 Base URL
+    static let baseURL: String = {
+        return value(key: "BASE_URL")
+    }()
 }
 
 // MARK: I/O 관련 코드

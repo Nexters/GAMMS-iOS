@@ -15,9 +15,8 @@ protocol Endpoint {
 }
 
 extension Endpoint {
-    /// FIXME: - xcconfig로 변환 예정
     var baseURLString: String {
-        return ""
+        return Environment.baseURL
     }
     
     var headers: [String: String] {
