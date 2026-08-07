@@ -96,14 +96,16 @@ final class ChatViewModel: ObservableObject {
         revealTask = Task { [weak self] in
             guard let self else { return }
             while true {
-                let next: Message? = await MainActor.run {
-                    guard !self.pendingComments.isEmpty else { return nil }
-                    return self.pendingComments.removeFirst()
-                }
-                guard let next else { break }
+                // 취소 시 flushPendingComments()가 그대로 쓸어담을 수 있도록, 자는 동안은
+                // pendingComments에서 빼지 않고 들여다보기만 한다(제거는 취소 검사 통과 후에만).
+                let hasNext: Bool = await MainActor.run { !self.pendingComments.isEmpty }
+                guard hasNext else { break }
                 try? await Task.sleep(nanoseconds: UInt64(CommentRevealPolicy.nextGapSeconds() * 1_000_000_000))
                 guard !Task.isCancelled else { break }
-                await MainActor.run { self.messages.append(next) }
+                await MainActor.run {
+                    guard !self.pendingComments.isEmpty else { return }
+                    self.messages.append(self.pendingComments.removeFirst())
+                }
             }
         }
     }
