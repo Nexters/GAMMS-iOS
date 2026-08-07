@@ -188,6 +188,23 @@ final class DefaultConversationSummaryStoreTests: XCTestCase {
         XCTAssertNil(result)
     }
 
+    func test_restore_withFewerThanRecentWindow_thenAdd_doesNotDuplicateFirstUtterance() async {
+        let (store, repository) = makeStore()
+        // 최근창(3개) 이하로 복원하면 recentStart()가 0이 되어, 다음 후보 인덱스가 바닥(1) 없이
+        // 그대로 대입되면 0이 되고 만다 — 그 상태에서 발화를 추가하면 첫 발화(인덱스 0)가
+        // 다시 청크 후보로 편입되어 anchor와 middle 양쪽에 중복 등장하게 된다.
+        await store.restore(historicalUtterances: ["첫발화", "두번째", "세번째"])
+        await store.add("네번째")
+
+        let result = await store.current()
+
+        XCTAssertEqual(result, "첫발화 두번째 세번째 네번째")
+        let occurrences = result?.components(separatedBy: "첫발화").count ?? 0
+        XCTAssertEqual(occurrences - 1, 1, "첫 발화는 정확히 한 번만 나타나야 함")
+        let callCount = await repository.summarizeCallCount
+        XCTAssertEqual(callCount, 0)
+    }
+
     func test_summarizeFailure_confirmsChunkAsRawText() async {
         let (store, repository) = makeStore()
         await repository.setShouldThrowOnSummarize(true)

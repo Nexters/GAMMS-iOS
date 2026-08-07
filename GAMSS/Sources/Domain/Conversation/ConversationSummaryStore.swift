@@ -83,7 +83,10 @@ actor DefaultConversationSummaryStore: ConversationSummaryStore {
         if recentStart > 1 {
             closedChunks = [utterances[1..<recentStart].joined(separator: Self.separator)]
         }
-        nextChunkCandidate = recentStart
+        // 첫 발화(인덱스 0)는 항상 청크 후보에서 제외되어야 한다. recentStart가 0 또는 1이면
+        // (발화가 3개 이하로 복원된 경우) 그대로 대입하면 후보 인덱스가 0이 되어 첫 발화가
+        // 다음 add()에서 청크 대상으로 잘못 편입된다 — 최소 1로 바닥을 둔다.
+        nextChunkCandidate = max(recentStart, 1)
     }
 
     private func recentStart() -> Int {

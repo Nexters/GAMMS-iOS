@@ -41,7 +41,7 @@ struct ChatView: View {
                 Button("전송") {
                     Task { await viewModel.send() }
                 }
-                .disabled(viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isSending)
             }
             .padding()
         }
