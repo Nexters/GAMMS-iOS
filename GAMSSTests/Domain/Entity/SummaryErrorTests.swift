@@ -2,6 +2,8 @@
 //  SummaryErrorTests.swift
 //  GAMSS
 //
+//  Created by cchanmi on 7/29/26.
+//
 
 import XCTest
 @testable import GAMSS

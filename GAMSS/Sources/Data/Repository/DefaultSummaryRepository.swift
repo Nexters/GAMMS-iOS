@@ -2,6 +2,8 @@
 //  DefaultSummaryRepository.swift
 //  GAMSS
 //
+//  Created by cchanmi on 8/7/26.
+//
 
 import Foundation
 import onnxruntime_objc

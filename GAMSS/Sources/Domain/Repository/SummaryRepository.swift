@@ -2,6 +2,8 @@
 //  SummaryRepository.swift
 //  GAMSS
 //
+//  Created by cchanmi on 8/7/26.
+//
 
 protocol SummaryRepository {
     func summarize(text: String) async throws -> String

@@ -2,6 +2,8 @@
 //  DefaultSummaryRepositoryTests.swift
 //  GAMSS
 //
+//  Created by cchanmi on 7/31/26.
+//
 
 import XCTest
 @testable import GAMSS
