@@ -35,6 +35,7 @@
 		E501ACC5914E6993491D23EB /* SaveMessageRequestDTOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774851BBBA8876650B662E17 /* SaveMessageRequestDTOTests.swift */; };
 		EE5555555555555555555555 /* TypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4444444444444444444444 /* TypographyTests.swift */; };
 		F1D4E5A20F2B3C4D5E6F7A8B /* SpacingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D4E5A30F2B3C4D5E6F7A8C /* SpacingTests.swift */; };
+		F29C98F332A3EC127B809DD3 /* ChatViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE5C85E76690E41AE394895D /* ChatViewModelTests.swift */; };
 		F2D4E5A40F2B3C4D5E6F7A9D /* RadiusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5A50F2B3C4D5E6F7A9E /* RadiusTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -67,6 +68,7 @@
 		B35175B780592B411BDD6B82 /* ConversationMessageDTOTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConversationMessageDTOTests.swift; sourceTree = "<group>"; };
 		B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultEmotionAnalysisRepositoryTests.swift; sourceTree = "<group>"; };
 		BB2222222222222222222222 /* FontWeightTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FontWeightTests.swift; sourceTree = "<group>"; };
+		BE5C85E76690E41AE394895D /* ChatViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChatViewModelTests.swift; sourceTree = "<group>"; };
 		BECB25622D5F9ADA8FA5E5B6 /* Pods-GAMSS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSS.release.xcconfig"; path = "Target Support Files/Pods-GAMSS/Pods-GAMSS.release.xcconfig"; sourceTree = "<group>"; };
 		C2D4E5A30F2B3C4D5E6F7A8C /* SpacingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpacingTests.swift; sourceTree = "<group>"; };
 		C3D4E5A50F2B3C4D5E6F7A9E /* RadiusTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadiusTests.swift; sourceTree = "<group>"; };
@@ -269,6 +271,7 @@
 			isa = PBXGroup;
 			children = (
 				79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */,
+				BE5C85E76690E41AE394895D /* ChatViewModelTests.swift */,
 			);
 			path = Presentation;
 			sourceTree = "<group>";
@@ -561,6 +564,7 @@
 				10B076C4CBD5237ECB6B305D /* DefaultAnalyzeEmotionUseCaseTests.swift in Sources */,
 				E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */,
 				06BCF4ADC30405F292D7B64C /* EmotionTestViewModelTests.swift in Sources */,
+				F29C98F332A3EC127B809DD3 /* ChatViewModelTests.swift in Sources */,
 				C63AB33F1424E4237FF76F6B /* SummaryErrorTests.swift in Sources */,
 				1D8DF6DFC7E7383B9B8C5850 /* DefaultSummaryRepositoryTests.swift in Sources */,
 				F1D4E5A20F2B3C4D5E6F7A8B /* SpacingTests.swift in Sources */,
