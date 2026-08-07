@@ -49,6 +49,8 @@
 		596EE0F239D37460A7BA389D /* Color_GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Color_GAMSSTests.swift; sourceTree = "<group>"; };
 		5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GAMSSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		708F57F33003C651008DF433 /* GAMSS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GAMSS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		70A259383022EBB100043BC0 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = /Users/igeonjun/Desktop/GAMSS/GAMSS/Config/Debug.xcconfig; sourceTree = "<absolute>"; };
+		70A259393022EBB100043BC0 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = /Users/igeonjun/Desktop/GAMSS/GAMSS/Config/Release.xcconfig; sourceTree = "<absolute>"; };
 		7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GAMSSTests.swift; sourceTree = "<group>"; };
 		79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTestViewModelTests.swift; sourceTree = "<group>"; };
 		A17C099A15F7D9B1481998D0 /* DefaultSummaryRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultSummaryRepositoryTests.swift; sourceTree = "<group>"; };
@@ -684,7 +686,8 @@
 		};
 		708F57FF3003C653008DF433 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EAD22D6FD3BB2E8E689A52BE /* Pods-GAMSS.debug.xcconfig */;
+			baseConfigurationReferenceAnchor = 708F57F53003C651008DF433 /* GAMSS */;
+			baseConfigurationReferenceRelativePath = Config/Debug.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -725,7 +728,8 @@
 		};
 		708F58003003C653008DF433 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BECB25622D5F9ADA8FA5E5B6 /* Pods-GAMSS.release.xcconfig */;
+			baseConfigurationReferenceAnchor = 708F57F53003C651008DF433 /* GAMSS */;
+			baseConfigurationReferenceRelativePath = Config/Release.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -766,7 +770,8 @@
 		};
 		8A305D6E137D5FF38853FE59 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1A8F630A15A80F5FAB52F2C1 /* Pods-GAMSSTests.debug.xcconfig */;
+			baseConfigurationReferenceAnchor = 708F57F53003C651008DF433 /* GAMSS */;
+			baseConfigurationReferenceRelativePath = Config/Debug.xcconfig;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -782,7 +787,8 @@
 		};
 		AE0A9E514EEAD6687005E404 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E7BE3E28AC7871B572DD4B7E /* Pods-GAMSSTests.release.xcconfig */;
+			baseConfigurationReferenceAnchor = 708F57F53003C651008DF433 /* GAMSS */;
+			baseConfigurationReferenceRelativePath = Config/Release.xcconfig;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
