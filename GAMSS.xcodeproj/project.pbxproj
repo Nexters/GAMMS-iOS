@@ -30,6 +30,7 @@
 		F2D4E5A40F2B3C4D5E6F7A9D /* RadiusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5A50F2B3C4D5E6F7A9E /* RadiusTests.swift */; };
 		3D1B542CB60C3958D3F16702 /* EmotionCharacterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BB1A4112363D93ED3AD1598 /* EmotionCharacterTests.swift */; };
 		5F8A6F3F851E20BCFE3F805D /* CommentRevealPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86563A77A8A674E7F050119E /* CommentRevealPolicyTests.swift */; };
+		1CE64E3A4D746FFBE391D949 /* DefaultConversationSummaryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032B0D990023EAA1E72E1E82 /* DefaultConversationSummaryStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 		ED231F0A80BD3A4AF9E50BBC /* diary_samples.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = diary_samples.json; sourceTree = "<group>"; };
 		F1CC8FA289575E4B98C41539 /* Pods_GAMSSTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GAMSSTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		86563A77A8A674E7F050119E /* CommentRevealPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommentRevealPolicyTests.swift; sourceTree = "<group>"; };
+		032B0D990023EAA1E72E1E82 /* DefaultConversationSummaryStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultConversationSummaryStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -248,6 +250,7 @@
 			children = (
 				7BB1A4112363D93ED3AD1598 /* EmotionCharacterTests.swift */,
 				86563A77A8A674E7F050119E /* CommentRevealPolicyTests.swift */,
+				032B0D990023EAA1E72E1E82 /* DefaultConversationSummaryStoreTests.swift */,
 			);
 			path = Conversation;
 			sourceTree = "<group>";
@@ -546,6 +549,7 @@
 				EE5555555555555555555555 /* TypographyTests.swift in Sources */,
 				3D1B542CB60C3958D3F16702 /* EmotionCharacterTests.swift in Sources */,
 				5F8A6F3F851E20BCFE3F805D /* CommentRevealPolicyTests.swift in Sources */,
+				1CE64E3A4D746FFBE391D949 /* DefaultConversationSummaryStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
