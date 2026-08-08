@@ -33,4 +33,12 @@ final class DefaultConversationRepository: ConversationRepository {
         )
         return response.data.compactMap { $0.toDomain() }
     }
+
+    func getConversations(date: String) async throws -> [ConversationSummary] {
+        let response = try await networkManager.request(
+            ConversationEndpoint.getConversations(date: date),
+            responseType: APIResponse<[ConversationSummaryDTO]>.self
+        )
+        return response.data.map { $0.toDomain() }
+    }
 }

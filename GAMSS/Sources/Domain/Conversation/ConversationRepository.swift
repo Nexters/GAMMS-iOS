@@ -12,4 +12,7 @@ protocol ConversationRepository {
 
     /// 작성순으로 온다. 화면이 이 순서에 의존한다.
     func getMessages(conversationId: Int) async throws -> [Message]
+
+    /// 지정한 날짜(yyyy-MM-dd, KST 00:00~24:00)에 생성된 채팅방 목록을 반환한다.
+    func getConversations(date: String) async throws -> [ConversationSummary]
 }

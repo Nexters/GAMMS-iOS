@@ -20,10 +20,14 @@ extension Endpoint {
     }
     
     var headers: [String: String] {
-        return [
+        var headers = [
             "Content-Type": "application/json",
             "Accept": "application/json"
         ]
+        if let accessToken = TokenStorage.shared.readToken(.accessToken) {
+            headers["Authorization"] = "Bearer \(accessToken)"
+        }
+        return headers
     }
     
     func asURLRequest() throws -> URLRequest {

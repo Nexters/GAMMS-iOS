@@ -10,6 +10,7 @@ import Foundation
 enum ConversationEndpoint: Endpoint {
     case saveMessage(SaveMessageRequestDTO)
     case getMessages(conversationId: Int)
+    case getConversations(date: String)
 
     var path: String {
         switch self {
@@ -17,6 +18,8 @@ enum ConversationEndpoint: Endpoint {
             return "/api/conversations/messages"
         case .getMessages(let conversationId):
             return "/api/conversations/\(conversationId)/messages"
+        case .getConversations(let date):
+            return "/api/conversations?date=\(date)"
         }
     }
 
@@ -24,7 +27,7 @@ enum ConversationEndpoint: Endpoint {
         switch self {
         case .saveMessage:
             return .post
-        case .getMessages:
+        case .getMessages, .getConversations:
             return .get
         }
     }
@@ -33,7 +36,7 @@ enum ConversationEndpoint: Endpoint {
         switch self {
         case .saveMessage(let request):
             return request
-        case .getMessages:
+        case .getMessages, .getConversations:
             return nil
         }
     }

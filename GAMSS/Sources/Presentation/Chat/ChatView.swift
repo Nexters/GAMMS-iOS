@@ -98,6 +98,10 @@ private struct PreviewConversationRepository: ConversationRepository {
             Message(id: 2, conversationId: 1, sender: .character(.warm), content: "안녕하세요! 오늘 하루는 어땠어요?", repliesToMessageId: 1)
         ]
     }
+
+    func getConversations(date: String) async throws -> [ConversationSummary] {
+        [ConversationSummary(id: 1, title: "미리보기 채팅방", status: "ACTIVE", createdAt: date)]
+    }
 }
 
 private actor PreviewConversationSummaryStore: ConversationSummaryStore {
