@@ -6,16 +6,16 @@
 //
 
 enum EmotionCharacter: CaseIterable, Equatable {
-    case joy, warm, anger, anxiety, prickly, quirky
+    case joy, sadness, anger, anxiety, prickly, quirky
 
     var displayName: String {
         switch self {
-        case .joy: "기쁨"
-        case .warm: "다정"
+        case .joy: "기쁨이"
+        case .sadness: "슬픔이"
         case .anger: "분노"
         case .anxiety: "불안"
-        case .prickly: "까칠"
-        case .quirky: "엉뚱"
+        case .prickly: "까칠이"
+        case .quirky: "엉뚱이"
         }
     }
 }

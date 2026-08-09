@@ -124,7 +124,7 @@ final class ChatViewModelTests: XCTestCase {
     func test_load_populatesMessagesAndRestoresSummaryStoreWithUserUtterancesOnly() async {
         let repository = MockConversationRepository()
         let userMessage = Message(id: 1, conversationId: 10, sender: .user, content: "사용자 발화", repliesToMessageId: nil)
-        let characterMessage = Message(id: 2, conversationId: 10, sender: .character(.warm), content: "캐릭터 답장", repliesToMessageId: 1)
+        let characterMessage = Message(id: 2, conversationId: 10, sender: .character(.sadness), content: "캐릭터 답장", repliesToMessageId: 1)
         repository.stubbedMessages = [userMessage, characterMessage]
         let summaryStore = MockConversationSummaryStore()
         let viewModel = makeViewModel(repository: repository, summaryStore: summaryStore)

@@ -63,14 +63,31 @@ private struct MessageRow: View {
     let message: Message
 
     var body: some View {
-        HStack {
-            if case .user = message.sender { Spacer() }
-            Text(message.content)
-                .padding(10)
-                .background(background)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            if case .character = message.sender { Spacer() }
+        HStack(alignment: .top, spacing: 8) {
+            switch message.sender {
+            case .user:
+                Spacer()
+                bubble
+            case let .character(emotion):
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 28, height: 28)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(emotion.displayName)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    bubble
+                }
+                Spacer()
+            }
         }
+    }
+
+    private var bubble: some View {
+        Text(message.content)
+            .padding(10)
+            .background(background)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private var background: Color {
@@ -95,7 +112,7 @@ private struct PreviewConversationRepository: ConversationRepository {
     func getMessages(conversationId: Int) async throws -> [Message] {
         [
             Message(id: 1, conversationId: 1, sender: .user, content: "안녕", repliesToMessageId: nil),
-            Message(id: 2, conversationId: 1, sender: .character(.warm), content: "안녕하세요! 오늘 하루는 어땠어요?", repliesToMessageId: 1)
+            Message(id: 2, conversationId: 1, sender: .character(.sadness), content: "안녕하세요! 오늘 하루는 어땠어요?", repliesToMessageId: 1)
         ]
     }
 

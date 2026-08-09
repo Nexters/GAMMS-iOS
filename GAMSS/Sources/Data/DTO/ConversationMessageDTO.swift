@@ -22,7 +22,7 @@ struct ConversationMessageDTO: Decodable {
 
     private static let serverTypeToCharacter: [String: EmotionCharacter] = [
         "JOY": .joy, "ANGER": .anger, "ANXIETY": .anxiety,
-        "GRUMPY": .prickly, "WARM": .warm, "QUIRKY": .quirky,
+        "GRUMPY": .prickly, "SAD": .sadness, "QUIRKY": .quirky,
     ]
 
     func toDomain() -> Message? {
