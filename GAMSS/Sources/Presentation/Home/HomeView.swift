@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject private var viewModel: HomeViewModel
+    @FocusState private var isInputFocused: Bool
 
     init(viewModel: HomeViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -16,25 +17,33 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: Spacing.spacing500) {
-                header
+            ZStack {
+                // 화면의 빈 영역(다른 인터랙티브 뷰가 가리지 않는 부분)을 탭하면 키보드를 내린다.
+                // TextEditor/버튼은 그 위에 그려져 자기 탭을 먼저 가져가므로 커서 이동 등은 방해받지 않는다.
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture { isInputFocused = false }
 
-                VStack(alignment: .leading, spacing: Spacing.spacing100) {
-                    Text("OO님 어서오세요")
-                        .typography(.title3)
-                        .foregroundStyle(Color.colorGray950)
-                    Text("마음 쌓아둔 이야기가 있다면 말씀해보세요.")
-                        .typography(.body3Regular)
-                        .foregroundStyle(Color.colorGray500)
+                VStack(alignment: .leading, spacing: Spacing.spacing500) {
+                    header
+
+                    VStack(alignment: .leading, spacing: Spacing.spacing100) {
+                        Text("OO님 어서오세요")
+                            .typography(.title3)
+                            .foregroundStyle(Color.colorGray950)
+                        Text("마음 쌓아둔 이야기가 있다면 말씀해보세요.")
+                            .typography(.body3Regular)
+                            .foregroundStyle(Color.colorGray500)
+                    }
+
+                    messageBox
+
+                    submitButton
+
+                    Spacer()
                 }
-
-                messageBox
-
-                submitButton
-
-                Spacer()
+                .padding(Spacing.spacing400)
             }
-            .padding(Spacing.spacing400)
             .navigationBarHidden(true)
             .navigationDestination(item: $viewModel.createdConversationId) { conversationId in
                 ChatView(
@@ -43,7 +52,8 @@ struct HomeView: View {
                         getMessagesUseCase: GetMessagesUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
                         summaryStore: LazyConversationSummaryStore()
                     ),
-                    conversationId: conversationId
+                    conversationId: conversationId,
+                    initialSentMessage: viewModel.createdSentMessage
                 )
                 .toolbar(.hidden, for: .tabBar)
             }
@@ -92,7 +102,15 @@ struct HomeView: View {
                     .foregroundStyle(Color.colorGray950)
                     .scrollContentBackground(.hidden)
                     .padding(Spacing.spacing200)
+                    .focused($isInputFocused)
                     .onChange(of: viewModel.input) { _, newValue in
+                        // iOS 키보드의 return 키는 TextEditor에서 줄바꿈으로 들어온다 —
+                        // 그 줄바꿈을 감지해 지우고 대신 키보드를 내린다.
+                        if newValue.hasSuffix("\n") {
+                            viewModel.input = String(newValue.dropLast())
+                            isInputFocused = false
+                            return
+                        }
                         if newValue.count > ConversationSummaryPolicy.maxMessageLength {
                             viewModel.input = String(newValue.prefix(ConversationSummaryPolicy.maxMessageLength))
                         }

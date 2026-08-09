@@ -14,6 +14,7 @@ final class HomeViewModel: ObservableObject {
     @Published private(set) var isSending = false
     @Published var toastMessage: String?
     @Published var createdConversationId: Int?
+    @Published private(set) var createdSentMessage: SentMessage?
 
     private let sendMessageUseCase: SendMessageUseCase
 
@@ -36,6 +37,7 @@ final class HomeViewModel: ObservableObject {
                 contextSummary: nil
             )
             input = ""
+            createdSentMessage = sent
             createdConversationId = sent.message.conversationId
         } catch {
             toastMessage = "쪽지를 보내지 못했어요"

@@ -21,6 +21,8 @@ final class ChatViewModel: ObservableObject {
     private let getMessagesUseCase: GetMessagesUseCase
     private let summaryStore: ConversationSummaryStore
     private var revealTask: Task<Void, Never>?
+    /// 테스트에서 백그라운드 요약 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
+    private(set) var pendingSummaryUpdateTask: Task<Void, Never>?
 
     init(sendMessageUseCase: SendMessageUseCase, getMessagesUseCase: GetMessagesUseCase, summaryStore: ConversationSummaryStore) {
         self.sendMessageUseCase = sendMessageUseCase
@@ -61,25 +63,33 @@ final class ChatViewModel: ObservableObject {
                 repliesToMessageId: nil,
                 contextSummary: contextSummary
             )
-            conversationId = sent.message.conversationId
             input = ""
+            seed(with: sent)
 
-            // 먼저 화면에 반영 — 첫 댓글은 즉시, 나머지는 순차 노출 큐로.
-            messages.append(sent.message)
-            if let first = sent.comments.first {
-                messages.append(first)
-            }
-            pendingComments = Array(sent.comments.dropFirst())
-            revealRemainingComments()
-
-            if sent.commentStatus != .done {
-                toastMessage = sent.commentStatus.toUserMessage()
-            }
-
-            // 요약기가 돌 수 있어 화면 갱신 뒤에, 블로킹 없이 둔다.
-            await summaryStore.add(trimmed)
+            // 요약기(온디바이스 추론)가 끝날 때까지 다음 입력을 막지 않도록 백그라운드로 돌린다.
+            // self가 아니라 summaryStore를 직접 캡처해 화면을 나가도 저장은 끝까지 완료되게 한다.
+            let summaryStore = summaryStore
+            pendingSummaryUpdateTask = Task { await summaryStore.add(trimmed) }
         } catch {
             toastMessage = "메시지를 보내지 못했어요"
+        }
+    }
+
+    /// 다른 화면(홈)에서 이미 받아온 응답으로 화면을 채운다 — 방금 받은 응답을 다시
+    /// getMessages로 조회하지 않기 위한 용도.
+    func seed(with sent: SentMessage) {
+        conversationId = sent.message.conversationId
+
+        // 첫 댓글은 즉시, 나머지는 순차 노출 큐로.
+        messages.append(sent.message)
+        if let first = sent.comments.first {
+            messages.append(first)
+        }
+        pendingComments = Array(sent.comments.dropFirst())
+        revealRemainingComments()
+
+        if sent.commentStatus != .done {
+            toastMessage = sent.commentStatus.toUserMessage()
         }
     }
 

@@ -23,6 +23,10 @@ private final class MockConversationRepository: ConversationRepository {
     func getMessages(conversationId: Int) async throws -> [Message] {
         stubbedMessages
     }
+
+    func getConversations(date: String) async throws -> [ConversationSummary] {
+        []
+    }
 }
 
 private actor MockConversationSummaryStore: ConversationSummaryStore {
@@ -74,6 +78,7 @@ final class ChatViewModelTests: XCTestCase {
         viewModel.input = "오늘 힘들었어"
 
         await viewModel.send()
+        await viewModel.pendingSummaryUpdateTask?.value
 
         let added = await summaryStore.addedUtterances
         XCTAssertEqual(added, ["오늘 힘들었어"], "전송 성공한 사용자 발화만 압축 저장소에 추가되어야 함")

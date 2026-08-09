@@ -20,6 +20,10 @@ private final class MockConversationRepository: ConversationRepository {
         receivedConversationId = conversationId
         return stubbedMessages
     }
+
+    func getConversations(date: String) async throws -> [ConversationSummary] {
+        []
+    }
 }
 
 final class GetMessagesUseCaseTests: XCTestCase {

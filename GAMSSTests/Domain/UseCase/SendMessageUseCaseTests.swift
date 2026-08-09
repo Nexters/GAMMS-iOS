@@ -26,6 +26,10 @@ private final class MockConversationRepository: ConversationRepository {
     func getMessages(conversationId: Int) async throws -> [Message] {
         []
     }
+
+    func getConversations(date: String) async throws -> [ConversationSummary] {
+        []
+    }
 }
 
 final class SendMessageUseCaseTests: XCTestCase {
