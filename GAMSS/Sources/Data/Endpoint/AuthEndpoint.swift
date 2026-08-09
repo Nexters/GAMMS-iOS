@@ -45,5 +45,12 @@ enum AuthEndpoint: Endpoint {
         }
     }
     
-    var header: HTTPHeader { .default }
+    var header: HTTPHeader {
+        switch self {
+        case .login, .reissueToken:
+            return .default
+        case .logout:
+            return .authorization
+        }
+    }
 }
