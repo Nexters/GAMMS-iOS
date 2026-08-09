@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CreateCardsRequestDTO: Encodable {
+struct CreateCardRequestDTO: Encodable {
     let conversationId: Int
     let emotion: String
     let summary: String

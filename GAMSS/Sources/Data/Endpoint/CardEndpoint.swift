@@ -9,7 +9,7 @@ import Foundation
 
 enum CardEndpoint: Endpoint {
     case fetchCards(date: String)
-    case createCard(CreateCardsRequestDTO)
+    case createCard(CreateCardRequestDTO)
     case deleteAllCards
     case fetchCard(cardId: String)
     case deleteCard(cardId: String)
