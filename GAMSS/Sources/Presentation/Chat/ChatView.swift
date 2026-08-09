@@ -29,8 +29,11 @@ struct ChatView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 8) {
                     ForEach(viewModel.messages) { message in
-                        MessageRow(message: message)
-                            .id(message.id)
+                        MessageRow(
+                            message: message,
+                            quotedMessage: viewModel.quotedMessage(for: message)
+                        )
+                        .id(message.id)
                     }
                 }
                 .padding()
@@ -137,6 +140,7 @@ struct ChatView: View {
 
 private struct MessageRow: View {
     let message: Message
+    let quotedMessage: Message?
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
@@ -165,12 +169,25 @@ private struct MessageRow: View {
     }
 
     private var bubble: some View {
-        Text(message.content)
-            .padding(10)
-            .background(background)
-            .clipShape(
-                RoundedRectangle(cornerRadius: 12)
-            )
+        VStack(alignment: .leading, spacing: 6) {
+            if let quotedMessage {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(quotedMessage.content)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+
+                    Divider()
+                }
+            }
+
+            Text(message.content)
+        }
+        .padding(10)
+        .background(background)
+        .clipShape(
+            RoundedRectangle(cornerRadius: 12)
+        )
     }
 
     private var background: Color {
@@ -184,93 +201,16 @@ private struct MessageRow: View {
     }
 }
 
-private struct PreviewConversationRepository: ConversationRepository {
-    func sendMessage(
-        conversationId: Int?,
-        content: String,
-        repliesToMessageId: Int?,
-        contextSummary: String?
-    ) async throws -> SentMessage {
-        SentMessage(
-            message: Message(
-                id: 1,
-                conversationId: 1,
-                sender: .user,
-                content: content,
-                repliesToMessageId: nil
-            ),
-            commentStatus: .done,
-            comments: [
-                Message(
-                    id: 2,
-                    conversationId: 1,
-                    sender: .character(.joy),
-                    content: "반가워!",
-                    repliesToMessageId: 1
-                )
-            ]
-        )
-    }
-
-    func getMessages(
-        conversationId: Int
-    ) async throws -> [Message] {
-        [
-            Message(
-                id: 1,
-                conversationId: 1,
-                sender: .user,
-                content: "안녕",
-                repliesToMessageId: nil
-            ),
-            Message(
-                id: 2,
-                conversationId: 1,
-                sender: .character(.sadness),
-                content: "안녕하세요! 오늘 하루는 어땠어요?",
-                repliesToMessageId: 1
-            )
-        ]
-    }
-
-    func getConversations(
-        date: String
-    ) async throws -> [ConversationSummary] {
-        [
-            ConversationSummary(
-                id: 1,
-                title: "미리보기 채팅방",
-                status: "ACTIVE",
-                createdAt: date
-            )
-        ]
-    }
-}
-
-private actor PreviewConversationSummaryStore: ConversationSummaryStore {
-    func add(_ utterance: String) async {}
-
-    func current() async -> String? {
-        nil
-    }
-
-    func reset() async {}
-
-    func restore(
-        historicalUtterances: [String]
-    ) async {}
-}
-
 #Preview {
     ChatView(
         viewModel: ChatViewModel(
             sendMessageUseCase: SendMessageUseCase(
-                conversationRepository: PreviewConversationRepository()
+                conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
             ),
             getMessagesUseCase: GetMessagesUseCase(
-                conversationRepository: PreviewConversationRepository()
+                conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
             ),
-            summaryStore: PreviewConversationSummaryStore()
+            summaryStore: LazyConversationSummaryStore()
         ),
         conversationId: 1
     )

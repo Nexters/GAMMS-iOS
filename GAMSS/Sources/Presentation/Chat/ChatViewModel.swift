@@ -93,6 +93,13 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
+    /// 답장 말풍선에 인용할 원본 메시지를 찾는다. 서버는 repliesToMessageId만 내려주므로
+    /// 이미 로드된 messages에서 직접 찾아야 한다.
+    func quotedMessage(for message: Message) -> Message? {
+        guard let repliesToMessageId = message.repliesToMessageId else { return nil }
+        return messages.first { $0.id == repliesToMessageId }
+    }
+
     private func flushPendingComments() {
         revealTask?.cancel()
         revealTask = nil
