@@ -12,24 +12,26 @@ enum HTTPHeader {
     case authorization
     case custom([String: String])
     
+    private var commonFields: [String: String] {
+        [
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        ]
+    }
+    
     var fields: [String: String] {
         switch self {
         case .default:
-            return [
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            ]
+            return commonFields
             
         case .authorization:
-            guard let accessToken = TokenStorage.shared.readToken(.accessToken) else {
-                return [:]
+            var fields = commonFields
+            
+            if let accessToken = TokenStorage.shared.readToken(.accessToken) {
+                fields["Authorization"] = "Bearer \(accessToken)"
             }
             
-            return [
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "Authorization": "Bearer \(accessToken)"
-            ]
+            return fields
             
         case let .custom(headers):
             return headers
