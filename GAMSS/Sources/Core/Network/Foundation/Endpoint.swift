@@ -32,7 +32,7 @@ extension Endpoint {
         for parameter in parameters {
             switch parameter {
             case let .query(query):
-                components.queryItems = query.map {
+                components.queryItems = (components.queryItems ?? []) + query.map {
                     URLQueryItem(
                         name: $0.key,
                         value: $0.value
