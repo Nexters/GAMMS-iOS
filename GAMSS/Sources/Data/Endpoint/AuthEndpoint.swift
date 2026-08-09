@@ -36,11 +36,11 @@ enum AuthEndpoint: Endpoint {
     
     var parameters: [RequestParameter] {
         switch self {
-        case .login(let request):
+        case let .login(request):
             return [.body(request)]
         case .logout:
             return []
-        case .reissueToken(let request):
+        case let .reissueToken(request):
             return [.body(request)]
         }
     }

@@ -56,19 +56,19 @@ enum CardEndpoint: Endpoint {
     
     var parameters: [RequestParameter] {
         switch self {
-        case .fetchCards(let date):
+        case let .fetchCards(date):
             return [.query(["date": date])]
-        case .createCard(let request):
+        case let .createCard(request):
             return [.body(request)]
         case .deleteAllCards:
             return []
-        case .fetchCard(let cardId):
+        case .fetchCard:
             return []
-        case .deleteCard(let cardId):
+        case .deleteCard:
             return []
-        case .fetchMonthlyCards(let yearMonth):
+        case let .fetchMonthlyCards(yearMonth):
             return [.query(["yearMonth": yearMonth])]
-        case .deleteCardsByEmotion(let emotion):
+        case .deleteCardsByEmotion:
             return []
         }
     }

@@ -43,7 +43,7 @@ enum MemberEndpoint: Endpoint {
         switch self {
         case .fetchMyProfile:
             return []
-        case .updateNickname(let request):
+        case let .updateNickname(request):
             return [.body(request)]
         case .deleteAccount:
             return []

@@ -67,15 +67,15 @@ enum ChatEndpoint: Endpoint {
         switch self {
         case .endChat:
             return []
-        case .createMessage(let request):
+        case let .createMessage(request):
             return [.body(request)]
-        case .createComment(let request):
+        case let .createComment(request):
             return [.body(request)]
         case .createReply:
             return []
         case let .updateTitle(_, request):
             return [.body(request)]
-        case .fetchChats(let date):
+        case let .fetchChats(date):
             return [.query(["date": date])]
         case .fetchMessages:
             return []
