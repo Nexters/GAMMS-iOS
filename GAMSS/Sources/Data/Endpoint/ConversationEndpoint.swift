@@ -32,12 +32,16 @@ enum ConversationEndpoint: Endpoint {
         }
     }
 
-    var body: Encodable? {
+    var parameters: [RequestParameter] {
         switch self {
         case .saveMessage(let request):
-            return request
+            return [.body(request)]
         case .getMessages, .getConversations:
-            return nil
+            return []
         }
+    }
+
+    var header: HTTPHeader {
+        .authorization
     }
 }
