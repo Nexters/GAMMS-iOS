@@ -1,19 +1,19 @@
 //
-//  DiarySummaryError.swift
+//  SummaryError.swift
 //  GAMSS
 //
-//  Created by cchanmi on 7/29/26.
+//  Created by cchanmi on 8/7/26.
 //
 
 import Foundation
 
-enum DiarySummaryError: Error {
+enum SummaryError: Error {
     case modelLoadFailed(underlying: Error? = nil)
     case inferenceFailed(underlying: Error? = nil)
 }
 
-extension DiarySummaryError: Equatable {
-    static func == (lhs: DiarySummaryError, rhs: DiarySummaryError) -> Bool {
+extension SummaryError: Equatable {
+    static func == (lhs: SummaryError, rhs: SummaryError) -> Bool {
         switch (lhs, rhs) {
         case (.modelLoadFailed, .modelLoadFailed):
             return true
@@ -25,7 +25,7 @@ extension DiarySummaryError: Equatable {
     }
 }
 
-extension DiarySummaryError: LocalizedError {
+extension SummaryError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .modelLoadFailed:

@@ -8,9 +8,9 @@
 import Foundation
 
 struct CreateMessageRequestDTO: Encodable {
-    let conversationId: Int
+    let conversationId: Int?
     let content: String
-    let repliesMessageId: Int
-    let currentConversationSummary: String
+    let repliesToMessageId: Int?
+    let currentConversationSummary: String?
     let excludeCharacters: [String]
 }

@@ -34,11 +34,18 @@ final class NetworkManager: NetworkRequesting {
     ) async throws -> T {
         
         let request = try endpoint.asURLRequest()
-        
+
+        let bodyString = request.httpBody.flatMap { String(data: $0, encoding: .utf8) } ?? "-"
+        Log.debug("📤 \(endpoint.method.rawValue) \(endpoint.path) body: \(bodyString)")
+
         let (data, response) = try await session.data(
             for: request
         )
-        
+
+        if let jsonString = String(data: data, encoding: .utf8) {
+            Log.debug("📦 \(endpoint.path) response: \(jsonString)")
+        }
+
         guard let response = response as? HTTPURLResponse else {
             throw NetworkError.invalidResponse
         }

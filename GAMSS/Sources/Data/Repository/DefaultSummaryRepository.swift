@@ -1,8 +1,8 @@
 //
-//  DefaultDiarySummaryRepository.swift
+//  DefaultSummaryRepository.swift
 //  GAMSS
 //
-//  Created by cchanmi on 7/31/26.
+//  Created by cchanmi on 8/7/26.
 //
 
 import Foundation
@@ -12,7 +12,7 @@ import Tokenizers
 // actor로 선언해 encoder/decoder ORTSession과 tokenizer에 대한 동시 접근을 직렬화한다.
 // ONNX Runtime 세션은 스레드 세이프하지 않아서, summarize가 여러 곳에서 동시에
 // 호출되면 run() 호출들이 서로 레이스할 수 있다.
-actor DefaultDiarySummaryRepository: DiarySummaryRepository {
+actor DefaultSummaryRepository: SummaryRepository {
     // 모델이 이 값들에 맞춰 학습/export되어 있으므로 임의 변경 금지.
     private static let decoderStartToken = 1
     private static let eosToken = 1
@@ -40,12 +40,12 @@ actor DefaultDiarySummaryRepository: DiarySummaryRepository {
         self.tokenizer = tokenizer
     }
 
-    static func make() async throws -> DefaultDiarySummaryRepository {
+    static func make() async throws -> DefaultSummaryRepository {
         guard
             let encoderPath = Bundle.main.path(forResource: "kobart_encoder_int8", ofType: "onnx"),
             let decoderPath = Bundle.main.path(forResource: "kobart_decoder_int8", ofType: "onnx")
         else {
-            throw DiarySummaryError.modelLoadFailed()
+            throw SummaryError.modelLoadFailed()
         }
 
         let encoder: ORTSession
@@ -55,11 +55,11 @@ actor DefaultDiarySummaryRepository: DiarySummaryRepository {
             encoder = try ORTSession(env: env, modelPath: encoderPath, sessionOptions: nil)
             decoder = try ORTSession(env: env, modelPath: decoderPath, sessionOptions: nil)
         } catch {
-            throw DiarySummaryError.modelLoadFailed(underlying: error)
+            throw SummaryError.modelLoadFailed(underlying: error)
         }
 
         let tokenizer = try await Self.loadTokenizer()
-        return DefaultDiarySummaryRepository(encoder: encoder, decoder: decoder, tokenizer: tokenizer)
+        return DefaultSummaryRepository(encoder: encoder, decoder: decoder, tokenizer: tokenizer)
     }
 
     // AutoTokenizer.from(modelFolder:)는 폴더 안에서 표준 파일명("tokenizer.json"/"tokenizer_config.json")을
@@ -68,7 +68,7 @@ actor DefaultDiarySummaryRepository: DiarySummaryRepository {
     // 이를 피하기 위해 표준 파일명으로만 구성된 격리된 임시 폴더를 만들어 그 안에서 로드한다.
     private static func loadTokenizer() async throws -> Tokenizer {
         guard let tokenizerURL = Bundle.main.url(forResource: "kobart_tokenizer", withExtension: "json") else {
-            throw DiarySummaryError.modelLoadFailed()
+            throw SummaryError.modelLoadFailed()
         }
 
         let isolatedFolder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
@@ -87,7 +87,7 @@ actor DefaultDiarySummaryRepository: DiarySummaryRepository {
 
             return try await AutoTokenizer.from(modelFolder: isolatedFolder)
         } catch {
-            throw DiarySummaryError.modelLoadFailed(underlying: error)
+            throw SummaryError.modelLoadFailed(underlying: error)
         }
     }
 
@@ -108,18 +108,24 @@ actor DefaultDiarySummaryRepository: DiarySummaryRepository {
                 runOptions: nil
             )
             guard let encoderHidden = encoderOutputs[Self.encoderOutputKey] else {
-                throw DiarySummaryError.inferenceFailed()
+                throw SummaryError.inferenceFailed()
             }
 
             let generatedTokens = try greedyDecode(encoderHidden: encoderHidden, encoderAttentionMask: maskTensor)
             let summary = tokenizer.decode(tokens: generatedTokens, skipSpecialTokens: true)
             return summary.trimmingCharacters(in: .whitespacesAndNewlines)
-        } catch let error as DiarySummaryError {
+        } catch let error as SummaryError {
             throw error
         } catch {
             Log.error("요약 추론 실패: \(error)")
-            throw DiarySummaryError.inferenceFailed(underlying: error)
+            throw SummaryError.inferenceFailed(underlying: error)
         }
+    }
+
+    /// 절단 없는 실제 토큰 수. swift-transformers의 encode()는 자체적으로 truncation을 하지 않으므로
+    /// (그 truncation은 summarize()의 buildEncoderInputs에서만 수동으로 함) 그대로 개수를 세면 된다.
+    func countTokens(text: String) async throws -> Int {
+        tokenizer.encode(text: text).count
     }
 
     // 인코더 1회 실행 결과(encoderHidden)를 매 스텝 재사용하며, 지금까지 생성된 전체 시퀀스를
@@ -140,7 +146,7 @@ actor DefaultDiarySummaryRepository: DiarySummaryRepository {
                 runOptions: nil
             )
             guard let logitsValue = decoderOutputs[Self.decoderOutputKey] else {
-                throw DiarySummaryError.inferenceFailed()
+                throw SummaryError.inferenceFailed()
             }
 
             let nextToken = try Self.argmaxLastPosition(
@@ -189,7 +195,7 @@ actor DefaultDiarySummaryRepository: DiarySummaryRepository {
         let shapeInfo = try logits.tensorTypeAndShapeInfo()
         let shape = shapeInfo.shape.map(\.intValue)
         guard shape.count == 3, shape[1] == sequenceLength, shape[2] == vocabSize else {
-            throw DiarySummaryError.inferenceFailed()
+            throw SummaryError.inferenceFailed()
         }
 
         let data = try logits.tensorData() as Data
