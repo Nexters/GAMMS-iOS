@@ -10,9 +10,11 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel: HomeViewModel
     @FocusState private var isInputFocused: Bool
+    @Binding private var isTabBarHidden: Bool
 
-    init(viewModel: HomeViewModel) {
+    init(viewModel: HomeViewModel, isTabBarHidden: Binding<Bool>) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        _isTabBarHidden = isTabBarHidden
     }
 
     var body: some View {
@@ -55,7 +57,8 @@ struct HomeView: View {
                         initialSentMessage: viewModel.createdSentMessage
                     )
                 )
-                .toolbar(.hidden, for: .tabBar)
+                .onAppear { isTabBarHidden = true }
+                .onDisappear { isTabBarHidden = false }
             }
         }
         .alert(viewModel.alertMessage ?? "", isPresented: Binding(
@@ -139,6 +142,7 @@ struct HomeView: View {
             sendMessageUseCase: SendMessageUseCase(
                 conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
             )
-        )
+        ),
+        isTabBarHidden: .constant(false)
     )
 }
