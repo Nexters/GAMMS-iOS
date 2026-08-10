@@ -14,9 +14,10 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var pendingComments: [Message] = []
     @Published var input: String = ""
     @Published private(set) var isSending = false
-    @Published var toastMessage: String?
+    @Published var alertMessage: String?
 
     private var conversationId: Int?
+    private let initialSentMessage: SentMessage?
     private let sendMessageUseCase: SendMessageUseCase
     private let getMessagesUseCase: GetMessagesUseCase
     private let summaryStore: ConversationSummaryStore
@@ -24,10 +25,28 @@ final class ChatViewModel: ObservableObject {
     /// 테스트에서 백그라운드 요약 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
     private(set) var pendingSummaryUpdateTask: Task<Void, Never>?
 
-    init(sendMessageUseCase: SendMessageUseCase, getMessagesUseCase: GetMessagesUseCase, summaryStore: ConversationSummaryStore) {
+    init(
+        sendMessageUseCase: SendMessageUseCase,
+        getMessagesUseCase: GetMessagesUseCase,
+        summaryStore: ConversationSummaryStore,
+        conversationId: Int? = nil,
+        initialSentMessage: SentMessage? = nil
+    ) {
         self.sendMessageUseCase = sendMessageUseCase
         self.getMessagesUseCase = getMessagesUseCase
         self.summaryStore = summaryStore
+        self.conversationId = conversationId
+        self.initialSentMessage = initialSentMessage
+    }
+
+    /// 화면 진입 시 한 번 호출한다. 다른 화면에서 이미 받아온 응답이 있으면 그걸로 채우고,
+    /// 없으면 기존 대화의 히스토리를 불러온다.
+    func start() async {
+        if let initialSentMessage {
+            seed(with: initialSentMessage)
+        } else if let conversationId {
+            await load(conversationId: conversationId)
+        }
     }
 
     /// 재진입 시 히스토리를 불러온다. 순차 노출은 적용하지 않고 한 번에 표시한다.
@@ -42,8 +61,19 @@ final class ChatViewModel: ObservableObject {
             }
             await summaryStore.restore(historicalUtterances: userUtterances)
         } catch {
-            toastMessage = "대화를 불러오지 못했어요"
+            alertMessage = "대화를 불러오지 못했어요"
         }
+    }
+
+    /// 입력창의 원시 입력값을 받아 정책에 맞게 정규화하고, 키보드를 내려야 하는지 돌려준다.
+    func updateInput(_ rawValue: String) -> Bool {
+        let result = ConversationSummaryPolicy.normalizeInput(rawValue)
+        input = result.value
+        return result.shouldDismissKeyboard
+    }
+
+    var isSendDisabled: Bool {
+        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending
     }
 
     func send() async {
@@ -70,8 +100,10 @@ final class ChatViewModel: ObservableObject {
             // self가 아니라 summaryStore를 직접 캡처해 화면을 나가도 저장은 끝까지 완료되게 한다.
             let summaryStore = summaryStore
             pendingSummaryUpdateTask = Task { await summaryStore.add(trimmed) }
+        } catch let error as SendMessageValidationError {
+            alertMessage = error.errorDescription
         } catch {
-            toastMessage = "메시지를 보내지 못했어요"
+            alertMessage = "메시지를 보내지 못했어요"
         }
     }
 
@@ -89,7 +121,7 @@ final class ChatViewModel: ObservableObject {
         revealRemainingComments()
 
         if sent.commentStatus != .done {
-            toastMessage = sent.commentStatus.toUserMessage()
+            alertMessage = sent.commentStatus.toUserMessage()
         }
     }
 

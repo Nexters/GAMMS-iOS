@@ -14,4 +14,26 @@ enum ConversationSummaryPolicy {
     static let recentRawUtterances = 3
     /// 요약기(KoBART) 인코더 입력 한계. 이 크기로 청크를 끊어 한 번씩만 요약한다.
     static let summaryChunkTokenBudget = 512
+
+    struct InputNormalizationResult: Equatable {
+        let value: String
+        let shouldDismissKeyboard: Bool
+    }
+
+    /// 메시지 입력창의 원시 입력값을 정책에 맞게 정규화한다.
+    /// iOS 키보드의 return 키는 텍스트 필드에서 줄바꿈으로 들어오므로, 줄바꿈으로 끝나면
+    /// 그 줄바꿈을 제거하고 키보드를 내리라는 신호를 함께 돌려준다.
+    /// 그 외에는 `maxMessageLength`를 넘지 않도록 잘라낸다(UX용 제한이며, 최종 검증은
+    /// `SendMessageUseCase`가 한다).
+    static func normalizeInput(_ raw: String) -> InputNormalizationResult {
+        if raw.hasSuffix("\n") {
+            return InputNormalizationResult(value: String(raw.dropLast()), shouldDismissKeyboard: true)
+        }
+
+        guard raw.count > maxMessageLength else {
+            return InputNormalizationResult(value: raw, shouldDismissKeyboard: false)
+        }
+
+        return InputNormalizationResult(value: String(raw.prefix(maxMessageLength)), shouldDismissKeyboard: false)
+    }
 }

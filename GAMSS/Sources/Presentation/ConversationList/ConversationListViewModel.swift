@@ -11,7 +11,7 @@ import Foundation
 @MainActor
 final class ConversationListViewModel: ObservableObject {
     @Published private(set) var conversations: [ConversationSummary] = []
-    @Published var toastMessage: String?
+    @Published var alertMessage: String?
 
     private let getConversationsUseCase: GetConversationsUseCase
 
@@ -23,7 +23,7 @@ final class ConversationListViewModel: ObservableObject {
         do {
             conversations = try await getConversationsUseCase.execute(date: Self.todayDateString())
         } catch {
-            toastMessage = "채팅방 목록을 불러오지 못했어요"
+            alertMessage = "채팅방 목록을 불러오지 못했어요"
         }
     }
 

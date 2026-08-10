@@ -12,6 +12,7 @@ private final class MockConversationRepository: ConversationRepository {
     var stubbedSendResult: Result<SentMessage, Error> = .failure(SummaryError.inferenceFailed())
     var stubbedMessages: [Message] = []
     private(set) var sendCallCount = 0
+    private(set) var getMessagesCallCount = 0
     private(set) var receivedContextSummary: String?
 
     func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage {
@@ -21,7 +22,8 @@ private final class MockConversationRepository: ConversationRepository {
     }
 
     func getMessages(conversationId: Int) async throws -> [Message] {
-        stubbedMessages
+        getMessagesCallCount += 1
+        return stubbedMessages
     }
 
     func getConversations(date: String) async throws -> [ConversationSummary] {
@@ -44,12 +46,16 @@ private actor MockConversationSummaryStore: ConversationSummaryStore {
 final class ChatViewModelTests: XCTestCase {
     private func makeViewModel(
         repository: MockConversationRepository = MockConversationRepository(),
-        summaryStore: MockConversationSummaryStore = MockConversationSummaryStore()
+        summaryStore: MockConversationSummaryStore = MockConversationSummaryStore(),
+        conversationId: Int? = nil,
+        initialSentMessage: SentMessage? = nil
     ) -> ChatViewModel {
         ChatViewModel(
             sendMessageUseCase: SendMessageUseCase(conversationRepository: repository),
             getMessagesUseCase: GetMessagesUseCase(conversationRepository: repository),
-            summaryStore: summaryStore
+            summaryStore: summaryStore,
+            conversationId: conversationId,
+            initialSentMessage: initialSentMessage
         )
     }
 
@@ -113,7 +119,7 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(repository.receivedContextSummary, "이전 압축본")
     }
 
-    func test_send_commentStatusNotDone_keepsMessageAndSetsToast() async {
+    func test_send_commentStatusNotDone_keepsMessageAndSetsAlert() async {
         let repository = MockConversationRepository()
         let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil)
         repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .limitExceeded, comments: []))
@@ -123,7 +129,18 @@ final class ChatViewModelTests: XCTestCase {
         await viewModel.send()
 
         XCTAssertEqual(viewModel.messages, [sentMessage], "댓글 생성 실패해도 보낸 메시지는 화면에 유지되어야 함")
-        XCTAssertNotNil(viewModel.toastMessage)
+        XCTAssertNotNil(viewModel.alertMessage)
+    }
+
+    func test_send_contentTooLong_setsValidationAlertAndDoesNotCallRepository() async {
+        let repository = MockConversationRepository()
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = String(repeating: "가", count: ConversationSummaryPolicy.maxMessageLength + 1)
+
+        await viewModel.send()
+
+        XCTAssertEqual(repository.sendCallCount, 0, "최종 검증에 걸리면 네트워크 호출까지 가면 안 됨")
+        XCTAssertEqual(viewModel.alertMessage, SendMessageValidationError.tooLong.errorDescription)
     }
 
     func test_load_populatesMessagesAndRestoresSummaryStoreWithUserUtterancesOnly() async {
@@ -139,5 +156,72 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.messages, [userMessage, characterMessage])
         let restored = await summaryStore.restoredHistories
         XCTAssertEqual(restored, [["사용자 발화"]], "재진입 복원은 사용자 발화만 summaryStore에 넘겨야 함")
+    }
+
+    func test_start_withInitialSentMessage_seedsWithoutLoadingHistory() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil)
+        let initialSentMessage = SentMessage(message: sentMessage, commentStatus: .done, comments: [])
+        let viewModel = makeViewModel(repository: repository, conversationId: 10, initialSentMessage: initialSentMessage)
+
+        await viewModel.start()
+
+        XCTAssertEqual(viewModel.messages, [sentMessage])
+        XCTAssertEqual(repository.getMessagesCallCount, 0, "initialSentMessage가 있으면 히스토리를 다시 조회하면 안 됨")
+    }
+
+    func test_start_withConversationIdOnly_loadsHistory() async {
+        let repository = MockConversationRepository()
+        let userMessage = Message(id: 1, conversationId: 10, sender: .user, content: "사용자 발화", repliesToMessageId: nil)
+        repository.stubbedMessages = [userMessage]
+        let viewModel = makeViewModel(repository: repository, conversationId: 10)
+
+        await viewModel.start()
+
+        XCTAssertEqual(viewModel.messages, [userMessage])
+        XCTAssertEqual(repository.getMessagesCallCount, 1)
+    }
+
+    func test_start_withNeitherConversationIdNorInitialSentMessage_doesNothing() async {
+        let repository = MockConversationRepository()
+        let viewModel = makeViewModel(repository: repository)
+
+        await viewModel.start()
+
+        XCTAssertTrue(viewModel.messages.isEmpty)
+        XCTAssertEqual(repository.getMessagesCallCount, 0)
+    }
+
+    func test_updateInput_trailingNewline_stripsNewlineAndSignalsKeyboardDismiss() {
+        let viewModel = makeViewModel()
+
+        let shouldDismiss = viewModel.updateInput("안녕\n")
+
+        XCTAssertTrue(shouldDismiss)
+        XCTAssertEqual(viewModel.input, "안녕")
+    }
+
+    func test_updateInput_overMaxLength_truncatesToMaxLength() {
+        let viewModel = makeViewModel()
+        let overLong = String(repeating: "가", count: ConversationSummaryPolicy.maxMessageLength + 10)
+
+        let shouldDismiss = viewModel.updateInput(overLong)
+
+        XCTAssertFalse(shouldDismiss)
+        XCTAssertEqual(viewModel.input.count, ConversationSummaryPolicy.maxMessageLength)
+    }
+
+    func test_isSendDisabled_trueWhenInputBlank() {
+        let viewModel = makeViewModel()
+        viewModel.input = "   "
+
+        XCTAssertTrue(viewModel.isSendDisabled)
+    }
+
+    func test_isSendDisabled_falseWhenInputHasContent() {
+        let viewModel = makeViewModel()
+        viewModel.input = "안녕"
+
+        XCTAssertFalse(viewModel.isSendDisabled)
     }
 }

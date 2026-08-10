@@ -11,17 +11,8 @@ struct ChatView: View {
     @StateObject private var viewModel: ChatViewModel
     @FocusState private var isInputFocused: Bool
 
-    private let conversationId: Int?
-    private let initialSentMessage: SentMessage?
-
-    init(
-        viewModel: ChatViewModel,
-        conversationId: Int?,
-        initialSentMessage: SentMessage? = nil
-    ) {
+    init(viewModel: ChatViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
-        self.conversationId = conversationId
-        self.initialSentMessage = initialSentMessage
     }
 
     var body: some View {
@@ -49,21 +40,17 @@ struct ChatView: View {
             }
         }
         .task {
-            if let initialSentMessage {
-                viewModel.seed(with: initialSentMessage)
-            } else if let conversationId {
-                await viewModel.load(conversationId: conversationId)
-            }
+            await viewModel.start()
         }
         .alert(
-            viewModel.toastMessage ?? "",
+            viewModel.alertMessage ?? "",
             isPresented: Binding(
                 get: {
-                    viewModel.toastMessage != nil
+                    viewModel.alertMessage != nil
                 },
                 set: {
                     if !$0 {
-                        viewModel.toastMessage = nil
+                        viewModel.alertMessage = nil
                     }
                 }
             )
@@ -83,7 +70,11 @@ struct ChatView: View {
             .focused($isInputFocused)
             .lineLimit(1...5)
             .onChange(of: viewModel.input) { _, newValue in
-                handleInputChange(newValue)
+                if viewModel.updateInput(newValue) {
+                    // 별도의 animation 없이 포커스만 해제한다.
+                    // keyboard dismiss와 layout animation이 충돌하는 것을 방지한다.
+                    isInputFocused = false
+                }
             }
 
             Button("전송") {
@@ -91,34 +82,11 @@ struct ChatView: View {
                     await viewModel.send()
                 }
             }
-            .disabled(
-                viewModel.input
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
-                    .isEmpty
-                || viewModel.isSending
-            )
+            .disabled(viewModel.isSendDisabled)
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
         .background(.background)
-    }
-
-    private func handleInputChange(_ newValue: String) {
-        // return 입력 시 줄바꿈을 제거하고 키보드를 내린다.
-        if newValue.hasSuffix("\n") {
-            viewModel.input = String(newValue.dropLast())
-
-            // 별도의 animation 없이 포커스만 해제한다.
-            // keyboard dismiss와 layout animation이 충돌하는 것을 방지한다.
-            isInputFocused = false
-            return
-        }
-
-        let maxLength = ConversationSummaryPolicy.maxMessageLength
-
-        if newValue.count > maxLength {
-            viewModel.input = String(newValue.prefix(maxLength))
-        }
     }
 
     private func scrollToBottom(
@@ -210,8 +178,8 @@ private struct MessageRow: View {
             getMessagesUseCase: GetMessagesUseCase(
                 conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
             ),
-            summaryStore: LazyConversationSummaryStore()
-        ),
-        conversationId: 1
+            summaryStore: LazyConversationSummaryStore(),
+            conversationId: 1
+        )
     )
 }

@@ -14,8 +14,10 @@ private final class MockConversationRepository: ConversationRepository {
     private(set) var receivedContent: String?
     private(set) var receivedRepliesToMessageId: Int?
     private(set) var receivedContextSummary: String?
+    private(set) var sendCallCount = 0
 
     func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage {
+        sendCallCount += 1
         receivedConversationId = conversationId
         receivedContent = content
         receivedRepliesToMessageId = repliesToMessageId
@@ -63,5 +65,48 @@ final class SendMessageUseCaseTests: XCTestCase {
         } catch {
             XCTAssertEqual(error as? SummaryError, .inferenceFailed())
         }
+    }
+
+    func test_execute_blankContent_throwsEmptyWithoutCallingRepository() async {
+        let repository = MockConversationRepository()
+        let useCase = SendMessageUseCase(conversationRepository: repository)
+
+        do {
+            _ = try await useCase.execute(conversationId: nil, content: "   ", repliesToMessageId: nil, contextSummary: nil)
+            XCTFail("Expected error to be thrown")
+        } catch {
+            XCTAssertEqual(error as? SendMessageValidationError, .empty)
+        }
+        XCTAssertEqual(repository.sendCallCount, 0, "검증에 실패하면 네트워크 호출까지 가면 안 됨")
+    }
+
+    func test_execute_contentOverMaxLength_throwsTooLongWithoutCallingRepository() async {
+        let repository = MockConversationRepository()
+        let useCase = SendMessageUseCase(conversationRepository: repository)
+        let overLong = String(repeating: "가", count: ConversationSummaryPolicy.maxMessageLength + 1)
+
+        do {
+            _ = try await useCase.execute(conversationId: nil, content: overLong, repliesToMessageId: nil, contextSummary: nil)
+            XCTFail("Expected error to be thrown")
+        } catch {
+            XCTAssertEqual(error as? SendMessageValidationError, .tooLong)
+        }
+        XCTAssertEqual(repository.sendCallCount, 0, "검증에 실패하면 네트워크 호출까지 가면 안 됨")
+    }
+
+    func test_execute_contentAtMaxLength_isAllowed() async throws {
+        let repository = MockConversationRepository()
+        let sent = SentMessage(
+            message: Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil),
+            commentStatus: .done,
+            comments: []
+        )
+        repository.stubbedSendResult = .success(sent)
+        let useCase = SendMessageUseCase(conversationRepository: repository)
+        let exact = String(repeating: "가", count: ConversationSummaryPolicy.maxMessageLength)
+
+        _ = try await useCase.execute(conversationId: nil, content: exact, repliesToMessageId: nil, contextSummary: nil)
+
+        XCTAssertEqual(repository.sendCallCount, 1)
     }
 }

@@ -13,14 +13,15 @@ final class DefaultConversationRepository: ConversationRepository {
     }
 
     func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage {
-        let request = SaveMessageRequestDTO(
-            content: content,
+        let request = CreateMessageRequestDTO(
             conversationId: conversationId,
+            content: content,
             repliesToMessageId: repliesToMessageId,
-            currentConversationSummary: contextSummary
+            currentConversationSummary: contextSummary,
+            excludeCharacters: []
         )
         let response = try await networkManager.request(
-            ConversationEndpoint.saveMessage(request),
+            ChatEndpoint.createMessage(request),
             responseType: APIResponse<SaveMessageResponseDTO>.self
         )
         return response.data.toDomain()
@@ -28,7 +29,7 @@ final class DefaultConversationRepository: ConversationRepository {
 
     func getMessages(conversationId: Int) async throws -> [Message] {
         let response = try await networkManager.request(
-            ConversationEndpoint.getMessages(conversationId: conversationId),
+            ChatEndpoint.fetchMessages(chatId: String(conversationId)),
             responseType: APIResponse<[ConversationMessageDTO]>.self
         )
         return response.data.compactMap { $0.toDomain() }
@@ -36,7 +37,7 @@ final class DefaultConversationRepository: ConversationRepository {
 
     func getConversations(date: String) async throws -> [ConversationSummary] {
         let response = try await networkManager.request(
-            ConversationEndpoint.getConversations(date: date),
+            ChatEndpoint.fetchChats(date: date),
             responseType: APIResponse<[ConversationSummaryDTO]>.self
         )
         return response.data.map { $0.toDomain() }

@@ -1,20 +1,25 @@
 //
-//  SaveMessageRequestDTOTests.swift
+//  CreateMessageRequestDTOTests.swift
 //  GAMSS
 //
-//  Created by cchanmi on 8/7/26.
+//  Created by cchanmi on 8/10/26.
 //
 
 import XCTest
 @testable import GAMSS
 
-final class SaveMessageRequestDTOTests: XCTestCase {
-    // Swift JSONEncoder는 기본적으로 옵셔널이 nil이어도 "key": null로 인코딩한다 — 커스텀
-    // encode(to:)가 없으면 이 테스트는 실패한다. 서버는 키 부재로 "새 대화"/"컨텍스트 없음"을
-    // 판단하므로(Kotlin encodeDefaults=false와 동일하게 맞춰야 함), null이 아니라 키 자체가
-    // 빠져야 한다.
+final class CreateMessageRequestDTOTests: XCTestCase {
+    // Swift의 합성 Encodable 구현은 옵셔널 프로퍼티가 nil이면 encodeIfPresent를 통해 키
+    // 자체를 생략한다(별도 커스텀 encode(to:) 없이도 보장됨). 서버는 키 부재로 "새 대화"/
+    // "컨텍스트 없음"을 판단하므로 이 동작이 깨지면 안 된다.
     func test_encode_withAllOptionalFieldsNil_omitsThoseKeysEntirely() throws {
-        let dto = SaveMessageRequestDTO(content: "안녕", conversationId: nil, repliesToMessageId: nil, currentConversationSummary: nil)
+        let dto = CreateMessageRequestDTO(
+            conversationId: nil,
+            content: "안녕",
+            repliesToMessageId: nil,
+            currentConversationSummary: nil,
+            excludeCharacters: []
+        )
 
         let data = try JSONEncoder().encode(dto)
         let json = try XCTUnwrap(String(data: data, encoding: .utf8))
@@ -26,7 +31,13 @@ final class SaveMessageRequestDTOTests: XCTestCase {
     }
 
     func test_encode_withAllOptionalFieldsPresent_includesAllKeys() throws {
-        let dto = SaveMessageRequestDTO(content: "안녕", conversationId: 1, repliesToMessageId: 2, currentConversationSummary: "요약본")
+        let dto = CreateMessageRequestDTO(
+            conversationId: 1,
+            content: "안녕",
+            repliesToMessageId: 2,
+            currentConversationSummary: "요약본",
+            excludeCharacters: []
+        )
 
         let data = try JSONEncoder().encode(dto)
         let json = try XCTUnwrap(String(data: data, encoding: .utf8))

@@ -32,9 +32,9 @@ struct ConversationListView: View {
                     viewModel: ChatViewModel(
                         sendMessageUseCase: SendMessageUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
                         getMessagesUseCase: GetMessagesUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
-                        summaryStore: LazyConversationSummaryStore()
-                    ),
-                    conversationId: conversation.id
+                        summaryStore: LazyConversationSummaryStore(),
+                        conversationId: conversation.id
+                    )
                 )
                 .toolbar(.hidden, for: .tabBar)
             }
@@ -42,9 +42,9 @@ struct ConversationListView: View {
         .task {
             await viewModel.load()
         }
-        .alert(viewModel.toastMessage ?? "", isPresented: Binding(
-            get: { viewModel.toastMessage != nil },
-            set: { if !$0 { viewModel.toastMessage = nil } }
+        .alert(viewModel.alertMessage ?? "", isPresented: Binding(
+            get: { viewModel.alertMessage != nil },
+            set: { if !$0 { viewModel.alertMessage = nil } }
         )) {
             Button("확인", role: .cancel) {}
         }

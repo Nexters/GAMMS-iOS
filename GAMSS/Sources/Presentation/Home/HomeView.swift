@@ -50,17 +50,17 @@ struct HomeView: View {
                     viewModel: ChatViewModel(
                         sendMessageUseCase: SendMessageUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
                         getMessagesUseCase: GetMessagesUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
-                        summaryStore: LazyConversationSummaryStore()
-                    ),
-                    conversationId: conversationId,
-                    initialSentMessage: viewModel.createdSentMessage
+                        summaryStore: LazyConversationSummaryStore(),
+                        conversationId: conversationId,
+                        initialSentMessage: viewModel.createdSentMessage
+                    )
                 )
                 .toolbar(.hidden, for: .tabBar)
             }
         }
-        .alert(viewModel.toastMessage ?? "", isPresented: Binding(
-            get: { viewModel.toastMessage != nil },
-            set: { if !$0 { viewModel.toastMessage = nil } }
+        .alert(viewModel.alertMessage ?? "", isPresented: Binding(
+            get: { viewModel.alertMessage != nil },
+            set: { if !$0 { viewModel.alertMessage = nil } }
         )) {
             Button("확인", role: .cancel) {}
         }
@@ -104,15 +104,8 @@ struct HomeView: View {
                     .padding(Spacing.spacing200)
                     .focused($isInputFocused)
                     .onChange(of: viewModel.input) { _, newValue in
-                        // iOS 키보드의 return 키는 TextEditor에서 줄바꿈으로 들어온다 —
-                        // 그 줄바꿈을 감지해 지우고 대신 키보드를 내린다.
-                        if newValue.hasSuffix("\n") {
-                            viewModel.input = String(newValue.dropLast())
+                        if viewModel.updateInput(newValue) {
                             isInputFocused = false
-                            return
-                        }
-                        if newValue.count > ConversationSummaryPolicy.maxMessageLength {
-                            viewModel.input = String(newValue.prefix(ConversationSummaryPolicy.maxMessageLength))
                         }
                     }
             }
@@ -136,7 +129,7 @@ struct HomeView: View {
         }
         .background(Color.colorGray950)
         .clipShape(RoundedRectangle(cornerRadius: Radius.radius200))
-        .disabled(viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isSending)
+        .disabled(viewModel.isSendDisabled)
     }
 }
 

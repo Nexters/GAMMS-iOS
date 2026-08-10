@@ -12,7 +12,7 @@ import Foundation
 final class HomeViewModel: ObservableObject {
     @Published var input: String = ""
     @Published private(set) var isSending = false
-    @Published var toastMessage: String?
+    @Published var alertMessage: String?
     @Published var createdConversationId: Int?
     @Published private(set) var createdSentMessage: SentMessage?
 
@@ -20,6 +20,17 @@ final class HomeViewModel: ObservableObject {
 
     init(sendMessageUseCase: SendMessageUseCase) {
         self.sendMessageUseCase = sendMessageUseCase
+    }
+
+    /// 입력창의 원시 입력값을 받아 정책에 맞게 정규화하고, 키보드를 내려야 하는지 돌려준다.
+    func updateInput(_ rawValue: String) -> Bool {
+        let result = ConversationSummaryPolicy.normalizeInput(rawValue)
+        input = result.value
+        return result.shouldDismissKeyboard
+    }
+
+    var isSendDisabled: Bool {
+        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending
     }
 
     func send() async {
@@ -39,8 +50,10 @@ final class HomeViewModel: ObservableObject {
             input = ""
             createdSentMessage = sent
             createdConversationId = sent.message.conversationId
+        } catch let error as SendMessageValidationError {
+            alertMessage = error.errorDescription
         } catch {
-            toastMessage = "쪽지를 보내지 못했어요"
+            alertMessage = "쪽지를 보내지 못했어요"
         }
     }
 }
