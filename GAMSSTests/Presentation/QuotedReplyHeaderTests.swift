@@ -10,7 +10,7 @@ import XCTest
 
 final class QuotedReplyHeaderTests: XCTestCase {
     func test_label_characterSender_returnsReplyToCharacterName() {
-        XCTAssertEqual(QuotedReplyHeader.label(forQuotedSender: .character(.anxiety)), "불안이에게 답장")
+        XCTAssertEqual(QuotedReplyHeader.label(forQuotedSender: .character(.anxiety)), "불안에게 답장")
     }
 
     func test_label_differentCharacterSender_usesThatCharactersName() {
