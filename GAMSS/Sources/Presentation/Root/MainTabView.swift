@@ -12,16 +12,16 @@ struct MainTabView: View {
     @State private var isTabBarHidden = false
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            content
-
-            CustomTabBar(selectedTab: $selectedTab)
-                .padding(.horizontal, Spacing.spacing400)
-                .padding(.bottom, Spacing.spacing200)
-                .opacity(isTabBarHidden ? 0 : 1)
-                .allowsHitTesting(!isTabBarHidden)
-                .animation(.easeInOut(duration: 0.15), value: isTabBarHidden)
-        }
+        content
+            .safeAreaInset(edge: .bottom) {
+                if !isTabBarHidden {
+                    CustomTabBar(selectedTab: $selectedTab)
+                        .padding(.horizontal, Spacing.spacing400)
+                        .padding(.bottom, Spacing.spacing200)
+                        .transition(.opacity)
+                }
+            }
+            .animation(.easeInOut(duration: 0.15), value: isTabBarHidden)
     }
 
     @ViewBuilder
