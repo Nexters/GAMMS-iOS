@@ -38,7 +38,7 @@ final class SendMessageUseCaseTests: XCTestCase {
     func test_execute_passesAllParametersThrough() async throws {
         let repository = MockConversationRepository()
         let sent = SentMessage(
-            message: Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil),
+            message: Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
             commentStatus: .done,
             comments: []
         )
@@ -97,7 +97,7 @@ final class SendMessageUseCaseTests: XCTestCase {
     func test_execute_contentAtMaxLength_isAllowed() async throws {
         let repository = MockConversationRepository()
         let sent = SentMessage(
-            message: Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil),
+            message: Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
             commentStatus: .done,
             comments: []
         )

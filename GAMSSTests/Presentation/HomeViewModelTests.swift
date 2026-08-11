@@ -34,7 +34,7 @@ final class HomeViewModelTests: XCTestCase {
 
     func test_send_onSuccess_setsCreatedConversationIdAndClearsInput() async {
         let repository = MockConversationRepository()
-        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil)
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
         repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
         let viewModel = makeViewModel(repository: repository)
         viewModel.input = "안녕"

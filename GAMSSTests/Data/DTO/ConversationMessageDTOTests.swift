@@ -16,6 +16,31 @@ final class ConversationMessageDTOTests: XCTestCase {
         )
     }
 
+    func test_toDomain_parsesCreatedAtAsISO8601Date() throws {
+        let dto = makeDTO(senderType: "USER", emotionType: nil)
+
+        let createdAt = try XCTUnwrap(dto.toDomain()?.createdAt)
+
+        let formatter = ISO8601DateFormatter()
+        XCTAssertEqual(createdAt, formatter.date(from: "2026-08-07T00:00:00Z"))
+    }
+
+    func test_toDomain_invalidCreatedAt_returnsNil() {
+        let dto = ConversationMessageDTO(
+            id: 1, conversationId: 10, senderType: "USER", emotionType: nil,
+            content: "내용", repliesToMessageId: nil, rootMessageId: nil, createdAt: "이상한값"
+        )
+
+        XCTAssertNil(dto.toDomain(), "createdAt 파싱에 실패하면 잘못된 시간으로 표시하는 대신 목록에서 제외되어야 함")
+    }
+
+    func test_toSentUserMessage_parsesCreatedAt() throws {
+        let dto = makeDTO(senderType: "CHARACTER", emotionType: "JOY")
+
+        let formatter = ISO8601DateFormatter()
+        XCTAssertEqual(dto.toSentUserMessage().createdAt, formatter.date(from: "2026-08-07T00:00:00Z"))
+    }
+
     func test_toDomain_userSender_mapsToUserMessage() {
         let dto = makeDTO(senderType: "USER", emotionType: nil)
         XCTAssertEqual(dto.toDomain()?.sender, .user)
