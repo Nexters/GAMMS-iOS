@@ -15,8 +15,8 @@ enum EmotionCharacter: CaseIterable, Equatable {
         switch self {
         case .joy: "기쁨이"
         case .sadness: "슬픔이"
-        case .anger: "분노"
-        case .anxiety: "불안"
+        case .anger: "분노이"
+        case .anxiety: "불안이"
         case .prickly: "까칠이"
         case .quirky: "엉뚱이"
         }
