@@ -14,6 +14,9 @@ enum MessageTimestampFormatter {
     private static let formatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
+        // 타임존을 한국으로 고정하는 것도 의도적인 선택이다 — 현재 앱 사용자층과 콘텐츠가
+        // 전부 한국 기준이라 실기기 타임존과 무관하게 고정한다. 일반적인 국제화 전략이
+        // 아니라 지금 단계의 단순화라는 점을 남겨둔다.
         formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
         formatter.dateStyle = .none
         formatter.timeStyle = .short

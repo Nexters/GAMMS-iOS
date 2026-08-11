@@ -20,4 +20,10 @@ final class MessageBubbleLayoutTests: XCTestCase {
 
         XCTAssertEqual(result, 200 - 84)
     }
+
+    func test_maxBubbleWidth_zeroAvailableWidth_clampsToZeroInsteadOfNegative() {
+        let result = MessageBubbleLayout.maxBubbleWidth(availableWidth: 0, containerPadding: 0)
+
+        XCTAssertEqual(result, 0)
+    }
 }

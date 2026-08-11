@@ -25,6 +25,19 @@ final class ConversationMessageDTOTests: XCTestCase {
         XCTAssertEqual(createdAt, formatter.date(from: "2026-08-07T00:00:00Z"))
     }
 
+    func test_toDomain_fractionalSecondsCreatedAt_parsesSuccessfullyIgnoringFraction() throws {
+        let dto = ConversationMessageDTO(
+            id: 1, conversationId: 10, senderType: "USER", emotionType: nil,
+            content: "내용", repliesToMessageId: nil, rootMessageId: nil, createdAt: "2026-08-07T00:00:00.500Z"
+        )
+
+        let createdAt = try XCTUnwrap(dto.toDomain()?.createdAt)
+
+        // 소수초는 화면 표시에 필요 없어 잘라내고 파싱한다 — 초 단위까지만 일치하면 된다.
+        let formatter = ISO8601DateFormatter()
+        XCTAssertEqual(createdAt, formatter.date(from: "2026-08-07T00:00:00Z"))
+    }
+
     func test_toDomain_invalidCreatedAt_returnsNil() {
         let dto = ConversationMessageDTO(
             id: 1, conversationId: 10, senderType: "USER", emotionType: nil,

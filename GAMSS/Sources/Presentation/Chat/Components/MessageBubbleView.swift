@@ -52,6 +52,12 @@ struct MessageBubbleView: View {
     private var bubble: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing050) {
             if let quotedHeaderLabel, let quotedMessage {
+                // 이 인용 헤더 블록은 light 버블(수신/캐릭터) 배경을 전제로 한
+                // colorGray950/colorGray500 색상을 쓴다. 현재는 사용자가 항상
+                // repliesToMessageId: nil로 보내기 때문에 user(sent, dark) 버블에서는
+                // 도달하지 않지만, 추후 sentReply 기능으로 사용자 버블에서도 인용 블록을
+                // 표시하게 되면 어두운 배경 위에서 거의 안 보이게 되므로 그때 색상을
+                // 재검토해야 한다.
                 Text(quotedHeaderLabel)
                     .typography(.body5Medium)
                     .foregroundStyle(Color.colorGray950)

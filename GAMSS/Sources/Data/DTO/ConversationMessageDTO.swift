@@ -28,6 +28,21 @@ struct ConversationMessageDTO: Decodable {
 
     private static let isoDateFormatter = ISO8601DateFormatter()
 
+    /// 화면에는 어차피 분 단위까지만 표시하므로(MessageTimestampFormatter), 소수초 정밀도는
+    /// 필요 없다. 서버가 소수초 포함 타임스탬프(예: "2026-08-07T00:00:00.123Z")를 보내더라도
+    /// 포매터를 두 개 두고 두 번 시도하는 대신, 소수초 부분만 잘라내고 포매터 하나로 한 번만
+    /// 파싱한다.
+    private static func parseCreatedAt(_ value: String) -> Date? {
+        isoDateFormatter.date(from: stripFractionalSeconds(value))
+    }
+
+    private static func stripFractionalSeconds(_ value: String) -> String {
+        guard let dotIndex = value.firstIndex(of: "."),
+              let suffixIndex = value[dotIndex...].firstIndex(where: { $0 == "Z" || $0 == "+" || $0 == "-" })
+        else { return value }
+        return String(value[..<dotIndex]) + String(value[suffixIndex...])
+    }
+
     func toDomain() -> Message? {
         let sender: MessageSender
         switch senderType {
@@ -39,7 +54,7 @@ struct ConversationMessageDTO: Decodable {
         default:
             return nil
         }
-        guard let createdAtDate = Self.isoDateFormatter.date(from: createdAt) else { return nil }
+        guard let createdAtDate = Self.parseCreatedAt(createdAt) else { return nil }
         return Message(id: id, conversationId: conversationId, sender: sender, content: content, repliesToMessageId: repliesToMessageId, createdAt: createdAtDate)
     }
 
@@ -53,7 +68,7 @@ struct ConversationMessageDTO: Decodable {
             sender: .user,
             content: content,
             repliesToMessageId: repliesToMessageId,
-            createdAt: Self.isoDateFormatter.date(from: createdAt) ?? Date()
+            createdAt: Self.parseCreatedAt(createdAt) ?? Date()
         )
     }
 }

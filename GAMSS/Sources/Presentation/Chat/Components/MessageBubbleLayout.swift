@@ -13,6 +13,8 @@ enum MessageBubbleLayout {
     static let oppositeMargin: CGFloat = 84
 
     static func maxBubbleWidth(availableWidth: CGFloat, containerPadding: CGFloat) -> CGFloat {
-        availableWidth - oppositeMargin - containerPadding
+        // 첫 SwiftUI 레이아웃 패스에서 geometry.size.width가 0일 수 있어 결과가 음수가
+        // 될 수 있다 — 음수 프레임 폭을 방지하기 위해 0으로 클램프한다.
+        max(0, availableWidth - oppositeMargin - containerPadding)
     }
 }
