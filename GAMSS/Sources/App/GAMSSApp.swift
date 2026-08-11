@@ -24,6 +24,10 @@ struct GAMSSApp: App {
     var body: some Scene {
         WindowGroup {
             MainTabView()
+                .preferredColorScheme(.light)
         }
+        // 디자인 토큰이 다크모드 값을 갖고 있지만 디자이너가 아직 다크모드 화면을 설계하지
+        // 않았다 — 시스템 다크모드를 그대로 따라가면 색상이 라이트/다크 목적과 반대로
+        // 뒤집혀 보이므로 앱 전체를 라이트 모드로 고정한다.
     }
 }
