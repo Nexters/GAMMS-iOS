@@ -71,13 +71,10 @@ struct HomeView: View {
 
     private var header: some View {
         HStack {
-            Text("GAMSS")
-                .typography(.subtitle3)
-                .foregroundStyle(Color.colorGray950)
-                .padding(.horizontal, Spacing.spacing300)
-                .padding(.vertical, Spacing.spacing100)
-                .background(Color.colorGray050)
-                .clipShape(Capsule())
+            Image("logoGamss")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 24)
 
             Spacer()
 
