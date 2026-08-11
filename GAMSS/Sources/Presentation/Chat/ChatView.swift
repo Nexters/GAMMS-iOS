@@ -16,27 +16,39 @@ struct ChatView: View {
     }
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 8) {
-                    ForEach(viewModel.messages) { message in
-                        MessageRow(
-                            message: message,
-                            quotedMessage: viewModel.quotedMessage(for: message)
-                        )
-                        .id(message.id)
+        GeometryReader { geometry in
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: Spacing.spacing200) {
+                        ForEach(viewModel.messages) { message in
+                            MessageBubbleView(
+                                message: message,
+                                quotedMessage: viewModel.quotedMessage(for: message),
+                                maxWidth: MessageBubbleLayout.maxBubbleWidth(
+                                    availableWidth: geometry.size.width,
+                                    containerPadding: Spacing.spacing300 * 2
+                                )
+                            )
+                            .id(message.id)
+                        }
                     }
+                    .padding(Spacing.spacing300)
                 }
-                .padding()
-            }
-            // ScrollView가 키보드에 의해 축소/복원될 때
-            // SwiftUI가 키보드 dismiss를 자연스럽게 처리하도록 한다.
-            .scrollDismissesKeyboard(.interactively)
-            .onChange(of: viewModel.messages) { _, newMessages in
-                scrollToBottom(proxy, messages: newMessages)
-            }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                composer
+                // ScrollView가 키보드에 의해 축소/복원될 때
+                // SwiftUI가 키보드 dismiss를 자연스럽게 처리하도록 한다.
+                .scrollDismissesKeyboard(.interactively)
+                .onChange(of: viewModel.messages) { _, newMessages in
+                    scrollToBottom(proxy, messages: newMessages)
+                }
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    ChatComposerView(
+                        text: $viewModel.input,
+                        isSendDisabled: viewModel.isSendDisabled,
+                        onSend: { Task { await viewModel.send() } },
+                        onTextChange: { viewModel.updateInput($0) },
+                        isFocused: $isInputFocused
+                    )
+                }
             }
         }
         .task {
@@ -59,36 +71,6 @@ struct ChatView: View {
         }
     }
 
-    private var composer: some View {
-        HStack(alignment: .bottom, spacing: 8) {
-            TextField(
-                "메시지를 입력하세요",
-                text: $viewModel.input,
-                axis: .vertical
-            )
-            .textFieldStyle(.roundedBorder)
-            .focused($isInputFocused)
-            .lineLimit(1...5)
-            .onChange(of: viewModel.input) { _, newValue in
-                if viewModel.updateInput(newValue) {
-                    // 별도의 animation 없이 포커스만 해제한다.
-                    // keyboard dismiss와 layout animation이 충돌하는 것을 방지한다.
-                    isInputFocused = false
-                }
-            }
-
-            Button("전송") {
-                Task {
-                    await viewModel.send()
-                }
-            }
-            .disabled(viewModel.isSendDisabled)
-        }
-        .padding(.horizontal)
-        .padding(.vertical, 8)
-        .background(.background)
-    }
-
     private func scrollToBottom(
         _ proxy: ScrollViewProxy,
         messages: [Message]
@@ -102,69 +84,6 @@ struct ChatView: View {
                 lastMessage.id,
                 anchor: .bottom
             )
-        }
-    }
-}
-
-private struct MessageRow: View {
-    let message: Message
-    let quotedMessage: Message?
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 8) {
-            switch message.sender {
-            case .user:
-                Spacer()
-
-                bubble
-
-            case let .character(emotion):
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 28, height: 28)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(emotion.displayName)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    bubble
-                }
-
-                Spacer()
-            }
-        }
-    }
-
-    private var bubble: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            if let quotedMessage {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(quotedMessage.content)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-
-                    Divider()
-                }
-            }
-
-            Text(message.content)
-        }
-        .padding(10)
-        .background(background)
-        .clipShape(
-            RoundedRectangle(cornerRadius: 12)
-        )
-    }
-
-    private var background: Color {
-        switch message.sender {
-        case .user:
-            .blue.opacity(0.2)
-
-        case .character:
-            .gray.opacity(0.2)
         }
     }
 }
