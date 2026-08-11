@@ -24,7 +24,9 @@
 		8F4E518B79C7B76223B098BA /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = 8E8487F478AF703D394C5EB6 /* Tokenizers */; };
 		94A526BCCCD9DF730A39BF97 /* sample_sentences.json in Resources */ = {isa = PBXBuildFile; fileRef = D4BE9D664889F13369325DC9 /* sample_sentences.json */; };
 		9EA6F6B8DF51021E18342083 /* HomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EDC07CB1FA5BA970388DB6A /* HomeViewModelTests.swift */; };
+		FA90ADA39E7A145713881061 /* MainTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C15D652D0472A1EBD024674 /* MainTabTests.swift */; };
 		A8948FBCA4DF4E43F2C582EA /* Pods_GAMSS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */; };
+		A8FEE0AD9A4A60908DC5F5F1 /* CreateMessageRequestDTOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAA522A6DCECC0B3666523C /* CreateMessageRequestDTOTests.swift */; };
 		ABF5C91182F3B409C1AA9E8E /* GetMessagesUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A67D7BECCB85A88C969AD7 /* GetMessagesUseCaseTests.swift */; };
 		B32ACCF04698A89364EDDECE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 316EA002FAC5D3328796EF90 /* Foundation.framework */; };
 		BA7748118B0D2759E0F6A207 /* Pods_GAMSSTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1CC8FA289575E4B98C41539 /* Pods_GAMSSTests.framework */; };
@@ -34,7 +36,6 @@
 		CC604C7607382102024E0FA1 /* ConversationSummaryPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CCBD8A019CAA37319E7984 /* ConversationSummaryPolicyTests.swift */; };
 		DC1369FEAE93D794107D5373 /* Color_GAMSSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596EE0F239D37460A7BA389D /* Color_GAMSSTests.swift */; };
 		E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */; };
-		A8FEE0AD9A4A60908DC5F5F1 /* CreateMessageRequestDTOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAA522A6DCECC0B3666523C /* CreateMessageRequestDTOTests.swift */; };
 		EE5555555555555555555555 /* TypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4444444444444444444444 /* TypographyTests.swift */; };
 		F1D4E5A20F2B3C4D5E6F7A8B /* SpacingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D4E5A30F2B3C4D5E6F7A8C /* SpacingTests.swift */; };
 		F29C98F332A3EC127B809DD3 /* ChatViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE5C85E76690E41AE394895D /* ChatViewModelTests.swift */; };
@@ -57,15 +58,16 @@
 		1A8F630A15A80F5FAB52F2C1 /* Pods-GAMSSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSSTests.debug.xcconfig"; path = "Target Support Files/Pods-GAMSSTests/Pods-GAMSSTests.debug.xcconfig"; sourceTree = "<group>"; };
 		316EA002FAC5D3328796EF90 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		3EDC07CB1FA5BA970388DB6A /* HomeViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeViewModelTests.swift; sourceTree = "<group>"; };
+		3C15D652D0472A1EBD024674 /* MainTabTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MainTabTests.swift; sourceTree = "<group>"; };
 		41CCBD8A019CAA37319E7984 /* ConversationSummaryPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConversationSummaryPolicyTests.swift; sourceTree = "<group>"; };
 		4DDF78D0118869F3D9E1E269 /* SendMessageUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SendMessageUseCaseTests.swift; sourceTree = "<group>"; };
 		596EE0F239D37460A7BA389D /* Color_GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Color_GAMSSTests.swift; sourceTree = "<group>"; };
 		5B4F594F8D1059D3DF30DE92 /* GAMSSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GAMSSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		708F57F33003C651008DF433 /* GAMSS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GAMSS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GAMSSTests.swift; sourceTree = "<group>"; };
-		7DAA522A6DCECC0B3666523C /* CreateMessageRequestDTOTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CreateMessageRequestDTOTests.swift; sourceTree = "<group>"; };
 		79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTestViewModelTests.swift; sourceTree = "<group>"; };
 		7BB1A4112363D93ED3AD1598 /* EmotionCharacterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionCharacterTests.swift; sourceTree = "<group>"; };
+		7DAA522A6DCECC0B3666523C /* CreateMessageRequestDTOTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CreateMessageRequestDTOTests.swift; sourceTree = "<group>"; };
 		83A67D7BECCB85A88C969AD7 /* GetMessagesUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GetMessagesUseCaseTests.swift; sourceTree = "<group>"; };
 		86563A77A8A674E7F050119E /* CommentRevealPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommentRevealPolicyTests.swift; sourceTree = "<group>"; };
 		A17C099A15F7D9B1481998D0 /* DefaultSummaryRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultSummaryRepositoryTests.swift; sourceTree = "<group>"; };
@@ -277,6 +279,7 @@
 				79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */,
 				BE5C85E76690E41AE394895D /* ChatViewModelTests.swift */,
 				3EDC07CB1FA5BA970388DB6A /* HomeViewModelTests.swift */,
+				3C15D652D0472A1EBD024674 /* MainTabTests.swift */,
 			);
 			path = Presentation;
 			sourceTree = "<group>";
@@ -516,13 +519,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-GAMSS/Pods-GAMSS-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-GAMSS/Pods-GAMSS-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -571,6 +570,7 @@
 				E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */,
 				06BCF4ADC30405F292D7B64C /* EmotionTestViewModelTests.swift in Sources */,
 				F29C98F332A3EC127B809DD3 /* ChatViewModelTests.swift in Sources */,
+				FA90ADA39E7A145713881061 /* MainTabTests.swift in Sources */,
 				9EA6F6B8DF51021E18342083 /* HomeViewModelTests.swift in Sources */,
 				C63AB33F1424E4237FF76F6B /* SummaryErrorTests.swift in Sources */,
 				1D8DF6DFC7E7383B9B8C5850 /* DefaultSummaryRepositoryTests.swift in Sources */,

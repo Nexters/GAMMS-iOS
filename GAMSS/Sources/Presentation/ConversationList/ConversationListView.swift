@@ -9,9 +9,11 @@ import SwiftUI
 
 struct ConversationListView: View {
     @StateObject private var viewModel: ConversationListViewModel
+    @Binding private var isTabBarHidden: Bool
 
-    init(viewModel: ConversationListViewModel) {
+    init(viewModel: ConversationListViewModel, isTabBarHidden: Binding<Bool>) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        _isTabBarHidden = isTabBarHidden
     }
 
     var body: some View {
@@ -36,7 +38,8 @@ struct ConversationListView: View {
                         conversationId: conversation.id
                     )
                 )
-                .toolbar(.hidden, for: .tabBar)
+                .onAppear { isTabBarHidden = true }
+                .onDisappear { isTabBarHidden = false }
             }
         }
         .task {
@@ -57,6 +60,7 @@ struct ConversationListView: View {
             getConversationsUseCase: GetConversationsUseCase(
                 conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
             )
-        )
+        ),
+        isTabBarHidden: .constant(false)
     )
 }

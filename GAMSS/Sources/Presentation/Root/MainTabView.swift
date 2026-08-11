@@ -8,25 +8,47 @@
 import SwiftUI
 
 struct MainTabView: View {
+    @State private var selectedTab: MainTab = .home
+    @State private var isTabBarHidden = false
+
     var body: some View {
-        TabView {
+        content
+            .safeAreaInset(edge: .bottom) {
+                if !isTabBarHidden {
+                    CustomTabBar(selectedTab: $selectedTab)
+                        .padding(.horizontal, Spacing.spacing400)
+                        .padding(.bottom, Spacing.spacing200)
+                        .transition(.opacity)
+                }
+            }
+            .animation(.easeInOut(duration: 0.15), value: isTabBarHidden)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch selectedTab {
+        case .archive:
+            ArchiveView()
+
+        case .home:
             HomeView(
                 viewModel: HomeViewModel(
                     sendMessageUseCase: SendMessageUseCase(
                         conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
                     )
-                )
+                ),
+                isTabBarHidden: $isTabBarHidden
             )
-            .tabItem { Label("홈", systemImage: "house") }
 
+        case .chat:
             ConversationListView(
                 viewModel: ConversationListViewModel(
                     getConversationsUseCase: GetConversationsUseCase(
                         conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
                     )
-                )
+                ),
+                isTabBarHidden: $isTabBarHidden
             )
-            .tabItem { Label("대화", systemImage: "bubble.left.and.bubble.right") }
         }
     }
 }
