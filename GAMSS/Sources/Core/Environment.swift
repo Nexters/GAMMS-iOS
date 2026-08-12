@@ -25,9 +25,29 @@ public enum Environment {
         return value(key: "APP_NAME")
     }()
     
+    /// 앱 버전 (`MARKETING_VERSION` → `CFBundleShortVersionString`)
+    static let appVersion: String = {
+        guard let version = infoDictionary["CFBundleShortVersionString"] as? String,
+              !version.isEmpty
+        else {
+            return "-"
+        }
+        return version
+    }()
+    
     /// 서버 Base URL
     static let baseURL: String = {
         return value(key: "BASE_URL")
+    }()
+    
+    /// 서비스 이용약관 URL
+    static let termsOfServiceURL: String = {
+        return value(key: "TERMS_OF_SERVICE_URL")
+    }()
+    
+    /// 개인정보 처리방침 URL
+    static let privacyPolicyURL: String = {
+        return value(key: "PRIVACY_POLICY_URL")
     }()
 }
 
