@@ -26,4 +26,16 @@ final class MessageBubbleLayoutTests: XCTestCase {
 
         XCTAssertEqual(result, 0)
     }
+
+    func test_receivedBubbleMaxWidth_subtractsIndent() {
+        let result = MessageBubbleLayout.receivedBubbleMaxWidth(maxWidth: 260)
+
+        XCTAssertEqual(result, 260 - 32)
+    }
+
+    func test_receivedBubbleMaxWidth_clampsToZeroInsteadOfNegative() {
+        let result = MessageBubbleLayout.receivedBubbleMaxWidth(maxWidth: 10)
+
+        XCTAssertEqual(result, 0)
+    }
 }

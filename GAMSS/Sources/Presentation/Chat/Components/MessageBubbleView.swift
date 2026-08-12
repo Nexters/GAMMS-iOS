@@ -29,6 +29,7 @@ struct MessageBubbleView: View {
                         bubble
                         timestamp
                     }
+                    .padding(.leading, MessageBubbleLayout.receivedIndent)
                 }
                 Spacer(minLength: 0)
             }
@@ -75,20 +76,24 @@ struct MessageBubbleView: View {
         }
         .padding(.vertical, Spacing.spacing100)
         .padding(.horizontal, Spacing.spacing200)
-        .frame(maxWidth: maxWidth, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: Radius.radius200)
-                .fill(bubbleBackground)
-        )
+        .frame(maxWidth: bubbleMaxWidth, alignment: .leading)
+        .background(bubbleBackground)
         .overlay(
-            RoundedRectangle(cornerRadius: Radius.radius200)
+            Rectangle()
                 .strokeBorder(Color.colorGray950, lineWidth: 1)
         )
     }
 
+    private var bubbleMaxWidth: CGFloat {
+        switch message.sender {
+        case .user: maxWidth
+        case .character: MessageBubbleLayout.receivedBubbleMaxWidth(maxWidth: maxWidth)
+        }
+    }
+
     private var timestamp: some View {
         Text(MessageTimestampFormatter.string(from: message.createdAt))
-            .typography(.body5Regular)
+            .typography(.body6Regular)
             .foregroundStyle(Color.colorGray600)
     }
 

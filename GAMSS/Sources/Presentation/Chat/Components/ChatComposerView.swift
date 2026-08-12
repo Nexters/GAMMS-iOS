@@ -40,12 +40,9 @@ struct ChatComposerView: View {
             }
             .padding(.vertical, Spacing.spacing150)
             .padding(.horizontal, Spacing.spacing200)
-            .background(
-                RoundedRectangle(cornerRadius: Radius.radius300)
-                    .fill(Color.colorGray025)
-            )
+            .background(Color.colorGray025)
             .overlay(
-                RoundedRectangle(cornerRadius: Radius.radius300)
+                Rectangle()
                     .strokeBorder(Color.colorGray950, lineWidth: 1)
             )
 
