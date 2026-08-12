@@ -51,32 +51,27 @@ struct MessageBubbleView: View {
     }
 
     private var bubble: some View {
-        VStack(alignment: .leading, spacing: Spacing.spacing050) {
-            if let quotedHeaderLabel, let quotedMessage {
-                // 이 인용 헤더 블록은 light 버블(수신/캐릭터) 배경을 전제로 한
-                // colorGray950/colorGray500 색상을 쓴다. 현재는 사용자가 항상
-                // repliesToMessageId: nil로 보내기 때문에 user(sent, dark) 버블에서는
-                // 도달하지 않지만, 추후 sentReply 기능으로 사용자 버블에서도 인용 블록을
-                // 표시하게 되면 어두운 배경 위에서 거의 안 보이게 되므로 그때 색상을
-                // 재검토해야 한다.
-                Text(quotedHeaderLabel)
-                    .typography(.body5Medium)
-                    .foregroundStyle(Color.colorGray950)
-                Text(quotedMessage.content)
-                    .typography(.body4Medium)
-                    .foregroundStyle(Color.colorGray500)
-                Rectangle()
-                    .fill(Color.colorGray200)
-                    .frame(height: 1)
-            }
+        BubbleWidthLayout(maxWidth: bubbleMaxWidth) {
+            VStack(alignment: .leading, spacing: Spacing.spacing050) {
+                if let quotedHeaderLabel, let quotedMessage {
+                    Text(quotedHeaderLabel)
+                        .typography(.body5Medium)
+                        .foregroundStyle(Color.colorGray950)
+                    Text(quotedMessage.content)
+                        .typography(.body4Medium)
+                        .foregroundStyle(Color.colorGray500)
+                    Rectangle()
+                        .fill(Color.colorGray200)
+                        .frame(height: 1)
+                }
 
-            Text(message.content)
-                .typography(.body4Medium)
-                .foregroundStyle(bodyTextColor)
+                Text(message.content)
+                    .typography(.body4Medium)
+                    .foregroundStyle(bodyTextColor)
+            }
+            .padding(.vertical, Spacing.spacing100)
+            .padding(.horizontal, Spacing.spacing200)
         }
-        .padding(.vertical, Spacing.spacing100)
-        .padding(.horizontal, Spacing.spacing200)
-        .frame(maxWidth: bubbleMaxWidth, alignment: .leading)
         .background(bubbleBackground)
         .overlay(
             Rectangle()
@@ -110,32 +105,4 @@ struct MessageBubbleView: View {
         case .character: Color.colorGray025
         }
     }
-}
-
-#Preview("sent") {
-    MessageBubbleView(
-        message: Message(id: 1, conversationId: 1, sender: .user, content: "안녕하세요, 오늘 하루도 힘내봐요!", repliesToMessageId: nil, createdAt: Date()),
-        quotedMessage: nil,
-        maxWidth: 260
-    )
-    .padding()
-}
-
-#Preview("received") {
-    MessageBubbleView(
-        message: Message(id: 2, conversationId: 1, sender: .character(.joy), content: "안녕! 오늘도 행복한 하루~!", repliesToMessageId: 1, createdAt: Date()),
-        quotedMessage: nil,
-        maxWidth: 260
-    )
-    .padding()
-}
-
-#Preview("receivedReply") {
-    let original = Message(id: 2, conversationId: 1, sender: .character(.anxiety), content: "안녕하세용", repliesToMessageId: 1, createdAt: Date())
-    return MessageBubbleView(
-        message: Message(id: 3, conversationId: 1, sender: .character(.prickly), content: "뭐가안녕한데 ㅋㅋ", repliesToMessageId: 2, createdAt: Date()),
-        quotedMessage: original,
-        maxWidth: 260
-    )
-    .padding()
 }
