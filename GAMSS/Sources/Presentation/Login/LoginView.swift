@@ -9,6 +9,7 @@ import AuthenticationServices
 import SwiftUI
 
 struct LoginView: View {
+    @SwiftUI.Environment(LoginSession.self) private var loginState
     @StateObject private var viewModel: LoginViewModel
     @State private var currentNonce: String?
     
@@ -48,9 +49,10 @@ struct LoginView: View {
                             credential: credential,
                             nonce: nonce
                         )
+                        loginState.value = LoginState.current
                     }
                 case .failure(let error):
-                    print(error.localizedDescription)
+                    Log.debug(error.localizedDescription)
                 }
             }
         }
