@@ -10,6 +10,8 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel: HomeViewModel
     @FocusState private var isInputFocused: Bool
+    @Binding private var isTabBarHidden: Bool
+    @State private var isSettingPresented = false
 
     init(viewModel: HomeViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -57,6 +59,11 @@ struct HomeView: View {
                 )
                 .toolbar(.hidden, for: .tabBar)
             }
+            .navigationDestination(isPresented: $isSettingPresented) {
+                SettingView()
+                    .onAppear { isTabBarHidden = true }
+                    .onDisappear { isTabBarHidden = false }
+            }
         }
         .alert(viewModel.alertMessage ?? "", isPresented: Binding(
             get: { viewModel.alertMessage != nil },
@@ -75,8 +82,12 @@ struct HomeView: View {
 
             Spacer()
 
-            Image(systemName: "gearshape")
-                .foregroundStyle(Color.colorGray500)
+            Button {
+                isSettingPresented = true
+            } label: {
+                Image(systemName: "gearshape")
+                    .foregroundStyle(Color.colorGray500)
+            }
         }
     }
 
