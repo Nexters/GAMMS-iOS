@@ -39,7 +39,11 @@ struct MessageComposerView: View {
 
     @State private var measuredContentHeight: CGFloat = MessageComposerLayout.collapsedHeight
 
-    private let controlsRowHeight: CGFloat = 40
+    private let controlsRowHeight: CGFloat = 48
+    /// TextEditor는 내부 UITextView의 기본 텍스트 컨테이너 인셋이 있어, 같은 패딩을 준
+    /// 일반 Text로 측정한 높이보다 실제로 조금 더 크게 렌더링된다(실기기 확인함). 그 오차를
+    /// 보정하기 위한 여유값.
+    private let textEditorInsetBuffer: CGFloat = 16
 
     private var isExpanded: Bool { !input.isEmpty }
 
@@ -69,7 +73,9 @@ struct MessageComposerView: View {
                 Text("무슨 이야기를 버려볼까요?")
                     .typography(.body3Regular)
                     .foregroundStyle(Color.colorGray400)
-                    .padding(.horizontal, Spacing.spacing300)
+                    .lineLimit(1)
+                    .padding(.leading, Spacing.spacing300)
+                    .padding(.trailing, 110) // 오른쪽 감정 트리거+전송 버튼과 겹치지 않게 예약
                     .frame(maxWidth: .infinity, minHeight: MessageComposerLayout.collapsedHeight, alignment: .leading)
             }
 
@@ -86,16 +92,32 @@ struct MessageComposerView: View {
         }
         .frame(height: boxHeight)
         .animation(.easeInOut(duration: 0.2), value: boxHeight)
-        .onPreferenceChange(ComposerContentHeightPreferenceKey.self) { measuredContentHeight = $0 }
-        .overlay(alignment: .bottomLeading) {
-            emotionTrigger
-                .padding(.horizontal, Spacing.spacing300)
-                .padding(.bottom, Spacing.spacing150)
+        .onPreferenceChange(ComposerContentHeightPreferenceKey.self) { measuredContentHeight = $0 + textEditorInsetBuffer }
+        .overlay(alignment: isExpanded ? .bottom : .center) {
+            controlsRow
         }
-        .overlay(alignment: .bottomTrailing) {
-            submitButton
+    }
+
+    /// collapsed일 때는 placeholder 옆(오른쪽)에 감정 트리거+전송 버튼이 나란히 붙고,
+    /// expanded일 때는 박스 하단 한 줄에 감정 트리거(좌)와 전송 버튼(우)이 양 끝으로 벌어진다.
+    private var controlsRow: some View {
+        Group {
+            if isExpanded {
+                HStack {
+                    emotionTrigger
+                    Spacer()
+                    submitButton
+                }
                 .padding(.horizontal, Spacing.spacing200)
-                .padding(.bottom, Spacing.spacing100)
+                .padding(.bottom, Spacing.spacing150)
+            } else {
+                HStack(spacing: Spacing.spacing150) {
+                    Spacer()
+                    emotionTrigger
+                    submitButton
+                }
+                .padding(.horizontal, Spacing.spacing300)
+            }
         }
     }
 

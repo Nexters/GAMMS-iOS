@@ -19,12 +19,17 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // 종이 질감 배경 — 에셋은 추후 전달 예정. 도착 전까지는 Image(_:)가 빈 화면으로
-                // 렌더링될 뿐 빌드/런타임 에러는 나지 않는다.
-                Image("homeBackgroundPaper")
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
+                // 종이 질감 배경 — 에셋은 추후 전달 예정. 에셋이 없는 동안에는 폭/높이를
+                // 명시적으로 고정해둔다 — scaledToFill()이 (0,0) 크기의 누락된 이미지에서
+                // 종횡비를 계산하면 NaN이 나와 레이아웃 전체가 깨질 수 있기 때문.
+                GeometryReader { geo in
+                    Image("homeBackgroundPaper")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .clipped()
+                }
+                .ignoresSafeArea()
 
                 decorations
 
@@ -132,24 +137,26 @@ struct HomeView: View {
         GeometryReader { geo in
             ZStack {
                 // TODO: 디자인팀 에셋 전달 예정 — /Users/hwangchanmi/Desktop/감쓰/홈화면/ 참고.
+                // 폭/높이를 둘 다 명시한다 — scaledToFit()이 (0,0) 크기의 누락된 이미지에서
+                // 종횡비를 계산하면 NaN이 나와 레이아웃 전체가 깨질 수 있기 때문(실기기 확인함).
                 Image("homeStickyNote")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 88)
+                    .frame(width: 88, height: 88)
                     .rotationEffect(.degrees(10))
                     .position(x: geo.size.width * 0.82, y: geo.size.height * 0.27)
 
                 Image("homeTapePink")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 130)
+                    .frame(width: 130, height: 50)
                     .rotationEffect(.degrees(-8))
                     .position(x: geo.size.width * 0.78, y: geo.size.height * 0.68)
 
                 Image("homeTapeOutline")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 90)
+                    .frame(width: 90, height: 60)
                     .rotationEffect(.degrees(-12))
                     .position(x: geo.size.width * 0.28, y: geo.size.height * 0.76)
             }
