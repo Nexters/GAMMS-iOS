@@ -37,6 +37,22 @@ final class DefaultMemberRepositoryTests: XCTestCase {
         XCTAssertEqual(network.lastEndpoint?.method, .get)
     }
 
+    /// 회귀 테스트: 닉네임을 아직 설정하지 않은 사용자의 실제 서버 응답 형태(name/nickname
+    /// null, DTO에 없는 status/createdAt 필드 포함)로도 실패 없이 조회돼야 한다.
+    func test_fetchMyProfile_serverReturnsNullNameAndNickname_decodesSuccessfullyWithNilValues() async throws {
+        let network = MockNetworkRequesting()
+        network.stubbedData = Data("""
+        {"success":true,"data":{"id":3,"email":"a@example.com","name":null,"nickname":null,"status":"ACTIVE","createdAt":"2026-08-01T04:08:46.042194Z"},"error":null}
+        """.utf8)
+        let repository = DefaultMemberRepository(networkManager: network, tokenStorage: .shared)
+
+        let user = try await repository.fetchMyProfile()
+
+        XCTAssertEqual(user.id, 3)
+        XCTAssertNil(user.name)
+        XCTAssertNil(user.nickname)
+    }
+
     func test_fetchMyProfile_propagatesNetworkError() async {
         let network = MockNetworkRequesting()
         network.stubbedError = SummaryError.inferenceFailed()
