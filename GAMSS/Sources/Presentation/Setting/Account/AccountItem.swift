@@ -40,6 +40,7 @@ enum AccountItem: CaseIterable, Identifiable {
     enum Action {
         case navigate
         case logout
+        case withdraw
         case none
     }
     
@@ -52,7 +53,7 @@ enum AccountItem: CaseIterable, Identifiable {
         case .logout:
             .logout
         case .withdraw:
-            .navigate
+            .withdraw
         }
     }
 }

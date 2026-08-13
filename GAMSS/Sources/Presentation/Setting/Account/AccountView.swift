@@ -92,6 +92,16 @@ struct AccountView: View {
             
         case .none:
             row
+        case .withdraw:
+            Button {
+                Task {
+                    await viewModel.deleteMember()
+                    loginSession.value = .current
+                }
+            } label: {
+                row
+            }
+            .buttonStyle(.plain)
         }
     }
     
@@ -116,6 +126,12 @@ struct AccountView: View {
                     authRepository: DefaultAuthRepository(
                         networkManager: NetworkManager.shared,
                         tokenStorage: TokenStorage.shared
+                    )
+                ),
+                deleteMemberUseCase: DefaultDeleteMemberUseCase(
+                    memberRepository: DefaultMemberRepository(
+                        networkManager: NetworkManager.shared,
+                        tokenStorage: .shared
                     )
                 )
             )
