@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-/// 대화방 목록 화면 상단 네비게이션. 로고 + 검색 아이콘(자리만 차지, 숨김 처리) + 햄버거 아이콘
-/// (표시되지만 탭 동작 없음). 검색/메뉴 기능은 이번 범위에서 구현하지 않는다.
+/// 대화방 목록 화면 상단 네비게이션. 로고 + 검색 아이콘 + 햄버거 아이콘, 둘 다 자리만 차지하고
+/// 숨김 처리(`.hidden()`). 검색/메뉴 기능은 이번 범위에서 구현하지 않는다.
 struct ConversationListHeaderView: View {
     var body: some View {
         HStack(spacing: Spacing.spacing200) {
@@ -25,6 +25,7 @@ struct ConversationListHeaderView: View {
 
             Image(systemName: "line.3.horizontal")
                 .foregroundStyle(Color.colorGray500)
+                .hidden()
         }
     }
 }

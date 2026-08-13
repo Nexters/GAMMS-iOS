@@ -25,13 +25,10 @@ struct ConversationRowView: View {
                 .typography(.body5Regular)
                 .foregroundStyle(Color.colorGray600)
         }
-        .padding(Spacing.spacing200)
-        .background(
-            RoundedRectangle(cornerRadius: Radius.radius200)
-                .fill(Color.colorGray025)
-        )
+        .padding(Spacing.spacing300)
+        .background(Color.colorGray025)
         .overlay(
-            RoundedRectangle(cornerRadius: Radius.radius200)
+            Rectangle()
                 .strokeBorder(Color.colorGray950, lineWidth: 1)
         )
     }

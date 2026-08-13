@@ -71,7 +71,7 @@ struct ConversationListView: View {
         HStack {
             Text(ConversationListDateHeaderFormatter.string(from: Date()))
                 .typography(.body5Regular)
-                .foregroundStyle(Color.colorGray500)
+                .foregroundStyle(Color.colorGray950)
 
             Spacer()
 
