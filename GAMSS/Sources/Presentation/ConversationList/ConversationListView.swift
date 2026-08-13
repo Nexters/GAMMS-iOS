@@ -18,17 +18,33 @@ struct ConversationListView: View {
 
     var body: some View {
         NavigationStack {
-            List(viewModel.conversations) { conversation in
-                NavigationLink(value: conversation) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(conversation.title ?? "제목 없음")
-                        Text(conversation.status)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 0) {
+                ConversationListHeaderView()
+                    .padding(.horizontal, Spacing.spacing400)
+                    .padding(.top, Spacing.spacing200)
+
+                dateHeader
+                    .padding(.horizontal, Spacing.spacing400)
+                    .padding(.top, Spacing.spacing300)
+                    .padding(.bottom, Spacing.spacing200)
+
+                if !viewModel.isLoading && viewModel.conversations.isEmpty {
+                    ConversationListEmptyView()
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: Spacing.spacing100) {
+                            ForEach(viewModel.conversations) { conversation in
+                                NavigationLink(value: conversation) {
+                                    ConversationRowView(conversation: conversation)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal, Spacing.spacing400)
                     }
                 }
             }
-            .navigationTitle("오늘의 채팅방")
+            .navigationBarHidden(true)
             .navigationDestination(for: ConversationSummary.self) { conversation in
                 ChatView(
                     viewModel: ChatViewModel(
@@ -50,6 +66,20 @@ struct ConversationListView: View {
             set: { if !$0 { viewModel.alertMessage = nil } }
         )) {
             Button("확인", role: .cancel) {}
+        }
+    }
+
+    private var dateHeader: some View {
+        HStack {
+            Text(ConversationListDateHeaderFormatter.string(from: Date()))
+                .typography(.body5Regular)
+                .foregroundStyle(Color.colorGray500)
+
+            Spacer()
+
+            Text("삭제하기")
+                .typography(.body5Regular)
+                .foregroundStyle(Color.colorGray500)
         }
     }
 }
