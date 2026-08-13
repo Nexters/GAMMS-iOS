@@ -81,7 +81,6 @@ struct MessageComposerView: View {
                 }
         }
         .frame(height: MessageComposerLayout.height(isExpanded: isExpanded))
-        .animation(.easeInOut(duration: 0.2), value: isExpanded)
         // overlay(alignment:)를 .bottom/.center로 바꿔가며 쓰면 Alignment 값 자체는
         // 애니메이션 보간이 안 돼서 박스 높이는 부드럽게 늘어나는데 버튼만 먼저 순간이동해
         // 보였다(실기기 확인함). alignment는 항상 .bottom으로 고정하고, 대신 하단 padding을
@@ -89,6 +88,12 @@ struct MessageComposerView: View {
         .overlay(alignment: .bottom) {
             controlsRow
         }
+        // .animation()은 이 시점보다 "앞에" 있는 모디파이어에만 적용된다 — .overlay()보다
+        // 먼저 붙어 있으면 overlay 내부(controlsRow의 padding) 변화는 애니메이션 대상에서
+        // 빠져서 박스 높이만 부드럽고 버튼은 순간이동했다(실기기로 재확인, 1차 수정 실패).
+        // .overlay() 다음으로 옮겨서 프레임 높이 변화와 overlay padding 변화가 같은
+        // 트랜잭션으로 묶이게 한다.
+        .animation(.easeInOut(duration: 0.2), value: isExpanded)
     }
 
     /// 감정 선택 기능은 보류 상태 — 트리거 버튼과 드롭다운을 숨긴다. 아래 `emotionTrigger`/
