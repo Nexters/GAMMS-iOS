@@ -10,6 +10,9 @@ import SwiftUI
 struct ChatView: View {
     @StateObject private var viewModel: ChatViewModel
     @FocusState private var isInputFocused: Bool
+    // 이 프로젝트에 이미 `Environment`라는 커스텀 타입(BASE_URL 등 환경변수 관리, Core/Environment.swift)이
+    // 있어서 이름이 충돌한다 — SwiftUI 쪽임을 명시하기 위해 `SwiftUI.Environment`로 정확히 지정한다.
+    @SwiftUI.Environment(\.dismiss) private var dismiss
 
     init(viewModel: ChatViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -21,41 +24,46 @@ struct ChatView: View {
     private let containerPadding = Spacing.spacing300
 
     var body: some View {
-        GeometryReader { geometry in
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: Spacing.spacing200) {
-                        ForEach(viewModel.messages) { message in
-                            MessageBubbleView(
-                                message: message,
-                                quotedMessage: viewModel.quotedMessage(for: message),
-                                maxWidth: MessageBubbleLayout.maxBubbleWidth(
-                                    availableWidth: geometry.size.width,
-                                    containerPadding: containerPadding * 2
+        VStack(spacing: 0) {
+            header
+
+            GeometryReader { geometry in
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: Spacing.spacing200) {
+                            ForEach(viewModel.messages) { message in
+                                MessageBubbleView(
+                                    message: message,
+                                    quotedMessage: viewModel.quotedMessage(for: message),
+                                    maxWidth: MessageBubbleLayout.maxBubbleWidth(
+                                        availableWidth: geometry.size.width,
+                                        containerPadding: containerPadding * 2
+                                    )
                                 )
-                            )
-                            .id(message.id)
+                                .id(message.id)
+                            }
                         }
+                        .padding(containerPadding)
                     }
-                    .padding(containerPadding)
-                }
-                // ScrollView가 키보드에 의해 축소/복원될 때
-                // SwiftUI가 키보드 dismiss를 자연스럽게 처리하도록 한다.
-                .scrollDismissesKeyboard(.interactively)
-                .onChange(of: viewModel.messages) { _, newMessages in
-                    scrollToBottom(proxy, messages: newMessages)
-                }
-                .safeAreaInset(edge: .bottom, spacing: 0) {
-                    ChatComposerView(
-                        text: $viewModel.input,
-                        isSendDisabled: viewModel.isSendDisabled,
-                        onSend: { Task { await viewModel.send() } },
-                        onTextChange: { viewModel.updateInput($0) },
-                        isFocused: $isInputFocused
-                    )
+                    // ScrollView가 키보드에 의해 축소/복원될 때
+                    // SwiftUI가 키보드 dismiss를 자연스럽게 처리하도록 한다.
+                    .scrollDismissesKeyboard(.interactively)
+                    .onChange(of: viewModel.messages) { _, newMessages in
+                        scrollToBottom(proxy, messages: newMessages)
+                    }
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        ChatComposerView(
+                            text: $viewModel.input,
+                            isSendDisabled: viewModel.isSendDisabled,
+                            onSend: { Task { await viewModel.send() } },
+                            onTextChange: { viewModel.updateInput($0) },
+                            isFocused: $isInputFocused
+                        )
+                    }
                 }
             }
         }
+        .toolbar(.hidden, for: .navigationBar)
         .task {
             await viewModel.start()
         }
@@ -74,6 +82,37 @@ struct ChatView: View {
         ) {
             Button("확인", role: .cancel) {}
         }
+    }
+
+    /// 커스텀 상단 헤더: 뒤로가기 + 대화방 생성 날짜만 표시한다(메모/햄버거 아이콘은 이번 범위에서
+    /// 제외). 시스템 네비게이션 바는 `.toolbar(.hidden, for: .navigationBar)`로 숨기고 이 헤더가
+    /// 대신한다.
+    private var header: some View {
+        ZStack {
+            Text(headerDateText)
+                .typography(.subtitle3)
+                .foregroundStyle(Color.colorGray950)
+
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .foregroundStyle(Color.colorGray950)
+                }
+
+                Spacer()
+            }
+        }
+        .padding(.horizontal, Spacing.spacing400)
+        .padding(.vertical, Spacing.spacing200)
+        .background(Color.colorWhite)
+    }
+
+    /// 대화방이 생성된 날짜(yy.MM.dd). 첫 메시지의 시각을 기준으로 삼는다 — 대화방 생성 시점과
+    /// 사실상 같고, 별도로 conversationId를 다시 조회하지 않아도 이미 로드된 messages에서 구할 수
+    /// 있다. 메시지가 아직 로드되기 전(화면 진입 직후 아주 짧은 순간)에는 빈 문자열을 보여준다.
+    private var headerDateText: String {
+        guard let firstMessageDate = viewModel.messages.first?.createdAt else { return "" }
+        return ConversationListDateHeaderFormatter.string(from: firstMessageDate)
     }
 
     private func scrollToBottom(
