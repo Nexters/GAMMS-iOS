@@ -44,10 +44,15 @@ struct HomeView: View {
                         viewModel.isEmotionPickerOpen = false
                     }
 
-                VStack(alignment: .leading, spacing: Spacing.spacing500) {
+                // spacing: 0으로 두고 각 요소가 자기 다음 요소와의 간격을 직접 padding으로
+                // 갖는다 — VStack 공통 spacing을 쓰면 로고-인사말 간격(Figma 지정값 188)만
+                // 따로 다르게 줄 수 없다.
+                VStack(alignment: .leading, spacing: 0) {
                     header
+                        .padding(.bottom, 188) // Figma 지정값 — 로고와 인사말 사이 간격
 
                     greeting
+                        .padding(.bottom, Spacing.spacing500)
 
                     MessageComposerView(
                         input: $viewModel.input,

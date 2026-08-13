@@ -7,17 +7,9 @@
 
 import SwiftUI
 
-/// 메시지 입력창의 실측 콘텐츠 높이를 상위로 전달하기 위한 PreferenceKey.
-/// `heightMeasuringText`(투명, 실제 렌더링 안 됨)의 크기를 GeometryReader로 재서 흘려보낸다.
-private struct ComposerContentHeightPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = MessageComposerLayout.collapsedHeight
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
-}
-
-/// 홈 화면 메시지 입력창. 입력이 비어있으면 한 줄(collapsed)로, 입력이 생기면 콘텐츠 높이만큼
-/// 자라나는(expanded) 박스로 표시된다. 감정 다중 선택 드롭다운과 전송 버튼을 함께 갖는다.
+/// 홈 화면 메시지 입력창. 입력이 비어있으면 collapsed(64), 입력이 생기면 expanded(149) 고정
+/// 높이로 표시된다 — 콘텐츠 길이에 따라 계속 늘어나지 않고, 넘치는 텍스트는 TextEditor 내부
+/// 스크롤로 처리된다. 감정 다중 선택 드롭다운과 전송 버튼을 함께 갖는다.
 ///
 /// TextEditor는 collapsed/expanded 어느 상태에서든 항상 같은 인스턴스로 유지한다 — 상태 전환마다
 /// TextEditor를 새로 만들면 그 순간 키보드 포커스가 끊길 수 있다. 대신 감정 트리거/전송 버튼을
@@ -37,22 +29,11 @@ struct MessageComposerView: View {
     /// 있어, 이 뷰가 자체 `@FocusState`를 따로 가지면 상위에서 그 상태를 제어할 수 없다.
     var isFocused: FocusState<Bool>.Binding
 
-    @State private var measuredContentHeight: CGFloat = MessageComposerLayout.collapsedHeight
-
-    private let controlsRowHeight: CGFloat = 56
-    /// TextEditor는 내부 UITextView의 기본 텍스트 컨테이너 인셋이 있어, 같은 패딩을 준
-    /// 일반 Text로 측정한 높이보다 실제로 조금 더 크게 렌더링된다(실기기 확인함). 그 오차를
-    /// 보정하기 위한 여유값. Text 기반 측정이라 완전히 정확하지 않을 수 있음 — 실제 에셋 적용
-    /// 후 실기기에서 재확인 필요(알려진 이슈로 남겨둠).
-    private let textEditorInsetBuffer: CGFloat = 24
+    /// 박스 하단 컨트롤 행(감정 트리거/전송 버튼)이 차지하는 높이 — expanded일 때 TextEditor
+    /// 텍스트가 그 밑에 깔리지 않도록 그만큼 하단 여백을 예약한다.
+    private let controlsRowHeight: CGFloat = 40
 
     private var isExpanded: Bool { !input.isEmpty }
-
-    private var boxHeight: CGFloat {
-        isExpanded
-            ? MessageComposerLayout.clampedHeight(forMeasuredContentHeight: measuredContentHeight)
-            : MessageComposerLayout.collapsedHeight
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing200) {
@@ -67,8 +48,6 @@ struct MessageComposerView: View {
         ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: Radius.radius300)
                 .fill(Color.colorGray025)
-
-            heightMeasuringText
 
             if input.isEmpty {
                 Text("무슨 이야기를 버려볼까요?")
@@ -91,9 +70,8 @@ struct MessageComposerView: View {
                     if onInputChange(newValue) { isFocused.wrappedValue = false }
                 }
         }
-        .frame(height: boxHeight)
-        .animation(.easeInOut(duration: 0.2), value: boxHeight)
-        .onPreferenceChange(ComposerContentHeightPreferenceKey.self) { measuredContentHeight = $0 + textEditorInsetBuffer }
+        .frame(height: MessageComposerLayout.height(isExpanded: isExpanded))
+        .animation(.easeInOut(duration: 0.2), value: isExpanded)
         .overlay(alignment: isExpanded ? .bottom : .center) {
             controlsRow
         }
@@ -125,23 +103,6 @@ struct MessageComposerView: View {
                 .padding(.horizontal, Spacing.spacing300)
             }
         }
-    }
-
-    /// 실제로는 그려지지 않는(opacity 0) 측정용 텍스트. TextEditor와 동일한 폰트/패딩으로
-    /// 배치해 GeometryReader로 콘텐츠 높이를 재고, 그 값을 `measuredContentHeight`로 흘려보낸다.
-    private var heightMeasuringText: some View {
-        Text(input.isEmpty ? " " : input)
-            .typography(.body3Regular)
-            .padding(.horizontal, Spacing.spacing200)
-            .padding(.bottom, isExpanded ? controlsRowHeight : 0)
-            .fixedSize(horizontal: false, vertical: true)
-            .opacity(0)
-            .allowsHitTesting(false)
-            .background(
-                GeometryReader { proxy in
-                    Color.clear.preference(key: ComposerContentHeightPreferenceKey.self, value: proxy.size.height)
-                }
-            )
     }
 
     private var emotionTrigger: some View {
