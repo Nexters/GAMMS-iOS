@@ -14,6 +14,9 @@ struct MainTabView: View {
         let appearance = UITabBarAppearance()
         let font = UIFont(name: FontWeight.medium.postScriptName(), size: Typography.caption3.metrics.fontSize)
 
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(Color.colorWhite)
+
         appearance.stackedLayoutAppearance.selected.iconColor = UIColor(Color.colorGray950)
         appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
             .foregroundColor: UIColor(Color.colorGray950),
