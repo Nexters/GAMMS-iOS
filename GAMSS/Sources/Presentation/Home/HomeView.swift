@@ -70,6 +70,10 @@ struct HomeView: View {
                 }
                 .padding(Spacing.spacing400)
             }
+            // 키보드가 올라오면 SwiftUI가 기본적으로 사용 가능한 영역을 줄이는데, 장식
+            // 이미지가 GeometryReader의 상대 좌표(geo.size)로 위치를 잡고 있어서 그 영역이
+            // 줄어들면 같이 움직여 보인다 — 키보드에 반응해 레이아웃이 줄어들지 않게 한다.
+            .ignoresSafeArea(.keyboard, edges: .bottom)
             .navigationBarHidden(true)
             .navigationDestination(item: $viewModel.createdConversationId) { conversationId in
                 ChatView(
