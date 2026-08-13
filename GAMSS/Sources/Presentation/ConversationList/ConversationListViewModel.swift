@@ -11,6 +11,7 @@ import Foundation
 @MainActor
 final class ConversationListViewModel: ObservableObject {
     @Published private(set) var conversations: [ConversationSummary] = []
+    @Published private(set) var isLoading = false
     @Published var alertMessage: String?
 
     private let getConversationsUseCase: GetConversationsUseCase
@@ -20,6 +21,8 @@ final class ConversationListViewModel: ObservableObject {
     }
 
     func load() async {
+        isLoading = true
+        defer { isLoading = false }
         do {
             conversations = try await getConversationsUseCase.execute(date: Self.todayDateString())
         } catch {

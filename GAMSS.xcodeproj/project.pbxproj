@@ -17,6 +17,7 @@
 		37CC583C76082794EA8ED2C3 /* ConversationListDateHeaderFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 279ECD6F38C25ADFF48996F2 /* ConversationListDateHeaderFormatterTests.swift */; };
 		3D1B542CB60C3958D3F16702 /* EmotionCharacterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BB1A4112363D93ED3AD1598 /* EmotionCharacterTests.swift */; };
 		3EF2F6DB34A2276C2C9FD746 /* diary_samples.json in Resources */ = {isa = PBXBuildFile; fileRef = ED231F0A80BD3A4AF9E50BBC /* diary_samples.json */; };
+		49CAEB1FBF568E55C6C648B7 /* ConversationListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A26CAC1BD5FA5DF19D14615 /* ConversationListViewModelTests.swift */; };
 		573CFD0A1638F27B889EF865 /* SendMessageUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DDF78D0118869F3D9E1E269 /* SendMessageUseCaseTests.swift */; };
 		58652E08F4413DEA2016C082 /* MessageBubbleLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF457567BE11A68704DC4FE /* MessageBubbleLayoutTests.swift */; };
 		5E6EF3C5D7CE4FF3EE4392EC /* ConversationMessageDTOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B35175B780592B411BDD6B82 /* ConversationMessageDTOTests.swift */; };
@@ -68,6 +69,7 @@
 		1B68677BF01B5A8971B85AC4 /* QuotedReplyHeaderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuotedReplyHeaderTests.swift; sourceTree = "<group>"; };
 		279ECD6F38C25ADFF48996F2 /* ConversationListDateHeaderFormatterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConversationListDateHeaderFormatterTests.swift; sourceTree = "<group>"; };
 		316EA002FAC5D3328796EF90 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		3A26CAC1BD5FA5DF19D14615 /* ConversationListViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConversationListViewModelTests.swift; sourceTree = "<group>"; };
 		3C15D652D0472A1EBD024674 /* MainTabTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MainTabTests.swift; sourceTree = "<group>"; };
 		3C5DF3BD54F67AE200949A44 /* ChatComposerViewTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChatComposerViewTests.swift; sourceTree = "<group>"; };
 		3EDC07CB1FA5BA970388DB6A /* HomeViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeViewModelTests.swift; sourceTree = "<group>"; };
@@ -304,6 +306,7 @@
 				3C5DF3BD54F67AE200949A44 /* ChatComposerViewTests.swift */,
 				5EA0CD379D5E578049585DD1 /* ConversationPreviewTextFormatterTests.swift */,
 				279ECD6F38C25ADFF48996F2 /* ConversationListDateHeaderFormatterTests.swift */,
+				3A26CAC1BD5FA5DF19D14615 /* ConversationListViewModelTests.swift */,
 			);
 			path = Presentation;
 			sourceTree = "<group>";
@@ -620,6 +623,7 @@
 				A2EE79F9D91A740A8F752761 /* ConversationSummaryDTOTests.swift in Sources */,
 				96AB63E38D6D2755BA3BC839 /* ConversationPreviewTextFormatterTests.swift in Sources */,
 				37CC583C76082794EA8ED2C3 /* ConversationListDateHeaderFormatterTests.swift in Sources */,
+				49CAEB1FBF568E55C6C648B7 /* ConversationListViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
