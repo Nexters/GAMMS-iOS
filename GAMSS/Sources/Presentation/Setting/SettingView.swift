@@ -102,6 +102,12 @@ struct SettingView: View {
                             networkManager: NetworkManager.shared,
                             tokenStorage: TokenStorage.shared
                         )
+                    ),
+                    deleteMemberUseCase: DefaultDeleteMemberUseCase(
+                        memberRepository: DefaultMemberRepository(
+                            networkManager: NetworkManager.shared,
+                            tokenStorage: .shared
+                        )
                     )
                 )
             )
