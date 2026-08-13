@@ -28,7 +28,7 @@ struct ConversationListView: View {
                     .padding(.top, Spacing.spacing300)
                     .padding(.bottom, Spacing.spacing200)
 
-                if !viewModel.isLoading && viewModel.conversations.isEmpty {
+                if !viewModel.isLoading && viewModel.alertMessage == nil && viewModel.conversations.isEmpty {
                     ConversationListEmptyView()
                 } else {
                     ScrollView {

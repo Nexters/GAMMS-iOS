@@ -25,8 +25,7 @@ struct ConversationRowView: View {
                 .typography(.body5Regular)
                 .foregroundStyle(Color.colorGray600)
         }
-        .padding(.vertical, Spacing.spacing200)
-        .padding(.horizontal, Spacing.spacing200)
+        .padding(Spacing.spacing200)
         .background(
             RoundedRectangle(cornerRadius: Radius.radius200)
                 .fill(Color.colorGray025)
