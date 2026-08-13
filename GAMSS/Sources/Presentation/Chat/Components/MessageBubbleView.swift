@@ -60,6 +60,7 @@ struct MessageBubbleView: View {
                     Text(quotedMessage.content)
                         .typography(.body4Medium)
                         .foregroundStyle(Color.colorGray500)
+                        .lineLimit(1)
                     Rectangle()
                         .fill(Color.colorGray200)
                         .frame(height: 1)

@@ -15,6 +15,11 @@ struct ChatView: View {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
+    /// ScrollView 콘텐츠(LazyVStack)에 적용하는 좌우 패딩. `maxBubbleWidth` 계산에 쓰는
+    /// containerPadding이 아래 `.padding(containerPadding)`과 같은 값을 참조하도록 상수 하나로
+    /// 묶어서, 패딩을 바꿀 때 폭 계산이 따로 놀지 않게 한다.
+    private let containerPadding = Spacing.spacing300
+
     var body: some View {
         GeometryReader { geometry in
             ScrollViewReader { proxy in
@@ -26,13 +31,13 @@ struct ChatView: View {
                                 quotedMessage: viewModel.quotedMessage(for: message),
                                 maxWidth: MessageBubbleLayout.maxBubbleWidth(
                                     availableWidth: geometry.size.width,
-                                    containerPadding: Spacing.spacing300 * 2
+                                    containerPadding: containerPadding * 2
                                 )
                             )
                             .id(message.id)
                         }
                     }
-                    .padding(Spacing.spacing300)
+                    .padding(containerPadding)
                 }
                 // ScrollView가 키보드에 의해 축소/복원될 때
                 // SwiftUI가 키보드 dismiss를 자연스럽게 처리하도록 한다.

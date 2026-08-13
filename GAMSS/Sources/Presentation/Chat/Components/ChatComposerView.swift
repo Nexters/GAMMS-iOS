@@ -22,6 +22,9 @@ struct ChatComposerView: View {
             TextField(
                 "메시지 입력",
                 text: $text,
+                // TextField(prompt:)는 Text 타입을 요구해서 `.typography(_:)`(some View 반환)를
+                // 쓸 수 없다 — Text 자체의 font/tracking으로 직접 맞춘다. lineSpacing은 Text에
+                // 없는 API라 여기선 적용 대상이 아니다.
                 prompt: Text("메시지 입력")
                     .font(.custom(Typography.body4Medium.metrics.weight.postScriptName(), size: Typography.body4Medium.metrics.fontSize))
                     .tracking(Typography.body4Medium.metrics.letterSpacing)
