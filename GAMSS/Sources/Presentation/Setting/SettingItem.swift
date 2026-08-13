@@ -18,7 +18,7 @@ enum SettingSection: CaseIterable, Identifiable {
         case .account:
             [.accountInfo, .notification]
         case .service:
-            [.termsOfService, .privacyPolicy, .appVersion]
+            [.privacyPolicy, .appVersion]
         }
     }
 }
@@ -26,7 +26,6 @@ enum SettingSection: CaseIterable, Identifiable {
 enum SettingItem: Identifiable {
     case accountInfo
     case notification
-    case termsOfService
     case privacyPolicy
     case appVersion
     
@@ -38,8 +37,6 @@ enum SettingItem: Identifiable {
             "계정 정보"
         case .notification:
             "알림 설정"
-        case .termsOfService:
-            "서비스 이용약관"
         case .privacyPolicy:
             "개인정보 처리방침"
         case .appVersion:
@@ -57,8 +54,6 @@ enum SettingItem: Identifiable {
         switch self {
         case .accountInfo, .notification:
             .navigate
-        case .termsOfService:
-            .web(Environment.termsOfServiceURL)
         case .privacyPolicy:
             .web(Environment.privacyPolicyURL)
         case .appVersion:
@@ -70,7 +65,7 @@ enum SettingItem: Identifiable {
         switch self {
         case .accountInfo, .notification:
             true
-        case .termsOfService, .privacyPolicy, .appVersion:
+        case .privacyPolicy, .appVersion:
             false
         }
     }

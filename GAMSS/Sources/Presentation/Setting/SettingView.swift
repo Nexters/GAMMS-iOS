@@ -113,7 +113,7 @@ struct SettingView: View {
             )
         case .notification:
             Text("알림 설정 화면 이동")
-        case .termsOfService, .privacyPolicy, .appVersion:
+        case .privacyPolicy, .appVersion:
             EmptyView()
         }
     }
