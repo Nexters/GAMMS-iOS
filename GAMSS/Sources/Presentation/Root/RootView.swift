@@ -34,6 +34,7 @@ struct RootView: View {
             }
         }
         .environment(loginSession)
+        .environment(UserManager.shared)
     }
 }
 
