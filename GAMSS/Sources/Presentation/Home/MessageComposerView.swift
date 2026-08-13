@@ -82,7 +82,11 @@ struct MessageComposerView: View {
         }
         .frame(height: MessageComposerLayout.height(isExpanded: isExpanded))
         .animation(.easeInOut(duration: 0.2), value: isExpanded)
-        .overlay(alignment: isExpanded ? .bottom : .center) {
+        // overlay(alignment:)를 .bottom/.center로 바꿔가며 쓰면 Alignment 값 자체는
+        // 애니메이션 보간이 안 돼서 박스 높이는 부드럽게 늘어나는데 버튼만 먼저 순간이동해
+        // 보였다(실기기 확인함). alignment는 항상 .bottom으로 고정하고, 대신 하단 padding을
+        // CGFloat(애니메이션 가능한 값)로 상태에 따라 바꿔서 박스 높이 변화와 같이 보간되게 한다.
+        .overlay(alignment: .bottom) {
             controlsRow
         }
     }
@@ -92,27 +96,18 @@ struct MessageComposerView: View {
     /// `isEmotionSelectionEnabled`만 true로 되돌리면 된다.
     private let isEmotionSelectionEnabled = false
 
-    /// collapsed일 때는 placeholder 옆(오른쪽)에 감정 트리거+전송 버튼이 나란히 붙고,
-    /// expanded일 때는 박스 하단 한 줄에 감정 트리거(좌)와 전송 버튼(우)이 양 끝으로 벌어진다.
+    /// collapsed일 때는 박스 세로 중앙에 오도록, expanded일 때는 박스 하단에 붙도록 같은
+    /// HStack의 하단 padding만 바꾼다 — 구조 자체(if/else)를 바꾸면 SwiftUI가 다른 뷰로
+    /// 취급해 애니메이션이 끊긴다.
     private var controlsRow: some View {
-        Group {
-            if isExpanded {
-                HStack {
-                    if isEmotionSelectionEnabled { emotionTrigger }
-                    Spacer()
-                    submitButton
-                }
-                .padding(.horizontal, Spacing.spacing200)
-                .padding(.bottom, Spacing.spacing150)
-            } else {
-                HStack(spacing: Spacing.spacing150) {
-                    Spacer()
-                    if isEmotionSelectionEnabled { emotionTrigger }
-                    submitButton
-                }
-                .padding(.horizontal, Spacing.spacing300)
-            }
+        HStack {
+            if isEmotionSelectionEnabled { emotionTrigger }
+            Spacer()
+            submitButton
         }
+        .padding(.horizontal, isExpanded ? Spacing.spacing200 : Spacing.spacing300)
+        // collapsed(64pt 박스, 32pt 버튼)일 때 세로 중앙에 오도록: (64-32)/2 = 16.
+        .padding(.bottom, isExpanded ? Spacing.spacing150 : 16)
     }
 
     private var emotionTrigger: some View {
@@ -131,19 +126,9 @@ struct MessageComposerView: View {
 
     private var submitButton: some View {
         Button(action: onCommit) {
-            if isSendDisabled {
-                Image("sendButtonDisabled")
-                    .resizable()
-                    .frame(width: 32, height: 32)
-            } else {
-                // TODO: 디자인팀에서 활성 상태 sendButton 에셋 전달 예정 — 도착하면 SF Symbol 대신 교체.
-                Image(systemName: "arrow.up")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color.colorWhite)
-                    .frame(width: 32, height: 32)
-                    .background(Color.colorGray950)
-                    .clipShape(Circle())
-            }
+            Image(isSendDisabled ? "sendButtonDisabled" : "sendButtonEnabled")
+                .resizable()
+                .frame(width: 32, height: 32)
         }
         .disabled(isSendDisabled)
     }

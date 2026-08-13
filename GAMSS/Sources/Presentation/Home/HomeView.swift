@@ -112,9 +112,10 @@ struct HomeView: View {
             Button {
                 isSettingPresented = true
             } label: {
-                // TODO: 디자인팀에서 햄버거 메뉴 에셋 전달 예정 — 도착하면 SF Symbol 대신 교체.
-                Image(systemName: "line.3.horizontal")
-                    .foregroundStyle(Color.colorGray500)
+                Image("homeMenuIcon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
             }
         }
     }
