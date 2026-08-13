@@ -19,27 +19,40 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // 화면의 빈 영역(다른 인터랙티브 뷰가 가리지 않는 부분)을 탭하면 키보드를 내린다.
-                // TextEditor/버튼은 그 위에 그려져 자기 탭을 먼저 가져가므로 커서 이동 등은 방해받지 않는다.
+                // 종이 질감 배경 — 에셋은 추후 전달 예정. 도착 전까지는 Image(_:)가 빈 화면으로
+                // 렌더링될 뿐 빌드/런타임 에러는 나지 않는다.
+                Image("homeBackgroundPaper")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+
+                decorations
+
+                // 화면의 빈 영역(다른 인터랙티브 뷰가 가리지 않는 부분)을 탭하면 키보드와 감정
+                // 드롭다운을 내린다. TextEditor/버튼은 그 위에 그려져 자기 탭을 먼저 가져가므로
+                // 커서 이동 등은 방해받지 않는다.
                 Color.clear
                     .contentShape(Rectangle())
-                    .onTapGesture { isInputFocused = false }
+                    .onTapGesture {
+                        isInputFocused = false
+                        viewModel.isEmotionPickerOpen = false
+                    }
 
                 VStack(alignment: .leading, spacing: Spacing.spacing500) {
                     header
 
-                    VStack(alignment: .leading, spacing: Spacing.spacing100) {
-                        Text("OO님 어서오세요")
-                            .typography(.title3)
-                            .foregroundStyle(Color.colorGray950)
-                        Text("마음 쌓아둔 이야기가 있다면 말씀해보세요.")
-                            .typography(.body3Regular)
-                            .foregroundStyle(Color.colorGray500)
-                    }
+                    greeting
 
-                    messageBox
-
-                    submitButton
+                    MessageComposerView(
+                        input: $viewModel.input,
+                        selectedEmotions: viewModel.selectedEmotions,
+                        isEmotionPickerOpen: $viewModel.isEmotionPickerOpen,
+                        isSendDisabled: viewModel.isSendDisabled,
+                        onToggleEmotion: { viewModel.toggleEmotion($0) },
+                        onCommit: { Task { await viewModel.send() } },
+                        onInputChange: { viewModel.updateInput($0) },
+                        isFocused: $isInputFocused
+                    )
 
                     Spacer()
                 }
@@ -82,59 +95,66 @@ struct HomeView: View {
             Button {
                 isSettingPresented = true
             } label: {
-                Image(systemName: "gearshape")
+                // TODO: 디자인팀에서 햄버거 메뉴 에셋 전달 예정 — 도착하면 SF Symbol 대신 교체.
+                Image(systemName: "line.3.horizontal")
                     .foregroundStyle(Color.colorGray500)
             }
         }
     }
 
-    private var messageBox: some View {
-        VStack(alignment: .trailing, spacing: Spacing.spacing100) {
-            ZStack(alignment: .topLeading) {
-                RoundedRectangle(cornerRadius: Radius.radius300)
-                    .fill(Color.colorGray025)
-
-                if viewModel.input.isEmpty {
-                    Text("임금님 귀는 당나귀 귀")
-                        .typography(.body3Regular)
-                        .foregroundStyle(Color.colorGray400)
-                        .padding(.horizontal, Spacing.spacing300)
-                        .padding(.vertical, Spacing.spacing300)
-                }
-
-                TextEditor(text: $viewModel.input)
-                    .typography(.body3Regular)
+    /// "{닉네임}님 오늘도" / "감쓰에 버려볼까요?" — 닉네임 부분만 분홍 배경으로 하이라이트한다.
+    /// 닉네임 서버 연동은 이후 단계에서 붙인다 — 지금은 UserManager에 값이 없으면 fallback을 쓴다.
+    private var greeting: some View {
+        let nickname = UserManager.shared.user?.nickname ?? "OO"
+        return VStack(alignment: .leading, spacing: Spacing.spacing050) {
+            HStack(spacing: 0) {
+                Text(nickname)
+                    .typography(.title3)
                     .foregroundStyle(Color.colorGray950)
-                    .scrollContentBackground(.hidden)
-                    .padding(Spacing.spacing200)
-                    .focused($isInputFocused)
-                    .onChange(of: viewModel.input) { _, newValue in
-                        if viewModel.updateInput(newValue) {
-                            isInputFocused = false
-                        }
-                    }
+                    .padding(.horizontal, Spacing.spacing050)
+                    .background(
+                        RoundedRectangle(cornerRadius: Radius.radius050)
+                            .fill(Color.colorPink.opacity(0.5))
+                    )
+                Text("님 오늘도")
+                    .typography(.title3)
+                    .foregroundStyle(Color.colorGray950)
             }
-            .frame(height: 220)
-
-            Text("\(viewModel.input.count)/\(ConversationSummaryPolicy.maxMessageLength)")
-                .typography(.caption2)
-                .foregroundStyle(Color.colorGray400)
+            Text("감쓰에 버려볼까요?")
+                .typography(.title3)
+                .foregroundStyle(Color.colorGray950)
         }
     }
 
-    private var submitButton: some View {
-        Button {
-            Task { await viewModel.send() }
-        } label: {
-            Text("쪽지 보내기")
-                .typography(.subtitle3)
-                .foregroundStyle(Color.colorWhite)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, Spacing.spacing300)
+    /// 포스트잇/테이프 장식 3종. 순수 장식이라 터치를 가로채지 않는다(`allowsHitTesting(false)`).
+    /// 위치/회전값은 Figma 레드라인 확정 전 임시값 — 실제 에셋 도착 후 다듬는다.
+    private var decorations: some View {
+        GeometryReader { geo in
+            ZStack {
+                // TODO: 디자인팀 에셋 전달 예정 — /Users/hwangchanmi/Desktop/감쓰/홈화면/ 참고.
+                Image("homeStickyNote")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 88)
+                    .rotationEffect(.degrees(10))
+                    .position(x: geo.size.width * 0.82, y: geo.size.height * 0.27)
+
+                Image("homeTapePink")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 130)
+                    .rotationEffect(.degrees(-8))
+                    .position(x: geo.size.width * 0.78, y: geo.size.height * 0.68)
+
+                Image("homeTapeOutline")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 90)
+                    .rotationEffect(.degrees(-12))
+                    .position(x: geo.size.width * 0.28, y: geo.size.height * 0.76)
+            }
         }
-        .background(Color.colorGray950)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.radius200))
-        .disabled(viewModel.isSendDisabled)
+        .allowsHitTesting(false)
     }
 }
 
