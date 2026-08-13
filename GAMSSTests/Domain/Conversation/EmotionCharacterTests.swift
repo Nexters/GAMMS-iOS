@@ -21,4 +21,20 @@ final class EmotionCharacterTests: XCTestCase {
     func test_allCases_hasExactlySixCharacters() {
         XCTAssertEqual(EmotionCharacter.allCases.count, 6)
     }
+
+    func test_pickerLabel_isShortKoreanWithoutCharacterSuffix() {
+        XCTAssertEqual(EmotionCharacter.joy.pickerLabel, "기쁨")
+        XCTAssertEqual(EmotionCharacter.sadness.pickerLabel, "슬픔")
+        XCTAssertEqual(EmotionCharacter.anger.pickerLabel, "분노")
+        XCTAssertEqual(EmotionCharacter.anxiety.pickerLabel, "불안")
+        XCTAssertEqual(EmotionCharacter.prickly.pickerLabel, "까칠")
+        XCTAssertEqual(EmotionCharacter.quirky.pickerLabel, "엉뚱")
+    }
+
+    func test_pickerOrder_matchesFigmaGridOrder() {
+        XCTAssertEqual(
+            EmotionCharacter.pickerOrder,
+            [.anger, .quirky, .prickly, .joy, .sadness, .anxiety]
+        )
+    }
 }

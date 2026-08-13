@@ -21,4 +21,21 @@ enum EmotionCharacter: CaseIterable, Equatable {
         case .quirky: "엉뚱이"
         }
     }
+
+    /// 홈 화면 감정 선택 그리드 전용 짧은 라벨. `displayName`은 채팅 화면에 캐릭터 이름으로
+    /// 쓰이는 문구("기쁨이" 등)라 감정 선택 UI("기쁨" 등, 어미 없음)에는 그대로 못 쓴다.
+    var pickerLabel: String {
+        switch self {
+        case .joy: "기쁨"
+        case .sadness: "슬픔"
+        case .anger: "분노"
+        case .anxiety: "불안"
+        case .prickly: "까칠"
+        case .quirky: "엉뚱"
+        }
+    }
+
+    /// 홈 화면 감정 선택 그리드(2행 3열)에 표시할 순서. Figma 시안 순서를 그대로 따르며,
+    /// `allCases` 선언 순서와는 다르다.
+    static let pickerOrder: [EmotionCharacter] = [.anger, .quirky, .prickly, .joy, .sadness, .anxiety]
 }
