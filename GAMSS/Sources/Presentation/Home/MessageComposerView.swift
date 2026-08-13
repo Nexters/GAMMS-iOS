@@ -99,13 +99,18 @@ struct MessageComposerView: View {
         }
     }
 
+    /// 감정 선택 기능은 보류 상태 — 트리거 버튼과 드롭다운을 숨긴다. 아래 `emotionTrigger`/
+    /// `emotionGrid`/`isEmotionPickerOpen` 관련 코드는 지우지 않고 남겨뒀다: 다시 켤 때
+    /// `isEmotionSelectionEnabled`만 true로 되돌리면 된다.
+    private let isEmotionSelectionEnabled = false
+
     /// collapsed일 때는 placeholder 옆(오른쪽)에 감정 트리거+전송 버튼이 나란히 붙고,
     /// expanded일 때는 박스 하단 한 줄에 감정 트리거(좌)와 전송 버튼(우)이 양 끝으로 벌어진다.
     private var controlsRow: some View {
         Group {
             if isExpanded {
                 HStack {
-                    emotionTrigger
+                    if isEmotionSelectionEnabled { emotionTrigger }
                     Spacer()
                     submitButton
                 }
@@ -114,7 +119,7 @@ struct MessageComposerView: View {
             } else {
                 HStack(spacing: Spacing.spacing150) {
                     Spacer()
-                    emotionTrigger
+                    if isEmotionSelectionEnabled { emotionTrigger }
                     submitButton
                 }
                 .padding(.horizontal, Spacing.spacing300)
