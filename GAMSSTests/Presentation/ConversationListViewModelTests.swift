@@ -19,7 +19,7 @@ private final class MockConversationRepository: ConversationRepository {
         []
     }
 
-    func getConversations(date: String) async throws -> [ConversationSummary] {
+    func getIncompleteConversations() async throws -> [ConversationSummary] {
         try stubbedGetConversationsResult.get()
     }
 }
@@ -27,7 +27,7 @@ private final class MockConversationRepository: ConversationRepository {
 @MainActor
 final class ConversationListViewModelTests: XCTestCase {
     private func makeViewModel(repository: MockConversationRepository = MockConversationRepository()) -> ConversationListViewModel {
-        ConversationListViewModel(getConversationsUseCase: GetConversationsUseCase(conversationRepository: repository))
+        ConversationListViewModel(getIncompleteConversationsUseCase: GetIncompleteConversationsUseCase(conversationRepository: repository))
     }
 
     func test_load_onSuccess_setsConversationsAndClearsLoading() async {

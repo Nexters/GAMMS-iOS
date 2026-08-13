@@ -42,7 +42,8 @@ struct ConversationListView: View {
                     }
                 }
             }
-            .navigationBarHidden(true)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: ConversationSummary.self) { conversation in
                 ChatView(
                     viewModel: ChatViewModel(
@@ -84,7 +85,7 @@ struct ConversationListView: View {
 #Preview {
     ConversationListView(
         viewModel: ConversationListViewModel(
-            getConversationsUseCase: GetConversationsUseCase(
+            getIncompleteConversationsUseCase: GetIncompleteConversationsUseCase(
                 conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
             )
         )

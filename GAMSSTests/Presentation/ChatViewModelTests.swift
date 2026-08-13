@@ -26,7 +26,7 @@ private final class MockConversationRepository: ConversationRepository {
         return stubbedMessages
     }
 
-    func getConversations(date: String) async throws -> [ConversationSummary] {
+    func getIncompleteConversations() async throws -> [ConversationSummary] {
         []
     }
 }
