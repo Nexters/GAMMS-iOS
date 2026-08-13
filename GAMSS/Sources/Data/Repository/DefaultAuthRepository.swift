@@ -21,6 +21,11 @@ final class DefaultAuthRepository: AuthRepository {
         self.tokenStorage = tokenStorage
     }
     
+    func logout() async throws {
+        _ = try await networkManager.request(AuthEndpoint.logout, responseType: APIResponse<EmptyResponseDTO>.self)
+        try tokenStorage.deleteTokens()
+    }
+    
     func login(
         with socialType: SocialType,
         credential: ASAuthorizationAppleIDCredential,

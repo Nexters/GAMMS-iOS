@@ -24,22 +24,20 @@ final class LoginViewModel: ObservableObject {
         credential: ASAuthorizationAppleIDCredential,
         nonce: String
     ) async {
-        Task {
-            isLoading = true
-            
-            defer {
-                isLoading = false
-            }
-            
-            do {
-                try await loginUseCase.login(
-                    with: socialType,
-                    credential: credential,
-                    nonce: nonce
-                )
-            } catch {
-                errorMessage = error.localizedDescription
-            }
+        isLoading = true
+        
+        defer {
+            isLoading = false
+        }
+        
+        do {
+            try await loginUseCase.login(
+                with: socialType,
+                credential: credential,
+                nonce: nonce
+            )
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 }

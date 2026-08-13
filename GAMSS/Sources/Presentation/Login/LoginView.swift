@@ -9,6 +9,7 @@ import AuthenticationServices
 import SwiftUI
 
 struct LoginView: View {
+    @SwiftUI.Environment(LoginSession.self) private var loginState
     @StateObject private var viewModel: LoginViewModel
     @State private var currentNonce: String?
     
@@ -19,9 +20,21 @@ struct LoginView: View {
     }
     
     var body: some View {
-        
-        // FIXME: 소셜로그인관련 Mock 버튼 추후 수정
         VStack(alignment: .center) {
+            Spacer()
+            
+            Image(.logoGamss)
+                .padding(.bottom, 12)
+            Text("오늘의 감정을 비워보세요")
+                .foregroundStyle(Color.colorGray950)
+                .typography(.subtitle2)
+                .padding(.bottom, 32)
+            Image(.emotions)
+                .resizable()
+                .scaledToFit()
+                .padding(.bottom, 54)
+                .padding(.horizontal, 31)
+            
             SignInWithAppleButton(.signIn) { request in
                 let nonce = NonceGenerator.generate()
                 currentNonce = nonce
@@ -48,11 +61,18 @@ struct LoginView: View {
                             credential: credential,
                             nonce: nonce
                         )
+                        loginState.value = LoginState.current
                     }
                 case .failure(let error):
-                    print(error.localizedDescription)
+                    Log.debug(error.localizedDescription)
                 }
             }
+            .frame(height: 54)
+            .padding(.horizontal, 18)
+            
+            Spacer()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.colorWhite)
     }
 }

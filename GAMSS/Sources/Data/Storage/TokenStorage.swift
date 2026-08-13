@@ -12,13 +12,14 @@ final class TokenStorage {
     
     private init() {}
     
-    func reissueToken() throws {
-        guard LoginState.current != .notLoggedIn else {
+    func reissueToken() async throws {
+        guard let refreshToken = readToken(.refreshToken) else {
             try TokenStorage.shared.deleteTokens()
             return
         }
         
-        /// TODO: - accessToken, refreshToken 재발행 로직 필요
+        let response = try await NetworkManager.shared.request(AuthEndpoint.reissueToken(.init(refreshToken: refreshToken)), responseType: APIResponse<ReissueTokenResponseDTO>.self).data
+        try createTokens(accessToken: response.accessToken, refreshToken: response.refreshToken)
     }
     
     func createTokens(accessToken: String, refreshToken: String) throws {

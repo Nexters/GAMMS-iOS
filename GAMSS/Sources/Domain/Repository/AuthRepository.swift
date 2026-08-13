@@ -7,11 +7,12 @@
 
 import AuthenticationServices
 
-// FIXME: - 로그인 시 올바른 응답값으로 수정 필요
 protocol AuthRepository {
     func login(
         with socialType: SocialType,
         credential: ASAuthorizationAppleIDCredential,
         nonce: String
-    ) async throws 
+    ) async throws
+    
+    func logout() async throws
 }

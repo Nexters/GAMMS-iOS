@@ -56,6 +56,16 @@ final class NetworkManager: NetworkRequesting {
                 from: data
             ).error
             
+            if apiError?.code == "EXPIRED_TOKEN" {
+                do {
+                    try await TokenStorage.shared.reissueToken()
+                } catch {
+                    Log.error("Token reissue failed: \(error)")
+                }
+                
+                throw NetworkError.expiredToken
+            }
+            
             Log.error("""
                     ❌ API Error
                     StatusCode: \(response.statusCode)

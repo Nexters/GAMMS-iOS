@@ -6,6 +6,10 @@
 	<string>$(APP_NAME)</string>
 	<key>BASE_URL</key>
 	<string>$(BASE_URL)</string>
+	<key>TERMS_OF_SERVICE_URL</key>
+	<string>$(TERMS_OF_SERVICE_URL)</string>
+	<key>PRIVACY_POLICY_URL</key>
+	<string>$(PRIVACY_POLICY_URL)</string>
 	<key>FIREBASE_CRASHLYTICS_COLLECTION_ENABLED</key>
 	<string>NO</string>
 	<key>UIDesignRequiresCompatibility</key>

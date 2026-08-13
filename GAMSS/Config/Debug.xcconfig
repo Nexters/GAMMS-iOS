@@ -16,3 +16,7 @@ APP_NAME =
 
 // Network Defines
 BASE_URL = 
+
+// Web
+TERMS_OF_SERVICE_URL =
+PRIVACY_POLICY_URL = 
