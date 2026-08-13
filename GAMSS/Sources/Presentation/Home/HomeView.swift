@@ -59,7 +59,7 @@ struct HomeView: View {
                 .toolbar(.hidden, for: .tabBar)
             }
             .navigationDestination(isPresented: $isSettingPresented) {
-                SettingView()
+                SettingView().toolbar(.hidden, for: .tabBar)
             }
         }
         .alert(viewModel.alertMessage ?? "", isPresented: Binding(
