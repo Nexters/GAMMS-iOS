@@ -11,6 +11,7 @@ struct HomeView: View {
     @StateObject private var viewModel: HomeViewModel
     @FocusState private var isInputFocused: Bool
     @State private var isSettingPresented = false
+    @SwiftUI.Environment(UserManager.self) private var userManager
 
     init(viewModel: HomeViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -80,6 +81,7 @@ struct HomeView: View {
                 SettingView()
             }
         }
+        .task { await viewModel.loadProfileIfNeeded() }
         .alert(viewModel.alertMessage ?? "", isPresented: Binding(
             get: { viewModel.alertMessage != nil },
             set: { if !$0 { viewModel.alertMessage = nil } }
@@ -108,9 +110,9 @@ struct HomeView: View {
     }
 
     /// "{닉네임}님 오늘도" / "감쓰에 버려볼까요?" — 닉네임 부분만 분홍 배경으로 하이라이트한다.
-    /// 닉네임 서버 연동은 이후 단계에서 붙인다 — 지금은 UserManager에 값이 없으면 fallback을 쓴다.
+    /// UserManager에 값이 아직 없으면(조회 전/실패) fallback을 쓴다.
     private var greeting: some View {
-        let nickname = UserManager.shared.user?.nickname ?? "OO"
+        let nickname = userManager.user?.nickname ?? "OO"
         return VStack(alignment: .leading, spacing: Spacing.spacing050) {
             HStack(spacing: 0) {
                 Text(nickname)
@@ -170,7 +172,11 @@ struct HomeView: View {
         viewModel: HomeViewModel(
             sendMessageUseCase: SendMessageUseCase(
                 conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
+            ),
+            fetchMyProfileUseCase: DefaultFetchMyProfileUseCase(
+                memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
             )
         )
     )
+    .environment(UserManager.shared)
 }

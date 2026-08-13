@@ -38,6 +38,9 @@ struct MainTabView: View {
                 viewModel: HomeViewModel(
                     sendMessageUseCase: SendMessageUseCase(
                         conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
+                    ),
+                    fetchMyProfileUseCase: DefaultFetchMyProfileUseCase(
+                        memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
                     )
                 )
             )

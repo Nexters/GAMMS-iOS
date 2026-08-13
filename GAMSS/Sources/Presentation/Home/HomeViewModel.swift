@@ -19,9 +19,28 @@ final class HomeViewModel: ObservableObject {
     @Published var isEmotionPickerOpen = false
 
     private let sendMessageUseCase: SendMessageUseCase
+    private let fetchMyProfileUseCase: FetchMyProfileUseCase
+    private let userManager: UserManager
 
-    init(sendMessageUseCase: SendMessageUseCase) {
+    init(
+        sendMessageUseCase: SendMessageUseCase,
+        fetchMyProfileUseCase: FetchMyProfileUseCase,
+        userManager: UserManager = .shared
+    ) {
         self.sendMessageUseCase = sendMessageUseCase
+        self.fetchMyProfileUseCase = fetchMyProfileUseCase
+        self.userManager = userManager
+    }
+
+    /// 화면 진입 시 1회 호출한다. 이미 프로필이 있으면(다른 화면에서 이미 불러온 경우 등)
+    /// 재조회하지 않는다 — 탭을 오갈 때마다 API를 다시 부르지 않기 위함.
+    func loadProfileIfNeeded() async {
+        guard userManager.user == nil else { return }
+        do {
+            userManager.user = try await fetchMyProfileUseCase.execute()
+        } catch {
+            alertMessage = "사용자 정보를 불러오지 못했어요"
+        }
     }
 
     /// 입력창의 원시 입력값을 받아 정책에 맞게 정규화하고, 키보드를 내려야 하는지 돌려준다.

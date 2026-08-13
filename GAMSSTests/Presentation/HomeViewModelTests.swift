@@ -26,10 +26,28 @@ private final class MockConversationRepository: ConversationRepository {
     }
 }
 
+private final class MockFetchMyProfileUseCase: FetchMyProfileUseCase {
+    var stubbedResult: Result<User, Error> = .failure(SummaryError.inferenceFailed())
+    private(set) var executeCallCount = 0
+
+    func execute() async throws -> User {
+        executeCallCount += 1
+        return try stubbedResult.get()
+    }
+}
+
 @MainActor
 final class HomeViewModelTests: XCTestCase {
-    private func makeViewModel(repository: MockConversationRepository = MockConversationRepository()) -> HomeViewModel {
-        HomeViewModel(sendMessageUseCase: SendMessageUseCase(conversationRepository: repository))
+    private func makeViewModel(
+        repository: MockConversationRepository = MockConversationRepository(),
+        fetchMyProfileUseCase: MockFetchMyProfileUseCase = MockFetchMyProfileUseCase(),
+        userManager: UserManager = UserManager()
+    ) -> HomeViewModel {
+        HomeViewModel(
+            sendMessageUseCase: SendMessageUseCase(conversationRepository: repository),
+            fetchMyProfileUseCase: fetchMyProfileUseCase,
+            userManager: userManager
+        )
     }
 
     func test_send_onSuccess_setsCreatedConversationIdAndClearsInput() async {
@@ -130,5 +148,41 @@ final class HomeViewModelTests: XCTestCase {
         let viewModel = makeViewModel()
 
         XCTAssertFalse(viewModel.isEmotionPickerOpen)
+    }
+
+    func test_loadProfileIfNeeded_whenUserAlreadySet_doesNotCallUseCase() async {
+        let useCase = MockFetchMyProfileUseCase()
+        let userManager = UserManager()
+        userManager.user = User(id: 1, email: "a@b.com", name: "기존", nickname: "기존닉네임")
+        let viewModel = makeViewModel(fetchMyProfileUseCase: useCase, userManager: userManager)
+
+        await viewModel.loadProfileIfNeeded()
+
+        XCTAssertEqual(useCase.executeCallCount, 0, "이미 값이 있으면 재조회하면 안 됨")
+        XCTAssertEqual(userManager.user?.nickname, "기존닉네임")
+    }
+
+    func test_loadProfileIfNeeded_whenUserNil_fetchesAndSetsUserManagerUser() async {
+        let useCase = MockFetchMyProfileUseCase()
+        useCase.stubbedResult = .success(User(id: 1, email: "a@b.com", name: "햄스터", nickname: "햄스터"))
+        let userManager = UserManager()
+        let viewModel = makeViewModel(fetchMyProfileUseCase: useCase, userManager: userManager)
+
+        await viewModel.loadProfileIfNeeded()
+
+        XCTAssertEqual(useCase.executeCallCount, 1)
+        XCTAssertEqual(userManager.user?.nickname, "햄스터")
+    }
+
+    func test_loadProfileIfNeeded_onFailure_setsAlertMessage() async {
+        let useCase = MockFetchMyProfileUseCase()
+        useCase.stubbedResult = .failure(SummaryError.inferenceFailed())
+        let userManager = UserManager()
+        let viewModel = makeViewModel(fetchMyProfileUseCase: useCase, userManager: userManager)
+
+        await viewModel.loadProfileIfNeeded()
+
+        XCTAssertNotNil(viewModel.alertMessage)
+        XCTAssertNil(userManager.user)
     }
 }
