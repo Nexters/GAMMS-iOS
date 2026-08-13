@@ -10,7 +10,6 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel: HomeViewModel
     @FocusState private var isInputFocused: Bool
-    @Binding private var isTabBarHidden: Bool
     @State private var isSettingPresented = false
 
     init(viewModel: HomeViewModel) {
@@ -61,8 +60,6 @@ struct HomeView: View {
             }
             .navigationDestination(isPresented: $isSettingPresented) {
                 SettingView()
-                    .onAppear { isTabBarHidden = true }
-                    .onDisappear { isTabBarHidden = false }
             }
         }
         .alert(viewModel.alertMessage ?? "", isPresented: Binding(
