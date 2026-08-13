@@ -70,4 +70,17 @@ final class DefaultConversationRepositoryTests: XCTestCase {
         XCTAssertEqual(network.lastEndpoint?.path, "/api/conversations/incomplete")
         XCTAssertEqual(network.lastEndpoint?.method, .get)
     }
+
+    func test_updateTitle_callsCorrectEndpointWithConversationIdAndTitle() async throws {
+        let network = MockNetworkRequesting()
+        network.stubbedData = Data("""
+        {"success":true,"data":{},"error":null}
+        """.utf8)
+        let repository = DefaultConversationRepository(networkManager: network)
+
+        try await repository.updateTitle(conversationId: 10, title: "안녕")
+
+        XCTAssertEqual(network.lastEndpoint?.path, "/api/conversations/10/title")
+        XCTAssertEqual(network.lastEndpoint?.method, .patch)
+    }
 }

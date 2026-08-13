@@ -24,6 +24,10 @@ private final class MockConversationRepository: ConversationRepository {
     func getIncompleteConversations() async throws -> [ConversationSummary] {
         []
     }
+
+    func updateTitle(conversationId: Int, title: String) async throws {
+        fatalError("not used in this test")
+    }
 }
 
 final class GetMessagesUseCaseTests: XCTestCase {

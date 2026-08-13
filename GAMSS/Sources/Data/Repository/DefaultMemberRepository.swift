@@ -20,4 +20,9 @@ final class DefaultMemberRepository: MemberRepository {
         _ = try await networkManager.request(MemberEndpoint.deleteAccount, responseType: APIResponse<EmptyResponseDTO>.self)
         try tokenStorage.deleteTokens()
     }
+
+    func fetchMyProfile() async throws -> User {
+        let response = try await networkManager.request(MemberEndpoint.fetchMyProfile, responseType: APIResponse<MemberProfileResponseDTO>.self)
+        return response.data.toDomain()
+    }
 }

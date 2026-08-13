@@ -11,6 +11,7 @@ struct HomeView: View {
     @StateObject private var viewModel: HomeViewModel
     @FocusState private var isInputFocused: Bool
     @State private var isSettingPresented = false
+    @SwiftUI.Environment(UserManager.self) private var userManager
 
     init(viewModel: HomeViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -19,32 +20,60 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // 화면의 빈 영역(다른 인터랙티브 뷰가 가리지 않는 부분)을 탭하면 키보드를 내린다.
-                // TextEditor/버튼은 그 위에 그려져 자기 탭을 먼저 가져가므로 커서 이동 등은 방해받지 않는다.
+                // 종이 질감 배경. 폭/높이를 명시적으로 고정해둔다 — scaledToFill()이 (0,0)
+                // 크기의 누락된 이미지에서 종횡비를 계산하면 NaN이 나와 레이아웃 전체가 깨질
+                // 수 있기 때문(에셋 없던 상태에서 실기기로 확인함) — 에셋이 있는 지금도
+                // 안전장치로 유지.
+                GeometryReader { geo in
+                    Image("homeBackgroundPaper")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .clipped()
+                }
+                .ignoresSafeArea()
+
+                decorations
+
+                // 화면의 빈 영역(다른 인터랙티브 뷰가 가리지 않는 부분)을 탭하면 키보드와 감정
+                // 드롭다운을 내린다. TextEditor/버튼은 그 위에 그려져 자기 탭을 먼저 가져가므로
+                // 커서 이동 등은 방해받지 않는다.
                 Color.clear
                     .contentShape(Rectangle())
-                    .onTapGesture { isInputFocused = false }
-
-                VStack(alignment: .leading, spacing: Spacing.spacing500) {
-                    header
-
-                    VStack(alignment: .leading, spacing: Spacing.spacing100) {
-                        Text("OO님 어서오세요")
-                            .typography(.title3)
-                            .foregroundStyle(Color.colorGray950)
-                        Text("마음 쌓아둔 이야기가 있다면 말씀해보세요.")
-                            .typography(.body3Regular)
-                            .foregroundStyle(Color.colorGray500)
+                    .onTapGesture {
+                        isInputFocused = false
+                        viewModel.isEmotionPickerOpen = false
                     }
 
-                    messageBox
+                // spacing: 0으로 두고 각 요소가 자기 다음 요소와의 간격을 직접 padding으로
+                // 갖는다 — VStack 공통 spacing을 쓰면 로고-인사말 간격(Figma 지정값 188)만
+                // 따로 다르게 줄 수 없다.
+                VStack(alignment: .leading, spacing: 0) {
+                    header
+                        .padding(.bottom, 188) // Figma 지정값 — 로고와 인사말 사이 간격
 
-                    submitButton
+                    greeting
+                        .padding(.bottom, Spacing.spacing500)
+
+                    MessageComposerView(
+                        input: $viewModel.input,
+                        selectedEmotions: viewModel.selectedEmotions,
+                        isEmotionPickerOpen: $viewModel.isEmotionPickerOpen,
+                        isSendDisabled: viewModel.isSendDisabled,
+                        onToggleEmotion: { viewModel.toggleEmotion($0) },
+                        onCommit: { Task { await viewModel.send() } },
+                        onInputChange: { viewModel.updateInput($0) },
+                        isFocused: $isInputFocused
+                    )
 
                     Spacer()
                 }
                 .padding(Spacing.spacing400)
             }
+            // 키보드가 올라오면 SwiftUI가 기본적으로 사용 가능한 영역을 줄이는데, 장식
+            // 이미지가 GeometryReader의 상대 좌표(geo.size)로 위치를 잡고 있어서 그 영역이
+            // 줄어들면 같이 움직여 보인다 — 키보드에 반응해 레이아웃이 줄어들지 않게 한다.
+            .ignoresSafeArea(.keyboard, edges: .bottom)
             .navigationBarHidden(true)
             .navigationDestination(item: $viewModel.createdConversationId) { conversationId in
                 ChatView(
@@ -62,6 +91,7 @@ struct HomeView: View {
                 SettingView().toolbar(.hidden, for: .tabBar)
             }
         }
+        .task { await viewModel.loadProfileIfNeeded() }
         .alert(viewModel.alertMessage ?? "", isPresented: Binding(
             get: { viewModel.alertMessage != nil },
             set: { if !$0 { viewModel.alertMessage = nil } }
@@ -82,59 +112,68 @@ struct HomeView: View {
             Button {
                 isSettingPresented = true
             } label: {
-                Image(systemName: "gearshape")
-                    .foregroundStyle(Color.colorGray500)
+                Image("homeMenuIcon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
             }
         }
     }
 
-    private var messageBox: some View {
-        VStack(alignment: .trailing, spacing: Spacing.spacing100) {
-            ZStack(alignment: .topLeading) {
-                RoundedRectangle(cornerRadius: Radius.radius300)
-                    .fill(Color.colorGray025)
-
-                if viewModel.input.isEmpty {
-                    Text("임금님 귀는 당나귀 귀")
-                        .typography(.body3Regular)
-                        .foregroundStyle(Color.colorGray400)
-                        .padding(.horizontal, Spacing.spacing300)
-                        .padding(.vertical, Spacing.spacing300)
-                }
-
-                TextEditor(text: $viewModel.input)
-                    .typography(.body3Regular)
+    /// "{닉네임}님 오늘도" / "감쓰에 버려볼까요?" — 닉네임 부분만 분홍 배경으로 하이라이트한다.
+    /// UserManager에 값이 아직 없으면(조회 전/실패) fallback을 쓴다.
+    private var greeting: some View {
+        let nickname = userManager.user?.nickname ?? "OO"
+        return VStack(alignment: .leading, spacing: Spacing.spacing050) {
+            HStack(spacing: 0) {
+                Text(nickname)
+                    .typography(.title3)
                     .foregroundStyle(Color.colorGray950)
-                    .scrollContentBackground(.hidden)
-                    .padding(Spacing.spacing200)
-                    .focused($isInputFocused)
-                    .onChange(of: viewModel.input) { _, newValue in
-                        if viewModel.updateInput(newValue) {
-                            isInputFocused = false
-                        }
-                    }
+                    .padding(.horizontal, Spacing.spacing050)
+                    .background(
+                        RoundedRectangle(cornerRadius: Radius.radius050)
+                            .fill(Color.colorPink.opacity(0.5))
+                    )
+                Text("님 오늘도")
+                    .typography(.title3)
+                    .foregroundStyle(Color.colorGray950)
             }
-            .frame(height: 220)
-
-            Text("\(viewModel.input.count)/\(ConversationSummaryPolicy.maxMessageLength)")
-                .typography(.caption2)
-                .foregroundStyle(Color.colorGray400)
+            Text("감쓰에 버려볼까요?")
+                .typography(.title3)
+                .foregroundStyle(Color.colorGray950)
         }
     }
 
-    private var submitButton: some View {
-        Button {
-            Task { await viewModel.send() }
-        } label: {
-            Text("쪽지 보내기")
-                .typography(.subtitle3)
-                .foregroundStyle(Color.colorWhite)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, Spacing.spacing300)
+    /// 포스트잇/테이프 장식 3종. 순수 장식이라 터치를 가로채지 않는다(`allowsHitTesting(false)`).
+    /// 위치/회전값은 Figma 레드라인 확정 전 임시값 — 정확한 좌표 받으면 다듬는다.
+    private var decorations: some View {
+        GeometryReader { geo in
+            ZStack {
+                // 폭/높이를 둘 다 명시한다 — scaledToFit()이 (0,0) 크기의 누락된 이미지에서
+                // 종횡비를 계산하면 NaN이 나와 레이아웃 전체가 깨질 수 있기 때문(실기기 확인함).
+                Image("homeStickyNote")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 88, height: 88)
+                    .rotationEffect(.degrees(10))
+                    .position(x: geo.size.width * 0.82, y: geo.size.height * 0.27)
+
+                Image("homeTapePink")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 130, height: 50)
+                    .rotationEffect(.degrees(-8))
+                    .position(x: geo.size.width * 0.78, y: geo.size.height * 0.68)
+
+                Image("homeTapeOutline")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 90, height: 60)
+                    .rotationEffect(.degrees(-12))
+                    .position(x: geo.size.width * 0.28, y: geo.size.height * 0.76)
+            }
         }
-        .background(Color.colorGray950)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.radius200))
-        .disabled(viewModel.isSendDisabled)
+        .allowsHitTesting(false)
     }
 }
 
@@ -143,7 +182,14 @@ struct HomeView: View {
         viewModel: HomeViewModel(
             sendMessageUseCase: SendMessageUseCase(
                 conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
+            ),
+            fetchMyProfileUseCase: DefaultFetchMyProfileUseCase(
+                memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
+            ),
+            updateConversationTitleUseCase: UpdateConversationTitleUseCase(
+                conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
             )
         )
     )
+    .environment(UserManager.shared)
 }

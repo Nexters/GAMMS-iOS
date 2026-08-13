@@ -67,6 +67,9 @@ struct ConversationListView: View {
         }
     }
 
+    /// 삭제하기 기능은 임시 보류 상태 — 버튼만 숨긴다. 다시 켤 때는 이 플래그만 true로.
+    private let isDeleteButtonEnabled = false
+
     /// 오늘 날짜를 표시만 한다 — 목록이 "미완료 대화방"(fetchIncompleteChats) 기준이라 실제로는
     /// 여러 날짜에 걸친 대화가 섞여 있을 수 있지만, 이 헤더는 조회 조건과 무관하게 항상 오늘 날짜 보여줌.
     private var dateHeader: some View {
@@ -77,9 +80,11 @@ struct ConversationListView: View {
 
             Spacer()
 
-            Text("삭제하기")
-                .typography(.body5Regular)
-                .foregroundStyle(Color.colorGray500)
+            if isDeleteButtonEnabled {
+                Text("삭제하기")
+                    .typography(.body5Regular)
+                    .foregroundStyle(Color.colorGray500)
+            }
         }
     }
 }

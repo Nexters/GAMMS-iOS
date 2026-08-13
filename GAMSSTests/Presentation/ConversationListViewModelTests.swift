@@ -22,6 +22,10 @@ private final class MockConversationRepository: ConversationRepository {
     func getIncompleteConversations() async throws -> [ConversationSummary] {
         try stubbedGetConversationsResult.get()
     }
+
+    func updateTitle(conversationId: Int, title: String) async throws {
+        fatalError("사용 안 함")
+    }
 }
 
 @MainActor

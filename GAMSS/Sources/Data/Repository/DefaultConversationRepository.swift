@@ -42,4 +42,11 @@ final class DefaultConversationRepository: ConversationRepository {
         )
         return response.data.compactMap { $0.toDomain() }
     }
+
+    func updateTitle(conversationId: Int, title: String) async throws {
+        _ = try await networkManager.request(
+            ChatEndpoint.updateTitle(chatId: String(conversationId), UpdateChatTitleRequestDTO(title: title)),
+            responseType: APIResponse<EmptyResponseDTO>.self
+        )
+    }
 }

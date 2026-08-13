@@ -62,7 +62,7 @@ final class ConversationMessageDTOTests: XCTestCase {
     func test_toDomain_characterSenderWithKnownEmotionType_mapsToCharacterMessage() {
         let cases: [(String, EmotionCharacter)] = [
             ("JOY", .joy), ("ANGER", .anger), ("ANXIETY", .anxiety),
-            ("GRUMPY", .prickly), ("WARM", .sadness), ("QUIRKY", .quirky),
+            ("GRUMPY", .prickly), ("SADNESS", .sadness), ("QUIRKY", .quirky),
         ]
         for (serverValue, expected) in cases {
             let dto = makeDTO(senderType: "CHARACTER", emotionType: serverValue)
