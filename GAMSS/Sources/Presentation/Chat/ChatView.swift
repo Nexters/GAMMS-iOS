@@ -10,8 +10,6 @@ import SwiftUI
 struct ChatView: View {
     @StateObject private var viewModel: ChatViewModel
     @FocusState private var isInputFocused: Bool
-    // 이 프로젝트에 이미 `Environment`라는 커스텀 타입(BASE_URL 등 환경변수 관리, Core/Environment.swift)이
-    // 있어서 이름이 충돌한다 — SwiftUI 쪽임을 명시하기 위해 `SwiftUI.Environment`로 정확히 지정한다.
     @SwiftUI.Environment(\.dismiss) private var dismiss
 
     init(viewModel: ChatViewModel) {
@@ -130,19 +128,4 @@ struct ChatView: View {
             )
         }
     }
-}
-
-#Preview {
-    ChatView(
-        viewModel: ChatViewModel(
-            sendMessageUseCase: SendMessageUseCase(
-                conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
-            ),
-            getMessagesUseCase: GetMessagesUseCase(
-                conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
-            ),
-            summaryStore: LazyConversationSummaryStore(),
-            conversationId: 1
-        )
-    )
 }

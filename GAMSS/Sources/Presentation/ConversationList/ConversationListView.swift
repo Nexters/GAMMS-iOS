@@ -67,6 +67,8 @@ struct ConversationListView: View {
         }
     }
 
+    /// 오늘 날짜를 표시만 한다 — 목록이 "미완료 대화방"(fetchIncompleteChats) 기준이라 실제로는
+    /// 여러 날짜에 걸친 대화가 섞여 있을 수 있지만, 이 헤더는 조회 조건과 무관하게 항상 오늘 날짜 보여줌.
     private var dateHeader: some View {
         HStack {
             Text(ConversationListDateHeaderFormatter.string(from: Date()))
@@ -80,14 +82,4 @@ struct ConversationListView: View {
                 .foregroundStyle(Color.colorGray500)
         }
     }
-}
-
-#Preview {
-    ConversationListView(
-        viewModel: ConversationListViewModel(
-            getIncompleteConversationsUseCase: GetIncompleteConversationsUseCase(
-                conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
-            )
-        )
-    )
 }
