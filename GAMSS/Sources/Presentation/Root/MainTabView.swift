@@ -41,6 +41,9 @@ struct MainTabView: View {
                     ),
                     fetchMyProfileUseCase: DefaultFetchMyProfileUseCase(
                         memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
+                    ),
+                    updateConversationTitleUseCase: UpdateConversationTitleUseCase(
+                        conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
                     )
                 )
             )

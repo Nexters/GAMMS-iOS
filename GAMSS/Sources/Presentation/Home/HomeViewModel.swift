@@ -20,15 +20,22 @@ final class HomeViewModel: ObservableObject {
 
     private let sendMessageUseCase: SendMessageUseCase
     private let fetchMyProfileUseCase: FetchMyProfileUseCase
+    private let updateConversationTitleUseCase: UpdateConversationTitleUseCase
     private let userManager: UserManager
+
+    /// 테스트에서 백그라운드 title 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들
+    /// (ChatViewModel.pendingSummaryUpdateTask와 동일한 목적).
+    private(set) var pendingTitleUpdateTask: Task<Void, Never>?
 
     init(
         sendMessageUseCase: SendMessageUseCase,
         fetchMyProfileUseCase: FetchMyProfileUseCase,
+        updateConversationTitleUseCase: UpdateConversationTitleUseCase,
         userManager: UserManager = .shared
     ) {
         self.sendMessageUseCase = sendMessageUseCase
         self.fetchMyProfileUseCase = fetchMyProfileUseCase
+        self.updateConversationTitleUseCase = updateConversationTitleUseCase
         self.userManager = userManager
     }
 
@@ -82,6 +89,19 @@ final class HomeViewModel: ObservableObject {
             input = ""
             createdSentMessage = sent
             createdConversationId = sent.message.conversationId
+
+            // 채팅 화면 이동은 위에서 이미 트리거됐다 — title 저장 완료를 기다리지 않고
+            // 백그라운드에서 처리한다. self를 캡처하면 pendingTitleUpdateTask(self 소유)와
+            // 순환 참조가 생기므로 weak로 잡는다.
+            let conversationId = sent.message.conversationId
+            let updateConversationTitleUseCase = updateConversationTitleUseCase
+            pendingTitleUpdateTask = Task { [weak self] in
+                do {
+                    try await updateConversationTitleUseCase.execute(conversationId: conversationId, title: trimmed)
+                } catch {
+                    self?.alertMessage = "제목을 저장하지 못했어요"
+                }
+            }
         } catch let error as SendMessageValidationError {
             alertMessage = error.errorDescription
         } catch {

@@ -15,4 +15,8 @@ protocol ConversationRepository {
 
     /// 아직 끝나지 않은(미완료) 채팅방 목록을 반환한다.
     func getIncompleteConversations() async throws -> [ConversationSummary]
+
+    /// 대화방 제목을 설정한다. 홈에서 첫 메시지로 새 대화가 만들어진 직후, 그 메시지 내용을
+    /// 그대로 제목으로 저장하는 데 쓰인다.
+    func updateTitle(conversationId: Int, title: String) async throws
 }

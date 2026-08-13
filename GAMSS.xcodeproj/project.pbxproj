@@ -15,6 +15,7 @@
 		1CE64E3A4D746FFBE391D949 /* DefaultConversationSummaryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032B0D990023EAA1E72E1E82 /* DefaultConversationSummaryStoreTests.swift */; };
 		1D8DF6DFC7E7383B9B8C5850 /* DefaultSummaryRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17C099A15F7D9B1481998D0 /* DefaultSummaryRepositoryTests.swift */; };
 		228C37F390B54C3FA3796868 /* DefaultFetchMyProfileUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F31305F9DDE03A304202C57 /* DefaultFetchMyProfileUseCaseTests.swift */; };
+		91789B140656BAFCCDEB8E50 /* UpdateConversationTitleUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57C94EC067D840B994A661B /* UpdateConversationTitleUseCaseTests.swift */; };
 		24EED49AAB4C574B02E9C077 /* EmotionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */; };
 		26A84A0255BB5BB7139414C5 /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = 4F92A4F86371ED0E8E85D78F /* Tokenizers */; };
 		37CC583C76082794EA8ED2C3 /* ConversationListDateHeaderFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 279ECD6F38C25ADFF48996F2 /* ConversationListDateHeaderFormatterTests.swift */; };
@@ -96,6 +97,7 @@
 		86563A77A8A674E7F050119E /* CommentRevealPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommentRevealPolicyTests.swift; sourceTree = "<group>"; };
 		95BC0A2F902BCC45D7A387D1 /* EmotionCharacterServerKeyMappingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionCharacterServerKeyMappingTests.swift; sourceTree = "<group>"; };
 		9F31305F9DDE03A304202C57 /* DefaultFetchMyProfileUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultFetchMyProfileUseCaseTests.swift; sourceTree = "<group>"; };
+		B57C94EC067D840B994A661B /* UpdateConversationTitleUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdateConversationTitleUseCaseTests.swift; sourceTree = "<group>"; };
 		A17C099A15F7D9B1481998D0 /* DefaultSummaryRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultSummaryRepositoryTests.swift; sourceTree = "<group>"; };
 		B35175B780592B411BDD6B82 /* ConversationMessageDTOTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConversationMessageDTOTests.swift; sourceTree = "<group>"; };
 		B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultEmotionAnalysisRepositoryTests.swift; sourceTree = "<group>"; };
@@ -230,6 +232,7 @@
 				C6E353FF7D86EAC9E125F484 /* DefaultAnalyzeEmotionUseCaseTests.swift */,
 				4DDF78D0118869F3D9E1E269 /* SendMessageUseCaseTests.swift */,
 				9F31305F9DDE03A304202C57 /* DefaultFetchMyProfileUseCaseTests.swift */,
+				B57C94EC067D840B994A661B /* UpdateConversationTitleUseCaseTests.swift */,
 				83A67D7BECCB85A88C969AD7 /* GetMessagesUseCaseTests.swift */,
 			);
 			path = UseCase;
@@ -561,9 +564,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-GAMSS/Pods-GAMSS-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-GAMSS/Pods-GAMSS-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -627,6 +634,7 @@
 				1CE64E3A4D746FFBE391D949 /* DefaultConversationSummaryStoreTests.swift in Sources */,
 				573CFD0A1638F27B889EF865 /* SendMessageUseCaseTests.swift in Sources */,
 				228C37F390B54C3FA3796868 /* DefaultFetchMyProfileUseCaseTests.swift in Sources */,
+				91789B140656BAFCCDEB8E50 /* UpdateConversationTitleUseCaseTests.swift in Sources */,
 				ABF5C91182F3B409C1AA9E8E /* GetMessagesUseCaseTests.swift in Sources */,
 				A8FEE0AD9A4A60908DC5F5F1 /* CreateMessageRequestDTOTests.swift in Sources */,
 				5E6EF3C5D7CE4FF3EE4392EC /* ConversationMessageDTOTests.swift in Sources */,

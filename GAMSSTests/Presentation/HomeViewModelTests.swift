@@ -10,7 +10,10 @@ import XCTest
 
 private final class MockConversationRepository: ConversationRepository {
     var stubbedSendResult: Result<SentMessage, Error> = .failure(SummaryError.inferenceFailed())
+    var stubbedUpdateTitleResult: Result<Void, Error> = .success(())
     private(set) var sendCallCount = 0
+    private(set) var receivedTitleConversationId: Int?
+    private(set) var receivedTitle: String?
 
     func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage {
         sendCallCount += 1
@@ -23,6 +26,12 @@ private final class MockConversationRepository: ConversationRepository {
 
     func getIncompleteConversations() async throws -> [ConversationSummary] {
         []
+    }
+
+    func updateTitle(conversationId: Int, title: String) async throws {
+        receivedTitleConversationId = conversationId
+        receivedTitle = title
+        _ = try stubbedUpdateTitleResult.get()
     }
 }
 
@@ -46,6 +55,7 @@ final class HomeViewModelTests: XCTestCase {
         HomeViewModel(
             sendMessageUseCase: SendMessageUseCase(conversationRepository: repository),
             fetchMyProfileUseCase: fetchMyProfileUseCase,
+            updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: repository),
             userManager: userManager
         )
     }
@@ -184,5 +194,35 @@ final class HomeViewModelTests: XCTestCase {
 
         XCTAssertNotNil(viewModel.alertMessage)
         XCTAssertNil(userManager.user)
+    }
+
+    func test_send_onSuccess_updatesTitleWithSentContentInBackground() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+        await viewModel.pendingTitleUpdateTask?.value
+
+        XCTAssertEqual(repository.receivedTitleConversationId, 10)
+        XCTAssertEqual(repository.receivedTitle, "안녕")
+        XCTAssertNil(viewModel.alertMessage, "title 저장 성공 시에는 알림이 뜨면 안 됨")
+    }
+
+    func test_send_onSuccess_titleUpdateFails_setsAlertMessageWithoutClearingCreatedConversationId() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+        repository.stubbedUpdateTitleResult = .failure(SummaryError.inferenceFailed())
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+        await viewModel.pendingTitleUpdateTask?.value
+
+        XCTAssertEqual(viewModel.createdConversationId, 10, "title 저장이 실패해도 이미 트리거된 네비게이션은 유지돼야 함")
+        XCTAssertNotNil(viewModel.alertMessage)
     }
 }
