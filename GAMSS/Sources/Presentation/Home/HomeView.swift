@@ -20,9 +20,10 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // 종이 질감 배경 — 에셋은 추후 전달 예정. 에셋이 없는 동안에는 폭/높이를
-                // 명시적으로 고정해둔다 — scaledToFill()이 (0,0) 크기의 누락된 이미지에서
-                // 종횡비를 계산하면 NaN이 나와 레이아웃 전체가 깨질 수 있기 때문.
+                // 종이 질감 배경. 폭/높이를 명시적으로 고정해둔다 — scaledToFill()이 (0,0)
+                // 크기의 누락된 이미지에서 종횡비를 계산하면 NaN이 나와 레이아웃 전체가 깨질
+                // 수 있기 때문(에셋 없던 상태에서 실기기로 확인함) — 에셋이 있는 지금도
+                // 안전장치로 유지.
                 GeometryReader { geo in
                     Image("homeBackgroundPaper")
                         .resizable()
@@ -139,11 +140,10 @@ struct HomeView: View {
     }
 
     /// 포스트잇/테이프 장식 3종. 순수 장식이라 터치를 가로채지 않는다(`allowsHitTesting(false)`).
-    /// 위치/회전값은 Figma 레드라인 확정 전 임시값 — 실제 에셋 도착 후 다듬는다.
+    /// 위치/회전값은 Figma 레드라인 확정 전 임시값 — 정확한 좌표 받으면 다듬는다.
     private var decorations: some View {
         GeometryReader { geo in
             ZStack {
-                // TODO: 디자인팀 에셋 전달 예정 — /Users/hwangchanmi/Desktop/감쓰/홈화면/ 참고.
                 // 폭/높이를 둘 다 명시한다 — scaledToFit()이 (0,0) 크기의 누락된 이미지에서
                 // 종횡비를 계산하면 NaN이 나와 레이아웃 전체가 깨질 수 있기 때문(실기기 확인함).
                 Image("homeStickyNote")

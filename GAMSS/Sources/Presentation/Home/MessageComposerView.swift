@@ -121,13 +121,19 @@ struct MessageComposerView: View {
 
     private var submitButton: some View {
         Button(action: onCommit) {
-            // TODO: 디자인팀에서 활성/비활성 sendButton 에셋 전달 예정 — 도착하면 SF Symbol 대신 교체.
-            Image(systemName: "arrow.up")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(isSendDisabled ? Color.colorGray400 : Color.colorWhite)
-                .frame(width: 32, height: 32)
-                .background(isSendDisabled ? Color.colorGray200 : Color.colorGray950)
-                .clipShape(Circle())
+            if isSendDisabled {
+                Image("sendButtonDisabled")
+                    .resizable()
+                    .frame(width: 32, height: 32)
+            } else {
+                // TODO: 디자인팀에서 활성 상태 sendButton 에셋 전달 예정 — 도착하면 SF Symbol 대신 교체.
+                Image(systemName: "arrow.up")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color.colorWhite)
+                    .frame(width: 32, height: 32)
+                    .background(Color.colorGray950)
+                    .clipShape(Circle())
+            }
         }
         .disabled(isSendDisabled)
     }
