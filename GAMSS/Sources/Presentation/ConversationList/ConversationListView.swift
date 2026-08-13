@@ -16,17 +16,34 @@ struct ConversationListView: View {
 
     var body: some View {
         NavigationStack {
-            List(viewModel.conversations) { conversation in
-                NavigationLink(value: conversation) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(conversation.title ?? "제목 없음")
-                        Text(conversation.status)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 0) {
+                ConversationListHeaderView()
+                    .padding(.horizontal, Spacing.spacing400)
+                    .padding(.top, Spacing.spacing200)
+
+                dateHeader
+                    .padding(.horizontal, Spacing.spacing400)
+                    .padding(.top, Spacing.spacing300)
+                    .padding(.bottom, Spacing.spacing200)
+
+                if !viewModel.isLoading && viewModel.alertMessage == nil && viewModel.conversations.isEmpty {
+                    ConversationListEmptyView()
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: Spacing.spacing100) {
+                            ForEach(viewModel.conversations) { conversation in
+                                NavigationLink(value: conversation) {
+                                    ConversationRowView(conversation: conversation)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal, Spacing.spacing400)
                     }
                 }
             }
-            .navigationTitle("오늘의 채팅방")
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: ConversationSummary.self) { conversation in
                 ChatView(
                     viewModel: ChatViewModel(
@@ -49,14 +66,20 @@ struct ConversationListView: View {
             Button("확인", role: .cancel) {}
         }
     }
-}
 
-#Preview {
-    ConversationListView(
-        viewModel: ConversationListViewModel(
-            getConversationsUseCase: GetConversationsUseCase(
-                conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
-            )
-        )
-    )
+    /// 오늘 날짜를 표시만 한다 — 목록이 "미완료 대화방"(fetchIncompleteChats) 기준이라 실제로는
+    /// 여러 날짜에 걸친 대화가 섞여 있을 수 있지만, 이 헤더는 조회 조건과 무관하게 항상 오늘 날짜 보여줌.
+    private var dateHeader: some View {
+        HStack {
+            Text(ConversationListDateHeaderFormatter.string(from: Date()))
+                .typography(.body5Regular)
+                .foregroundStyle(Color.colorGray950)
+
+            Spacer()
+
+            Text("삭제하기")
+                .typography(.body5Regular)
+                .foregroundStyle(Color.colorGray500)
+        }
+    }
 }

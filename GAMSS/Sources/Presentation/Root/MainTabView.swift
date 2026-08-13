@@ -46,7 +46,7 @@ struct MainTabView: View {
 
             ConversationListView(
                 viewModel: ConversationListViewModel(
-                    getConversationsUseCase: GetConversationsUseCase(
+                    getIncompleteConversationsUseCase: GetIncompleteConversationsUseCase(
                         conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
                     )
                 )

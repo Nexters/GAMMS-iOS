@@ -55,4 +55,19 @@ final class DefaultConversationRepositoryTests: XCTestCase {
         XCTAssertEqual(network.lastEndpoint?.path, "/api/conversations/10/messages")
         XCTAssertEqual(network.lastEndpoint?.method, .get)
     }
+
+    func test_getIncompleteConversations_decodesResponseAndExcludesInvalidCreatedAt() async throws {
+        let network = MockNetworkRequesting()
+        network.stubbedData = Data("""
+        {"success":true,"data":[{"id":1,"title":"첫 대화","status":"ACTIVE","createdAt":"2026-08-07T00:00:00Z","updatedAt":"2026-08-07T00:00:00Z"},{"id":2,"title":"잘못된 대화","status":"ACTIVE","createdAt":"이상한값","updatedAt":"이상한값"}],"error":null}
+        """.utf8)
+        let repository = DefaultConversationRepository(networkManager: network)
+
+        let result = try await repository.getIncompleteConversations()
+
+        XCTAssertEqual(result.count, 1, "createdAt 파싱에 실패한 대화방은 목록에서 제외되어야 함")
+        XCTAssertEqual(result.first?.id, 1)
+        XCTAssertEqual(network.lastEndpoint?.path, "/api/conversations/incomplete")
+        XCTAssertEqual(network.lastEndpoint?.method, .get)
+    }
 }
