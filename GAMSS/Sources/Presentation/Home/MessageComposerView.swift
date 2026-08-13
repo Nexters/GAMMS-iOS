@@ -39,11 +39,12 @@ struct MessageComposerView: View {
 
     @State private var measuredContentHeight: CGFloat = MessageComposerLayout.collapsedHeight
 
-    private let controlsRowHeight: CGFloat = 48
+    private let controlsRowHeight: CGFloat = 56
     /// TextEditor는 내부 UITextView의 기본 텍스트 컨테이너 인셋이 있어, 같은 패딩을 준
     /// 일반 Text로 측정한 높이보다 실제로 조금 더 크게 렌더링된다(실기기 확인함). 그 오차를
-    /// 보정하기 위한 여유값.
-    private let textEditorInsetBuffer: CGFloat = 16
+    /// 보정하기 위한 여유값. Text 기반 측정이라 완전히 정확하지 않을 수 있음 — 실제 에셋 적용
+    /// 후 실기기에서 재확인 필요(알려진 이슈로 남겨둠).
+    private let textEditorInsetBuffer: CGFloat = 24
 
     private var isExpanded: Bool { !input.isEmpty }
 
