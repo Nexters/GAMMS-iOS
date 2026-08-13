@@ -30,8 +30,8 @@ final class GetMessagesUseCaseTests: XCTestCase {
     func test_execute_returnsMessagesFromRepository() async throws {
         let repository = MockConversationRepository()
         repository.stubbedMessages = [
-            Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil),
-            Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1),
+            Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+            Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0)),
         ]
         let useCase = GetMessagesUseCase(conversationRepository: repository)
 

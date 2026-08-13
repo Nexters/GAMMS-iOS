@@ -61,9 +61,9 @@ final class ChatViewModelTests: XCTestCase {
 
     func test_send_onSuccess_appendsSentMessageAndFirstCommentImmediately() async {
         let repository = MockConversationRepository()
-        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil)
-        let comment1 = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1)
-        let comment2 = Message(id: 3, conversationId: 10, sender: .character(.joy), content: "오늘 어때?", repliesToMessageId: 1)
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        let comment1 = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        let comment2 = Message(id: 3, conversationId: 10, sender: .character(.joy), content: "오늘 어때?", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
         repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: [comment1, comment2]))
         let viewModel = makeViewModel(repository: repository)
         viewModel.input = "안녕"
@@ -77,7 +77,7 @@ final class ChatViewModelTests: XCTestCase {
 
     func test_send_onSuccess_addsContentToSummaryStoreAfterUpdatingMessages() async {
         let repository = MockConversationRepository()
-        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "오늘 힘들었어", repliesToMessageId: nil)
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "오늘 힘들었어", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
         repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
         let summaryStore = MockConversationSummaryStore()
         let viewModel = makeViewModel(repository: repository, summaryStore: summaryStore)
@@ -106,7 +106,7 @@ final class ChatViewModelTests: XCTestCase {
     func test_send_usesCurrentContextSummaryFromStore() async {
         let repository = MockConversationRepository()
         repository.stubbedSendResult = .success(SentMessage(
-            message: Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil),
+            message: Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
             commentStatus: .done, comments: []
         ))
         let summaryStore = MockConversationSummaryStore()
@@ -121,7 +121,7 @@ final class ChatViewModelTests: XCTestCase {
 
     func test_send_commentStatusNotDone_keepsMessageAndSetsAlert() async {
         let repository = MockConversationRepository()
-        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil)
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
         repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .limitExceeded, comments: []))
         let viewModel = makeViewModel(repository: repository)
         viewModel.input = "안녕"
@@ -145,8 +145,8 @@ final class ChatViewModelTests: XCTestCase {
 
     func test_load_populatesMessagesAndRestoresSummaryStoreWithUserUtterancesOnly() async {
         let repository = MockConversationRepository()
-        let userMessage = Message(id: 1, conversationId: 10, sender: .user, content: "사용자 발화", repliesToMessageId: nil)
-        let characterMessage = Message(id: 2, conversationId: 10, sender: .character(.sadness), content: "캐릭터 답장", repliesToMessageId: 1)
+        let userMessage = Message(id: 1, conversationId: 10, sender: .user, content: "사용자 발화", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        let characterMessage = Message(id: 2, conversationId: 10, sender: .character(.sadness), content: "캐릭터 답장", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
         repository.stubbedMessages = [userMessage, characterMessage]
         let summaryStore = MockConversationSummaryStore()
         let viewModel = makeViewModel(repository: repository, summaryStore: summaryStore)
@@ -160,7 +160,7 @@ final class ChatViewModelTests: XCTestCase {
 
     func test_start_withInitialSentMessage_seedsWithoutLoadingHistory() async {
         let repository = MockConversationRepository()
-        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil)
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
         let initialSentMessage = SentMessage(message: sentMessage, commentStatus: .done, comments: [])
         let viewModel = makeViewModel(repository: repository, conversationId: 10, initialSentMessage: initialSentMessage)
 
@@ -172,7 +172,7 @@ final class ChatViewModelTests: XCTestCase {
 
     func test_start_withConversationIdOnly_loadsHistory() async {
         let repository = MockConversationRepository()
-        let userMessage = Message(id: 1, conversationId: 10, sender: .user, content: "사용자 발화", repliesToMessageId: nil)
+        let userMessage = Message(id: 1, conversationId: 10, sender: .user, content: "사용자 발화", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
         repository.stubbedMessages = [userMessage]
         let viewModel = makeViewModel(repository: repository, conversationId: 10)
 
