@@ -173,6 +173,7 @@ struct HomeView: View {
                     .position(x: geo.size.width * 0.28, y: geo.size.height * 0.76)
             }
         }
+        .ignoresSafeArea()
         .allowsHitTesting(false)
     }
 }
