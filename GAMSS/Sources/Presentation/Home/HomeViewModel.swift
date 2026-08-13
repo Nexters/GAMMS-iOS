@@ -15,6 +15,8 @@ final class HomeViewModel: ObservableObject {
     @Published var alertMessage: String?
     @Published var createdConversationId: Int?
     @Published private(set) var createdSentMessage: SentMessage?
+    @Published private(set) var selectedEmotions: Set<EmotionCharacter> = Set(EmotionCharacter.allCases)
+    @Published var isEmotionPickerOpen = false
 
     private let sendMessageUseCase: SendMessageUseCase
 
@@ -31,6 +33,17 @@ final class HomeViewModel: ObservableObject {
 
     var isSendDisabled: Bool {
         input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending
+    }
+
+    /// 감정 선택을 토글한다. 최소 1개는 항상 선택되어 있어야 하므로, 마지막 1개를
+    /// 해제하려는 시도는 무시한다.
+    func toggleEmotion(_ emotion: EmotionCharacter) {
+        if selectedEmotions.contains(emotion) {
+            guard selectedEmotions.count > 1 else { return }
+            selectedEmotions.remove(emotion)
+        } else {
+            selectedEmotions.insert(emotion)
+        }
     }
 
     func send() async {

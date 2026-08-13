@@ -88,4 +88,47 @@ final class HomeViewModelTests: XCTestCase {
 
         XCTAssertFalse(viewModel.isSendDisabled)
     }
+
+    func test_selectedEmotions_defaultsToAllSixCharacters() {
+        let viewModel = makeViewModel()
+
+        XCTAssertEqual(viewModel.selectedEmotions, Set(EmotionCharacter.allCases))
+    }
+
+    func test_toggleEmotion_deselectsWhenMoreThanOneRemainsSelected() {
+        let viewModel = makeViewModel()
+
+        viewModel.toggleEmotion(.joy)
+
+        XCTAssertFalse(viewModel.selectedEmotions.contains(.joy))
+        XCTAssertEqual(viewModel.selectedEmotions.count, 5)
+    }
+
+    func test_toggleEmotion_reselectsAfterBeingDeselected() {
+        let viewModel = makeViewModel()
+        viewModel.toggleEmotion(.joy)
+
+        viewModel.toggleEmotion(.joy)
+
+        XCTAssertTrue(viewModel.selectedEmotions.contains(.joy))
+        XCTAssertEqual(viewModel.selectedEmotions.count, 6)
+    }
+
+    func test_toggleEmotion_lastRemainingSelection_isIgnored() {
+        let viewModel = makeViewModel()
+        for emotion in EmotionCharacter.allCases where emotion != .joy {
+            viewModel.toggleEmotion(emotion)
+        }
+        XCTAssertEqual(viewModel.selectedEmotions, [.joy], "사전 조건: 마지막 1개(joy)만 남아있어야 함")
+
+        viewModel.toggleEmotion(.joy)
+
+        XCTAssertEqual(viewModel.selectedEmotions, [.joy], "마지막 1개는 해제할 수 없어야 함")
+    }
+
+    func test_isEmotionPickerOpen_defaultsToFalse() {
+        let viewModel = makeViewModel()
+
+        XCTAssertFalse(viewModel.isEmotionPickerOpen)
+    }
 }
