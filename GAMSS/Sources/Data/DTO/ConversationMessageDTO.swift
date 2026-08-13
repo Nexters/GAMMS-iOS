@@ -21,9 +21,12 @@ struct ConversationMessageDTO: Decodable {
     let rootMessageId: Int?
     let createdAt: String
 
+    // "WARM"이 아니라 "SADNESS"가 맞는 서버 키다 — 실제 응답으로 확인함
+    // ({"emotionType":"SADNESS", ...}가 "WARM"으로는 매핑을 못 찾아 toDomain()이 nil을
+    // 반환하면서 해당 캐릭터 메시지가 채팅 목록에서 통째로 사라졌었다).
     private static let serverTypeToCharacter: [String: EmotionCharacter] = [
         "JOY": .joy, "ANGER": .anger, "ANXIETY": .anxiety,
-        "GRUMPY": .prickly, "WARM": .sadness, "QUIRKY": .quirky,
+        "GRUMPY": .prickly, "SADNESS": .sadness, "QUIRKY": .quirky,
     ]
 
     func toDomain() -> Message? {

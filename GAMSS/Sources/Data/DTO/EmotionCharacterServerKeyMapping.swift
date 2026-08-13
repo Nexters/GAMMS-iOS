@@ -13,9 +13,10 @@
 enum EmotionCharacterServerKeyMapping {
     /// 서버 키 → `EmotionCharacter`. 이 딕셔너리가 유일한 진실 공급원이며, 반대 방향은
     /// 여기서 파생한다.
+    // "WARM"이 아니라 "SADNESS"가 맞는 서버 키다 — 실제 응답으로 확인함.
     private static let serverKeyToCharacter: [String: EmotionCharacter] = [
         "JOY": .joy, "ANGER": .anger, "ANXIETY": .anxiety,
-        "GRUMPY": .prickly, "WARM": .sadness, "QUIRKY": .quirky,
+        "GRUMPY": .prickly, "SADNESS": .sadness, "QUIRKY": .quirky,
     ]
 
     private static let characterToServerKey: [EmotionCharacter: String] = Dictionary(

@@ -12,7 +12,7 @@ final class EmotionCharacterServerKeyMappingTests: XCTestCase {
     func test_character_forKnownServerKeys_returnsExpectedCharacter() {
         let cases: [(String, EmotionCharacter)] = [
             ("JOY", .joy), ("ANGER", .anger), ("ANXIETY", .anxiety),
-            ("GRUMPY", .prickly), ("WARM", .sadness), ("QUIRKY", .quirky),
+            ("GRUMPY", .prickly), ("SADNESS", .sadness), ("QUIRKY", .quirky),
         ]
         for (serverKey, expected) in cases {
             XCTAssertEqual(EmotionCharacterServerKeyMapping.character(forServerKey: serverKey), expected, "서버 키 \(serverKey)")
