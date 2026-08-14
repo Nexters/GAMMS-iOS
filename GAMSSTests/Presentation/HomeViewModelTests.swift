@@ -144,7 +144,7 @@ final class HomeViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.selectedEmotions.count, 6)
     }
 
-    func test_toggleEmotion_lastRemainingSelection_isIgnored() {
+    func test_toggleEmotion_lastRemainingSelection_isAllowed_resultsInEmptySelection() {
         let viewModel = makeViewModel()
         for emotion in EmotionCharacter.allCases where emotion != .joy {
             viewModel.toggleEmotion(emotion)
@@ -153,7 +153,7 @@ final class HomeViewModelTests: XCTestCase {
 
         viewModel.toggleEmotion(.joy)
 
-        XCTAssertEqual(viewModel.selectedEmotions, [.joy], "마지막 1개는 해제할 수 없어야 함")
+        XCTAssertTrue(viewModel.selectedEmotions.isEmpty, "전체 해제가 허용되어야 함")
     }
 
     func test_isEmotionPickerOpen_defaultsToFalse() {
@@ -240,5 +240,16 @@ final class HomeViewModelTests: XCTestCase {
         await viewModel.send()
 
         XCTAssertEqual(repository.receivedExcludedCharacters, [.anger, .quirky])
+    }
+
+    func test_isSendDisabled_trueWhenAllEmotionsDeselected_evenWithInput() {
+        let viewModel = makeViewModel()
+        viewModel.input = "안녕"
+        for emotion in EmotionCharacter.allCases {
+            viewModel.toggleEmotion(emotion)
+        }
+
+        XCTAssertTrue(viewModel.selectedEmotions.isEmpty, "사전 조건: 전체 해제 상태여야 함")
+        XCTAssertTrue(viewModel.isSendDisabled, "감정을 전체 제외하면 입력이 있어도 전송은 막혀야 함")
     }
 }

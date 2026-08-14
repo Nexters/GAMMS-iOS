@@ -156,8 +156,6 @@ struct MessageComposerView: View {
 
     private func emotionOption(_ emotion: EmotionCharacter) -> some View {
         let isSelected = selectedEmotions.contains(emotion)
-        // 마지막 1개 남은 선택은 해제할 수 없다 — 흐리게 표시해 "더 해제 안 됨"을 알린다.
-        let isLocked = isSelected && selectedEmotions.count == 1
 
         return Button {
             onToggleEmotion(emotion)
@@ -169,7 +167,6 @@ struct MessageComposerView: View {
                     .typography(.body4Regular)
                     .foregroundStyle(Color.colorGray800)
             }
-            .opacity(isLocked ? 0.4 : 1)
         }
     }
 }
