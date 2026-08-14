@@ -15,6 +15,7 @@ final class ChatViewModel: ObservableObject {
     @Published var input: String = ""
     @Published private(set) var isSending = false
     @Published var alertMessage: String?
+    @Published private(set) var pendingUserMessage: Message?
 
     private var conversationId: Int?
     private let initialSentMessage: SentMessage?
@@ -84,6 +85,9 @@ final class ChatViewModel: ObservableObject {
         isSending = true
         defer { isSending = false }
 
+        pendingUserMessage = Message(id: 0, conversationId: 0, sender: .user, content: trimmed, repliesToMessageId: nil, createdAt: Date())
+        input = ""
+
         let contextSummary = await summaryStore.current()
 
         do {
@@ -93,7 +97,7 @@ final class ChatViewModel: ObservableObject {
                 repliesToMessageId: nil,
                 contextSummary: contextSummary
             )
-            input = ""
+            pendingUserMessage = nil
             seed(with: sent)
 
             // 요약기(온디바이스 추론)가 끝날 때까지 다음 입력을 막지 않도록 백그라운드로 돌린다.
@@ -101,8 +105,12 @@ final class ChatViewModel: ObservableObject {
             let summaryStore = summaryStore
             pendingSummaryUpdateTask = Task { await summaryStore.add(trimmed) }
         } catch let error as SendMessageValidationError {
+            pendingUserMessage = nil
+            input = trimmed
             alertMessage = error.errorDescription
         } catch {
+            pendingUserMessage = nil
+            input = trimmed
             alertMessage = "메시지를 보내지 못했어요"
         }
     }
