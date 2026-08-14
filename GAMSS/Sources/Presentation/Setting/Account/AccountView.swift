@@ -14,6 +14,8 @@ struct AccountView: View {
     @SwiftUI.Environment(LoginSession.self) private var loginSession
     @SwiftUI.Environment(UserManager.self) private var userManager
     @SwiftUI.Environment(\.dismiss) private var dismiss
+    @State private var isLogoutModalPresented = false
+    @State private var isWithdrawModalPresented = false
     
     init(title: String, viewModel: AccountViewModel) {
         self.title = title
@@ -21,29 +23,70 @@ struct AccountView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            header
-                .padding(.horizontal, 18)
-                .padding(.vertical, Spacing.spacing400)
-            
-            ForEach(AccountItem.allCases) { item in
-                accountItem(item)
+        ZStack {
+            VStack(alignment: .leading, spacing: 0) {
+                header
                     .padding(.horizontal, 18)
+                    .padding(.vertical, Spacing.spacing400)
+                
+                ForEach(AccountItem.allCases) { item in
+                    accountItem(item)
+                        .padding(.horizontal, 18)
+                }
+                
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(Color.colorWhite)
+            .toolbar(.hidden, for: .navigationBar)
+            .alert(
+                viewModel.errorMessage ?? "",
+                isPresented: Binding(
+                    get: { viewModel.errorMessage != nil },
+                    set: { if !$0 { viewModel.errorMessage = nil } }
+                )
+            ) {
+                Button("확인", role: .cancel) {}
             }
             
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Color.colorWhite)
-        .toolbar(.hidden, for: .navigationBar)
-        .alert(
-            viewModel.errorMessage ?? "",
-            isPresented: Binding(
-                get: { viewModel.errorMessage != nil },
-                set: { if !$0 { viewModel.errorMessage = nil } }
-            )
-        ) {
-            Button("확인", role: .cancel) {}
+            if isLogoutModalPresented {
+                ModalContainerView(isPresented: $isLogoutModalPresented) {
+                    ModalContentView(title: "로그아웃 하시겠어요?", actions: [
+                        .init(title: "로그아웃", style: .secondary, action: {
+                            isLogoutModalPresented = false
+                            
+                            Task {
+                                await viewModel.logout()
+                                loginSession.value = .current
+                            }
+                        }),
+                        .init(title: "마저 사용하기", style: .primary, action: {
+                            isLogoutModalPresented = false
+                        })
+                    ])
+                }
+            }
+            
+            if isWithdrawModalPresented {
+                ModalContainerView(isPresented: $isWithdrawModalPresented) {
+                    ModalContentView(
+                        title: "정말 탈퇴하시겠어요?",
+                        subtitle: "회원 탈퇴 시 지금까지 기록된 카드와 대화 내용은\n 영원히 삭제되며 복구되지 않아요.",
+                        actions: [
+                            .init(title: "뒤로가기", style: .secondary, action: {
+                                isWithdrawModalPresented = false
+                            }),
+                            .init(title: "탈퇴하기", style: .destructive, action: {
+                                isWithdrawModalPresented = false
+                                
+                                Task {
+                                    await viewModel.deleteMember()
+                                    loginSession.value = .current
+                                }
+                            })
+                        ])
+                }
+            }
         }
     }
     
@@ -81,10 +124,7 @@ struct AccountView: View {
             
         case .logout:
             Button {
-                Task {
-                    await viewModel.logout()
-                    loginSession.value = .current
-                }
+                isLogoutModalPresented = true
             } label: {
                 row
             }
@@ -94,10 +134,7 @@ struct AccountView: View {
             row
         case .withdraw:
             Button {
-                Task {
-                    await viewModel.deleteMember()
-                    loginSession.value = .current
-                }
+                isWithdrawModalPresented = true
             } label: {
                 row
             }
