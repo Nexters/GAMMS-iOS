@@ -26,7 +26,7 @@ struct ModalContainerView<Content: View>: View {
     var body: some View {
         ZStack {
             Color.colorBlack
-                .opacity(0.3)
+                .opacity(0.7)
                 .ignoresSafeArea()
                 .onTapGesture {
                     guard dismissOnBackgroundTap else { return }
@@ -38,6 +38,7 @@ struct ModalContainerView<Content: View>: View {
             
             content()
                 .transition(.scale.combined(with: .opacity))
+                .padding(.horizontal, 28)
         }
         .animation(.easeInOut(duration: 0.25), value: isPresented)
     }
