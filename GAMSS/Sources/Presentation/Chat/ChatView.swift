@@ -40,14 +40,29 @@ struct ChatView: View {
                                 )
                                 .id(message.id)
                             }
+
+                            if let pendingUserMessage = viewModel.pendingUserMessage {
+                                MessageBubbleView(
+                                    message: pendingUserMessage,
+                                    quotedMessage: nil,
+                                    maxWidth: MessageBubbleLayout.maxBubbleWidth(
+                                        availableWidth: geometry.size.width,
+                                        containerPadding: containerPadding * 2
+                                    )
+                                )
+                                .id(pendingUserMessage.id)
+                            }
                         }
                         .padding(containerPadding)
                     }
                     // ScrollView가 키보드에 의해 축소/복원될 때
                     // SwiftUI가 키보드 dismiss를 자연스럽게 처리하도록 한다.
                     .scrollDismissesKeyboard(.interactively)
-                    .onChange(of: viewModel.messages) { _, newMessages in
-                        scrollToBottom(proxy, messages: newMessages)
+                    .onChange(of: viewModel.messages) { _, _ in
+                        scrollToBottom(proxy)
+                    }
+                    .onChange(of: viewModel.pendingUserMessage) { _, _ in
+                        scrollToBottom(proxy)
                     }
                     .safeAreaInset(edge: .bottom, spacing: 0) {
                         ChatComposerView(
@@ -113,19 +128,16 @@ struct ChatView: View {
         return ConversationListDateHeaderFormatter.string(from: firstMessageDate)
     }
 
-    private func scrollToBottom(
-        _ proxy: ScrollViewProxy,
-        messages: [Message]
-    ) {
-        guard let lastMessage = messages.last else {
+    /// 확정된 메시지 목록의 마지막 항목, 없으면 전송 중인 낙관적 메시지를 기준으로 맨 아래로
+    /// 스크롤한다. pendingUserMessage가 항상 messages보다 나중에 화면에 그려지므로, 둘 다 있을
+    /// 때는 pendingUserMessage 쪽으로 스크롤해야 실제로 맨 아래가 된다.
+    private func scrollToBottom(_ proxy: ScrollViewProxy) {
+        guard let targetId = viewModel.pendingUserMessage?.id ?? viewModel.messages.last?.id else {
             return
         }
 
         withAnimation(.easeOut(duration: 0.2)) {
-            proxy.scrollTo(
-                lastMessage.id,
-                anchor: .bottom
-            )
+            proxy.scrollTo(targetId, anchor: .bottom)
         }
     }
 }
