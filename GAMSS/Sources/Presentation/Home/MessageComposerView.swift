@@ -71,6 +71,9 @@ struct MessageComposerView: View {
                 .frame(height: isExpanded ? nil : collapsedLineHeight)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: isExpanded ? .top : .center)
                 .focused(isFocused)
+                .onChange(of: isFocused.wrappedValue) { _, isFocusedNow in
+                    if isFocusedNow { isEmotionPickerOpen = false }
+                }
                 .onChange(of: input) { _, newValue in
                     if onInputChange(newValue) { isFocused.wrappedValue = false }
                 }
@@ -99,6 +102,7 @@ struct MessageComposerView: View {
 
     private var emotionTrigger: some View {
         Button {
+            isFocused.wrappedValue = false
             isEmotionPickerOpen.toggle()
         } label: {
             HStack(spacing: Spacing.spacing025) {
