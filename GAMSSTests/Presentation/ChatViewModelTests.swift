@@ -206,6 +206,27 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertNotNil(viewModel.alertMessage)
     }
 
+    func test_send_onFailure_doesNotOverwriteInputIfUserTypedSomethingNewWhileSending() async {
+        let repository = MockConversationRepository()
+        let gate = SendGate()
+        repository.sendGate = gate
+        repository.stubbedSendResult = .failure(SummaryError.inferenceFailed())
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "실패할 메시지"
+
+        let sendTask = Task { await viewModel.send() }
+        while viewModel.pendingUserMessage == nil {
+            await Task.yield()
+        }
+
+        viewModel.input = "그 사이에 새로 입력한 메시지"
+        await gate.open()
+        await sendTask.value
+
+        XCTAssertEqual(viewModel.input, "그 사이에 새로 입력한 메시지", "전송 실패 시점에 사용자가 이미 새 내용을 입력 중이었다면 그 내용을 덮어쓰면 안 됨")
+        XCTAssertNil(viewModel.pendingUserMessage)
+    }
+
     func test_load_populatesMessagesAndRestoresSummaryStoreWithUserUtterancesOnly() async {
         let repository = MockConversationRepository()
         let userMessage = Message(id: 1, conversationId: 10, sender: .user, content: "사용자 발화", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))

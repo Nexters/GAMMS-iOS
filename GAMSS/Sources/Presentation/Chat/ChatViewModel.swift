@@ -106,11 +106,11 @@ final class ChatViewModel: ObservableObject {
             pendingSummaryUpdateTask = Task { await summaryStore.add(trimmed) }
         } catch let error as SendMessageValidationError {
             pendingUserMessage = nil
-            input = trimmed
+            if input.isEmpty { input = trimmed }
             alertMessage = error.errorDescription
         } catch {
             pendingUserMessage = nil
-            input = trimmed
+            if input.isEmpty { input = trimmed }
             alertMessage = "메시지를 보내지 못했어요"
         }
     }
