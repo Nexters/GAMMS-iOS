@@ -14,6 +14,7 @@ final class LoginSession {
 
 struct RootView: View {
     @State private var loginSession = LoginSession()
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     
     var body: some View {
         Group {
@@ -30,7 +31,13 @@ struct RootView: View {
                     )
                 )
             case .autoLoginPending, .loggedIn:
-                MainTabView()
+                if hasCompletedOnboarding {
+                    MainTabView()
+                } else {
+                    OnboardingView {
+                        hasCompletedOnboarding = true
+                    }
+                }
             }
         }
         .environment(loginSession)
