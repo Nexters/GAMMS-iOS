@@ -39,12 +39,7 @@ struct MessageComposerView: View {
     private var isExpanded: Bool { !input.isEmpty }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.spacing200) {
-            composerBox
-            if isEmotionPickerOpen {
-                emotionGrid
-            }
-        }
+        composerBox
     }
 
     private var composerBox: some View {
@@ -96,18 +91,12 @@ struct MessageComposerView: View {
         .animation(.easeInOut(duration: 0.2), value: isExpanded)
     }
 
-    /// 감정 선택 기능은 보류 상태 — 트리거 버튼과 드롭다운을 숨긴다. 아래 `emotionTrigger`/
-    /// `emotionGrid`/`isEmotionPickerOpen` 관련 코드는 지우지 않고 남겨뒀다: 다시 켤 때
-    /// `isEmotionSelectionEnabled`만 true로 되돌리면 된다.
-    private let isEmotionSelectionEnabled = false
+    private let isEmotionSelectionEnabled = true
 
-    /// collapsed일 때는 박스 세로 중앙에 오도록, expanded일 때는 박스 하단에 붙도록 같은
-    /// HStack의 하단 padding만 바꾼다 — 구조 자체(if/else)를 바꾸면 SwiftUI가 다른 뷰로
-    /// 취급해 애니메이션이 끊긴다.
     private var controlsRow: some View {
         HStack {
-            if isEmotionSelectionEnabled { emotionTrigger }
             Spacer()
+            if isEmotionSelectionEnabled { emotionTrigger }
             submitButton
         }
         .padding(.horizontal, isExpanded ? Spacing.spacing200 : Spacing.spacing300)
@@ -126,6 +115,15 @@ struct MessageComposerView: View {
                     .font(.system(size: 10))
             }
             .foregroundStyle(Color.colorGray500)
+        }
+        // emotionGrid를 여기(트리거) 기준 오버레이로 붙이면, controlsRow가 입력창 높이
+        // 변화(collapsed↔expanded)에 맞춰 이미 움직이고 있는 애니메이션에 자동으로 같이
+        // 실린다 — 별도의 위치 재계산 코드가 필요 없다.
+        .overlay(alignment: .topLeading) {
+            if isEmotionPickerOpen {
+                emotionGrid
+                    .padding(.top, controlsRowHeight) // 트리거 버튼 아래(박스 바깥)로 밀어냄
+            }
         }
     }
 
@@ -150,7 +148,7 @@ struct MessageComposerView: View {
         .clipShape(RoundedRectangle(cornerRadius: Radius.radius200))
         .overlay(
             RoundedRectangle(cornerRadius: Radius.radius200)
-                .stroke(Color.colorGray200)
+                .stroke(Color.colorGray950, lineWidth: 1.5)
         )
     }
 
@@ -213,6 +211,14 @@ private struct MessageComposerPreviewContainer: View {
 #Preview("expanded with emotion picker open") {
     MessageComposerPreviewContainer(
         input: "이게 뭐냐아~",
+        selectedEmotions: [.joy, .sadness],
+        isEmotionPickerOpen: true
+    )
+}
+
+#Preview("collapsed with emotion picker open") {
+    MessageComposerPreviewContainer(
+        input: "",
         selectedEmotions: [.joy, .sadness],
         isEmotionPickerOpen: true
     )
