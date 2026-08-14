@@ -12,18 +12,20 @@ struct HomeView: View {
     @FocusState private var isInputFocused: Bool
     @State private var isSettingPresented = false
     @SwiftUI.Environment(UserManager.self) private var userManager
+    @State private var loginSession = LoginSession()
 
     init(viewModel: HomeViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
+//        do {
+//         try? TokenStorage.shared.deleteTokens()
+//         loginSession.value = .current
+//        }
+        
     }
 
     var body: some View {
         NavigationStack {
             ZStack {
-                // 종이 질감 배경. 폭/높이를 명시적으로 고정해둔다 — scaledToFill()이 (0,0)
-                // 크기의 누락된 이미지에서 종횡비를 계산하면 NaN이 나와 레이아웃 전체가 깨질
-                // 수 있기 때문(에셋 없던 상태에서 실기기로 확인함) — 에셋이 있는 지금도
-                // 안전장치로 유지.
                 GeometryReader { geo in
                     Image("homeBackgroundPaper")
                         .resizable()
@@ -45,9 +47,6 @@ struct HomeView: View {
                         viewModel.isEmotionPickerOpen = false
                     }
 
-                // spacing: 0으로 두고 각 요소가 자기 다음 요소와의 간격을 직접 padding으로
-                // 갖는다 — VStack 공통 spacing을 쓰면 로고-인사말 간격(Figma 지정값 188)만
-                // 따로 다르게 줄 수 없다.
                 VStack(alignment: .leading, spacing: 0) {
                     header
                         .padding(.bottom, 188) // Figma 지정값 — 로고와 인사말 사이 간격
@@ -149,8 +148,6 @@ struct HomeView: View {
     private var decorations: some View {
         GeometryReader { geo in
             ZStack {
-                // 폭/높이를 둘 다 명시한다 — scaledToFit()이 (0,0) 크기의 누락된 이미지에서
-                // 종횡비를 계산하면 NaN이 나와 레이아웃 전체가 깨질 수 있기 때문(실기기 확인함).
                 Image("homeStickyNote")
                     .resizable()
                     .scaledToFit()

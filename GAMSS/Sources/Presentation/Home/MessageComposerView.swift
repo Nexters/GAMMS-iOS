@@ -76,16 +76,9 @@ struct MessageComposerView: View {
                 }
         }
         .frame(height: MessageComposerLayout.height(isExpanded: isExpanded))
-        // overlay(alignment:)를 .bottom/.center로 바꿔가며 쓰면 Alignment 값 자체는
-        // 애니메이션 보간이 안 돼서 박스 높이는 부드럽게 늘어나는데 버튼만 먼저 순간이동해
-        // 보였다(실기기 확인함). alignment는 항상 .bottom으로 고정하고, 대신 하단 padding을
-        // CGFloat(애니메이션 가능한 값)로 상태에 따라 바꿔서 박스 높이 변화와 같이 보간되게 한다.
         .overlay(alignment: .bottom) {
             controlsRow
         }
-        // .animation()은 이 시점보다 "앞에" 있는 모디파이어에만 적용된다 — .overlay()보다
-        // 먼저 붙어 있으면 overlay 내부(controlsRow의 padding) 변화는 애니메이션 대상에서
-        // 빠져서 박스 높이만 부드럽고 버튼은 순간이동했다(실기기로 재확인, 1차 수정 실패).
         // .overlay() 다음으로 옮겨서 프레임 높이 변화와 overlay padding 변화가 같은
         // 트랜잭션으로 묶이게 한다.
         .animation(.easeInOut(duration: 0.2), value: isExpanded)
@@ -116,10 +109,7 @@ struct MessageComposerView: View {
             }
             .foregroundStyle(Color.colorGray500)
         }
-        // emotionGrid를 여기(트리거) 기준 오버레이로 붙이면, controlsRow가 입력창 높이
-        // 변화(collapsed↔expanded)에 맞춰 이미 움직이고 있는 애니메이션에 자동으로 같이
-        // 실린다 — 별도의 위치 재계산 코드가 필요 없다.
-        .overlay(alignment: .topLeading) {
+        .overlay(alignment: .topTrailing) {
             if isEmotionPickerOpen {
                 emotionGrid
                     .padding(.top, controlsRowHeight) // 트리거 버튼 아래(박스 바깥)로 밀어냄
@@ -137,13 +127,21 @@ struct MessageComposerView: View {
     }
 
     private var emotionGrid: some View {
-        let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
-        return LazyVGrid(columns: columns, spacing: Spacing.spacing200) {
-            ForEach(EmotionCharacter.pickerOrder, id: \.self) { emotion in
-                emotionOption(emotion)
+        let topRow = EmotionCharacter.pickerOrder.prefix(3)
+        let bottomRow = EmotionCharacter.pickerOrder.suffix(3)
+        return VStack(spacing: Spacing.spacing350) {
+            HStack(spacing: Spacing.spacing350) {
+                ForEach(Array(topRow), id: \.self) { emotion in
+                    emotionOption(emotion)
+                }
+            }
+            HStack(spacing: Spacing.spacing350) {
+                ForEach(Array(bottomRow), id: \.self) { emotion in
+                    emotionOption(emotion)
+                }
             }
         }
-        .padding(Spacing.spacing300)
+        .padding(Spacing.spacing400)
         .background(Color.colorWhite)
         .clipShape(RoundedRectangle(cornerRadius: Radius.radius200))
         .overlay(
@@ -164,6 +162,7 @@ struct MessageComposerView: View {
                 Text(emotion.pickerLabel)
                     .typography(.body4Regular)
                     .foregroundStyle(Color.colorGray800)
+                    .fixedSize(horizontal: true, vertical: false)
             }
         }
     }
