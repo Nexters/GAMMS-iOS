@@ -11,7 +11,7 @@ import XCTest
 private final class MockConversationRepository: ConversationRepository {
     var stubbedGetConversationsResult: Result<[ConversationSummary], Error> = .success([])
 
-    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage {
+    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
         fatalError("사용 안 함")
     }
 

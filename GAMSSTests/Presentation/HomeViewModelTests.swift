@@ -12,11 +12,13 @@ private final class MockConversationRepository: ConversationRepository {
     var stubbedSendResult: Result<SentMessage, Error> = .failure(SummaryError.inferenceFailed())
     var stubbedUpdateTitleResult: Result<Void, Error> = .success(())
     private(set) var sendCallCount = 0
+    private(set) var receivedExcludedCharacters: Set<EmotionCharacter>?
     private(set) var receivedTitleConversationId: Int?
     private(set) var receivedTitle: String?
 
-    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage {
+    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
         sendCallCount += 1
+        receivedExcludedCharacters = excludedCharacters
         return try stubbedSendResult.get()
     }
 
@@ -224,5 +226,19 @@ final class HomeViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.createdConversationId, 10, "title 저장이 실패해도 이미 트리거된 네비게이션은 유지돼야 함")
         XCTAssertNotNil(viewModel.alertMessage)
+    }
+
+    func test_send_excludesDeselectedEmotionsOnly() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+        viewModel.toggleEmotion(.anger)
+        viewModel.toggleEmotion(.quirky)
+
+        await viewModel.send()
+
+        XCTAssertEqual(repository.receivedExcludedCharacters, [.anger, .quirky])
     }
 }

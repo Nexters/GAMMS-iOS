@@ -84,7 +84,8 @@ final class HomeViewModel: ObservableObject {
                 conversationId: nil,
                 content: trimmed,
                 repliesToMessageId: nil,
-                contextSummary: nil
+                contextSummary: nil,
+                excludedCharacters: Set(EmotionCharacter.allCases).subtracting(selectedEmotions)
             )
             input = ""
             createdSentMessage = sent

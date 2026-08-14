@@ -30,7 +30,7 @@ final class DefaultConversationRepositoryTests: XCTestCase {
         """.utf8)
         let repository = DefaultConversationRepository(networkManager: network)
 
-        let result = try await repository.sendMessage(conversationId: nil, content: "안녕", repliesToMessageId: nil, contextSummary: nil)
+        let result = try await repository.sendMessage(conversationId: nil, content: "안녕", repliesToMessageId: nil, contextSummary: nil, excludedCharacters: [])
 
         XCTAssertEqual(result.message.content, "안녕")
         XCTAssertEqual(result.message.sender, .user)
@@ -82,5 +82,21 @@ final class DefaultConversationRepositoryTests: XCTestCase {
 
         XCTAssertEqual(network.lastEndpoint?.path, "/api/conversations/10/title")
         XCTAssertEqual(network.lastEndpoint?.method, .patch)
+    }
+
+    func test_sendMessage_mapsExcludedCharactersToServerKeys() async throws {
+        let network = MockNetworkRequesting()
+        network.stubbedData = Data("""
+        {"success":true,"data":{"message":{"id":1,"conversationId":10,"senderType":"USER","emotionType":null,"content":"안녕","repliesToMessageId":null,"rootMessageId":null,"createdAt":"2026-08-07T00:00:00Z"},"commentStatus":"DONE","comments":[]},"error":null}
+        """.utf8)
+        let repository = DefaultConversationRepository(networkManager: network)
+
+        _ = try await repository.sendMessage(conversationId: nil, content: "안녕", repliesToMessageId: nil, contextSummary: nil, excludedCharacters: [.anger, .joy])
+
+        guard case let .createMessage(request)? = network.lastEndpoint as? ChatEndpoint else {
+            XCTFail("createMessage 엔드포인트가 호출되어야 함")
+            return
+        }
+        XCTAssertEqual(Set(request.excludeCharacters), ["ANGER", "JOY"])
     }
 }

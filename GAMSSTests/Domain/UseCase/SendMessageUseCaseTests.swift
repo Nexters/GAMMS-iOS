@@ -14,14 +14,16 @@ private final class MockConversationRepository: ConversationRepository {
     private(set) var receivedContent: String?
     private(set) var receivedRepliesToMessageId: Int?
     private(set) var receivedContextSummary: String?
+    private(set) var receivedExcludedCharacters: Set<EmotionCharacter>?
     private(set) var sendCallCount = 0
 
-    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage {
+    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
         sendCallCount += 1
         receivedConversationId = conversationId
         receivedContent = content
         receivedRepliesToMessageId = repliesToMessageId
         receivedContextSummary = contextSummary
+        receivedExcludedCharacters = excludedCharacters
         return try stubbedSendResult.get()
     }
 
@@ -49,7 +51,7 @@ final class SendMessageUseCaseTests: XCTestCase {
         repository.stubbedSendResult = .success(sent)
         let useCase = SendMessageUseCase(conversationRepository: repository)
 
-        let result = try await useCase.execute(conversationId: 10, content: "안녕", repliesToMessageId: 5, contextSummary: "압축본")
+        let result = try await useCase.execute(conversationId: 10, content: "안녕", repliesToMessageId: 5, contextSummary: "압축본", excludedCharacters: [])
 
         XCTAssertEqual(result, sent)
         XCTAssertEqual(repository.receivedConversationId, 10)
@@ -64,7 +66,7 @@ final class SendMessageUseCaseTests: XCTestCase {
         let useCase = SendMessageUseCase(conversationRepository: repository)
 
         do {
-            _ = try await useCase.execute(conversationId: nil, content: "안녕", repliesToMessageId: nil, contextSummary: nil)
+            _ = try await useCase.execute(conversationId: nil, content: "안녕", repliesToMessageId: nil, contextSummary: nil, excludedCharacters: [])
             XCTFail("Expected error to be thrown")
         } catch {
             XCTAssertEqual(error as? SummaryError, .inferenceFailed())
@@ -76,7 +78,7 @@ final class SendMessageUseCaseTests: XCTestCase {
         let useCase = SendMessageUseCase(conversationRepository: repository)
 
         do {
-            _ = try await useCase.execute(conversationId: nil, content: "   ", repliesToMessageId: nil, contextSummary: nil)
+            _ = try await useCase.execute(conversationId: nil, content: "   ", repliesToMessageId: nil, contextSummary: nil, excludedCharacters: [])
             XCTFail("Expected error to be thrown")
         } catch {
             XCTAssertEqual(error as? SendMessageValidationError, .empty)
@@ -90,7 +92,7 @@ final class SendMessageUseCaseTests: XCTestCase {
         let overLong = String(repeating: "가", count: ConversationSummaryPolicy.maxMessageLength + 1)
 
         do {
-            _ = try await useCase.execute(conversationId: nil, content: overLong, repliesToMessageId: nil, contextSummary: nil)
+            _ = try await useCase.execute(conversationId: nil, content: overLong, repliesToMessageId: nil, contextSummary: nil, excludedCharacters: [])
             XCTFail("Expected error to be thrown")
         } catch {
             XCTAssertEqual(error as? SendMessageValidationError, .tooLong)
@@ -109,8 +111,23 @@ final class SendMessageUseCaseTests: XCTestCase {
         let useCase = SendMessageUseCase(conversationRepository: repository)
         let exact = String(repeating: "가", count: ConversationSummaryPolicy.maxMessageLength)
 
-        _ = try await useCase.execute(conversationId: nil, content: exact, repliesToMessageId: nil, contextSummary: nil)
+        _ = try await useCase.execute(conversationId: nil, content: exact, repliesToMessageId: nil, contextSummary: nil, excludedCharacters: [])
 
         XCTAssertEqual(repository.sendCallCount, 1)
+    }
+
+    func test_execute_passesExcludedCharactersThrough() async throws {
+        let repository = MockConversationRepository()
+        let sent = SentMessage(
+            message: Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+            commentStatus: .done,
+            comments: []
+        )
+        repository.stubbedSendResult = .success(sent)
+        let useCase = SendMessageUseCase(conversationRepository: repository)
+
+        _ = try await useCase.execute(conversationId: nil, content: "안녕", repliesToMessageId: nil, contextSummary: nil, excludedCharacters: [.anger, .joy])
+
+        XCTAssertEqual(repository.receivedExcludedCharacters, [.anger, .joy])
     }
 }
