@@ -21,12 +21,14 @@ struct ChatComposerView: View {
     @FocusState.Binding var isFocused: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.spacing100) {
-            if let replyTargetLabel, let replyTargetContent {
-                replyPreview(label: replyTargetLabel, content: replyTargetContent)
-            }
+        HStack(alignment: .bottom, spacing: Spacing.spacing100) {
+            // 답장 미리보기와 텍스트 입력이 한 박스(배경+테두리) 안에 같이 들어가야 하므로,
+            // 둘을 이 VStack으로 묶은 뒤 박스 스타일을 여기 하나에만 적용한다.
+            VStack(alignment: .leading, spacing: Spacing.spacing100) {
+                if let replyTargetLabel, let replyTargetContent {
+                    replyPreview(label: replyTargetLabel, content: replyTargetContent)
+                }
 
-            HStack(alignment: .bottom, spacing: Spacing.spacing100) {
                 TextField(
                     "메시지 입력",
                     text: $text,
@@ -49,17 +51,17 @@ struct ChatComposerView: View {
                         isFocused = false
                     }
                 }
-                .padding(.vertical, Spacing.spacing150)
-                .padding(.horizontal, Spacing.spacing200)
-                .background(Color.colorGray025)
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Color.colorGray950, lineWidth: 1)
-                )
+            }
+            .padding(.vertical, Spacing.spacing150)
+            .padding(.horizontal, Spacing.spacing200)
+            .background(Color.colorGray025)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(Color.colorGray950, lineWidth: 1)
+            )
 
-                if Self.hasText(text) {
-                    sendButton
-                }
+            if Self.hasText(text) {
+                sendButton
             }
         }
         .padding(.horizontal, 18)
