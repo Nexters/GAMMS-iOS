@@ -15,7 +15,7 @@ final class ChatViewModel: ObservableObject {
     @Published var input: String = ""
     @Published private(set) var isSending = false
     @Published var alertMessage: String?
-    @Published private(set) var pendingUserMessage: Message?
+    @Published private(set) var pendingUserMessage: PendingUserMessage?
 
     private var conversationId: Int?
     private let initialSentMessage: SentMessage?
@@ -85,7 +85,7 @@ final class ChatViewModel: ObservableObject {
         isSending = true
         defer { isSending = false }
 
-        pendingUserMessage = Message(id: 0, conversationId: 0, sender: .user, content: trimmed, repliesToMessageId: nil, createdAt: Date())
+        pendingUserMessage = PendingUserMessage(content: trimmed, sentAt: Date())
         input = ""
 
         let contextSummary = await summaryStore.current()

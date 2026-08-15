@@ -8,15 +8,38 @@
 import SwiftUI
 
 /// 채팅 메시지 한 건을 sent(사용자)/received(캐릭터)/receivedReply(캐릭터의 인용 답장)
-/// 스타일로 렌더링한다.
+/// 스타일로 렌더링한다. 렌더링에 필요한 필드만 저장해서, 확정된 `Message`든 아직 서버 응답을
+/// 기다리는 `PendingUserMessage`든 같은 방식으로 그릴 수 있다.
 struct MessageBubbleView: View {
-    let message: Message
-    let quotedMessage: Message?
-    let maxWidth: CGFloat
+    private let sender: MessageSender
+    private let content: String
+    private let createdAt: Date
+    private let quotedHeaderLabel: String?
+    private let quotedContent: String?
+    private let maxWidth: CGFloat
+
+    init(message: Message, quotedMessage: Message?, maxWidth: CGFloat) {
+        self.sender = message.sender
+        self.content = message.content
+        self.createdAt = message.createdAt
+        self.quotedHeaderLabel = quotedMessage.flatMap { QuotedReplyHeader.label(forQuotedSender: $0.sender) }
+        self.quotedContent = quotedMessage?.content
+        self.maxWidth = maxWidth
+    }
+
+    /// 전송 중인 내 메시지 전용 — 항상 사용자 발신, 인용 답장은 없다.
+    init(pendingUserMessage: PendingUserMessage, maxWidth: CGFloat) {
+        self.sender = .user
+        self.content = pendingUserMessage.content
+        self.createdAt = pendingUserMessage.sentAt
+        self.quotedHeaderLabel = nil
+        self.quotedContent = nil
+        self.maxWidth = maxWidth
+    }
 
     var body: some View {
         HStack(alignment: .bottom, spacing: Spacing.spacing100) {
-            switch message.sender {
+            switch sender {
             case .user:
                 Spacer(minLength: 0)
                 timestamp
@@ -45,19 +68,14 @@ struct MessageBubbleView: View {
         }
     }
 
-    private var quotedHeaderLabel: String? {
-        guard let quotedMessage else { return nil }
-        return QuotedReplyHeader.label(forQuotedSender: quotedMessage.sender)
-    }
-
     private var bubble: some View {
         BubbleWidthLayout(maxWidth: bubbleMaxWidth) {
             VStack(alignment: .leading, spacing: Spacing.spacing050) {
-                if let quotedHeaderLabel, let quotedMessage {
+                if let quotedHeaderLabel, let quotedContent {
                     Text(quotedHeaderLabel)
                         .typography(.body5Medium)
                         .foregroundStyle(Color.colorGray950)
-                    Text(quotedMessage.content)
+                    Text(quotedContent)
                         .typography(.body4Medium)
                         .foregroundStyle(Color.colorGray500)
                         .lineLimit(1)
@@ -66,7 +84,7 @@ struct MessageBubbleView: View {
                         .frame(height: 1)
                 }
 
-                Text(message.content)
+                Text(content)
                     .typography(.body4Medium)
                     .foregroundStyle(bodyTextColor)
             }
@@ -81,27 +99,27 @@ struct MessageBubbleView: View {
     }
 
     private var bubbleMaxWidth: CGFloat {
-        switch message.sender {
+        switch sender {
         case .user: maxWidth
         case .character: MessageBubbleLayout.receivedBubbleMaxWidth(maxWidth: maxWidth)
         }
     }
 
     private var timestamp: some View {
-        Text(MessageTimestampFormatter.string(from: message.createdAt))
+        Text(MessageTimestampFormatter.string(from: createdAt))
             .typography(.body6Regular)
             .foregroundStyle(Color.colorGray600)
     }
 
     private var bodyTextColor: Color {
-        switch message.sender {
+        switch sender {
         case .user: Color.colorGray025
         case .character: Color.colorGray950
         }
     }
 
     private var bubbleBackground: Color {
-        switch message.sender {
+        switch sender {
         case .user: Color.colorGray900
         case .character: Color.colorGray025
         }

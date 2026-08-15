@@ -182,7 +182,6 @@ final class ChatViewModelTests: XCTestCase {
         }
 
         XCTAssertEqual(viewModel.pendingUserMessage?.content, "안녕")
-        XCTAssertEqual(viewModel.pendingUserMessage?.sender, .user)
         XCTAssertEqual(viewModel.input, "", "응답을 기다리지 않고 입력창이 바로 비워져야 함")
         XCTAssertTrue(viewModel.messages.isEmpty, "응답 전에는 확정 목록에 들어가면 안 됨")
 

@@ -43,14 +43,13 @@ struct ChatView: View {
 
                             if let pendingUserMessage = viewModel.pendingUserMessage {
                                 MessageBubbleView(
-                                    message: pendingUserMessage,
-                                    quotedMessage: nil,
+                                    pendingUserMessage: pendingUserMessage,
                                     maxWidth: MessageBubbleLayout.maxBubbleWidth(
                                         availableWidth: geometry.size.width,
                                         containerPadding: containerPadding * 2
                                     )
                                 )
-                                .id(pendingUserMessage.id)
+                                .id(PendingUserMessage.scrollAnchorID)
                             }
                         }
                         .padding(containerPadding)
@@ -132,12 +131,12 @@ struct ChatView: View {
     /// 스크롤한다. pendingUserMessage가 항상 messages보다 나중에 화면에 그려지므로, 둘 다 있을
     /// 때는 pendingUserMessage 쪽으로 스크롤해야 실제로 맨 아래가 된다.
     private func scrollToBottom(_ proxy: ScrollViewProxy) {
-        guard let targetId = viewModel.pendingUserMessage?.id ?? viewModel.messages.last?.id else {
-            return
-        }
-
         withAnimation(.easeOut(duration: 0.2)) {
-            proxy.scrollTo(targetId, anchor: .bottom)
+            if viewModel.pendingUserMessage != nil {
+                proxy.scrollTo(PendingUserMessage.scrollAnchorID, anchor: .bottom)
+            } else if let lastId = viewModel.messages.last?.id {
+                proxy.scrollTo(lastId, anchor: .bottom)
+            }
         }
     }
 }
