@@ -18,6 +18,7 @@ enum ChatEndpoint: Endpoint {
     case searchChats(keyword: String, page: Int, size: Int)
     case fetchIncompleteChats
     case deleteChat(chatId: String)
+    case deleteChats(DeleteChatsRequestDTO)
     
     var path: String {
         switch self {
@@ -41,6 +42,8 @@ enum ChatEndpoint: Endpoint {
             return "/api/conversations/incomplete"
         case let .deleteChat(chatId):
             return "/api/conversations/\(chatId)"
+        case .deleteChats:
+            return "/api/conversations"
         }
     }
     
@@ -58,7 +61,8 @@ enum ChatEndpoint: Endpoint {
              .searchChats,
              .fetchIncompleteChats:
             return .get
-        case .deleteChat:
+        case .deleteChat,
+             .deleteChats:
             return .delete
         }
     }
@@ -85,6 +89,8 @@ enum ChatEndpoint: Endpoint {
             return []
         case .deleteChat:
             return []
+        case let .deleteChats(request):
+            return [.body(request)]
         }
     }
     

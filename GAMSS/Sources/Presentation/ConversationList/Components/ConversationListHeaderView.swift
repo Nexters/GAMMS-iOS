@@ -7,30 +7,48 @@
 
 import SwiftUI
 
-/// 대화방 목록 화면 상단 네비게이션. 로고 + 검색 아이콘 + 햄버거 아이콘, 둘 다 자리만 차지하고
-/// 숨김 처리(`.hidden()`). 검색/메뉴 기능은 이번 범위에서 구현하지 않는다.
 struct ConversationListHeaderView: View {
+    var currentMode: ConversationMode
+    var onTappedBackButton: (() -> Void)?
+    var onTappedSearchButton: (() -> Void)?
+    
     var body: some View {
         HStack(spacing: Spacing.spacing200) {
-            Image("logoGamss")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 24)
+            switch currentMode {
+            case .normal:
+                Image("logoGamss")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 24)
+            case .delete:
+                Button {
+                    onTappedBackButton?()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(Color.colorGray900)
+                }
+            }
 
             Spacer()
 
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(Color.colorGray500)
-                .hidden()
+            Button {
+                onTappedSearchButton?()
+            } label: {
+                Image(systemName: "magnifyingglass")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .foregroundStyle(Color.colorGray500)
+            }
 
-            Image(systemName: "line.3.horizontal")
+            Image(.homeMenuIcon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
                 .foregroundStyle(Color.colorGray500)
-                .hidden()
         }
     }
-}
-
-#Preview {
-    ConversationListHeaderView()
-        .padding(Spacing.spacing400)
 }
