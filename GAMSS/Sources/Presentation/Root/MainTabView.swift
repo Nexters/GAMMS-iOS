@@ -54,7 +54,7 @@ struct MainTabView: View {
                 viewModel: ConversationListViewModel(
                     getIncompleteConversationsUseCase: GetIncompleteConversationsUseCase(
                         conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
-                    ), deleteConversationsUseCase: DefaultDeleteConversationsUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared))
+                    ), deleteConversationsUseCase: DefaultDeleteConversationsUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)), searchConversationUseCase: DefaultSearchConversationUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared))
                 )
             )
             .tabItem { tabLabel(for: .chat) }

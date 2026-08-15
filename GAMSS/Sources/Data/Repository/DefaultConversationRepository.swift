@@ -56,4 +56,15 @@ final class DefaultConversationRepository: ConversationRepository {
             responseType: APIResponse<DeleteChatsResponseDTO>.self
         )
     }
+    
+    func searchConversations(_ text: String) async throws -> SearchChatResponseDTO {
+        return try await networkManager.request(
+            ChatEndpoint.searchChats(
+                keyword: text,
+                page: 0,
+                size: 20
+            ),
+            responseType: APIResponse<SearchChatResponseDTO>.self
+        ).data
+    }
 }

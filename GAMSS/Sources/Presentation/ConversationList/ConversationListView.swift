@@ -24,21 +24,37 @@ struct ConversationListView: View {
             VStack(alignment: .leading, spacing: 0) {
                 ConversationListHeaderView(currentMode: viewModel.currentMode, onTappedBackButton: {
                     viewModel.updateMode(.normal)
-                })
-                .padding(.horizontal, Spacing.spacing400)
-                .padding(.top, Spacing.spacing200)
+                }, onTappedSearchButton: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        viewModel.startSearching()
+                    }
+                }).frame(height: 64)
                 
-                dateHeader
-                    .padding(.horizontal, Spacing.spacing400)
-                    .padding(.top, Spacing.spacing300)
-                    .padding(.bottom, Spacing.spacing200)
+                if viewModel.isSearching {
+                    ConversationSearchView(onTappedCancelButton: {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            viewModel.stopSearching()
+                        }
+                    }, onTappedSearchButton: {
+                        Task {
+                            await viewModel.searchText()
+                        }
+                    }, editingText: $viewModel.editedText)
+                    .frame(height: 42)
+                    .transition(
+                        .move(edge: .top)
+                        .combined(with: .opacity)
+                    )
+                }
                 
-                if !viewModel.isLoading && viewModel.alertMessage == nil && viewModel.conversations.isEmpty {
+                dateHeader.padding(.vertical, Spacing.spacing150)
+                
+                if !viewModel.isLoading && viewModel.displayedConversations.isEmpty {
                     ConversationListEmptyView()
                 } else {
                     ScrollView {
                         LazyVStack(spacing: Spacing.spacing100) {
-                            ForEach(viewModel.conversations) { conversation in
+                            ForEach(viewModel.displayedConversations) { conversation in
                                 switch viewModel.currentMode {
                                 case .normal:
                                     NavigationLink(value: conversation) {
@@ -66,7 +82,6 @@ struct ConversationListView: View {
                                 }
                             }
                         }
-                        .padding(.horizontal, Spacing.spacing400)
                     }
                     Spacer()
                     if viewModel.currentMode == .delete {
@@ -93,13 +108,13 @@ struct ConversationListView: View {
                                     RoundedRectangle(cornerRadius: 12)
                                 )
                         }
-                        .padding(.horizontal, 18)
                         .padding(.bottom, 10)
                         .disabled(!viewModel.isDeleteButtonEnabled)
                     }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .padding(.horizontal, Spacing.spacing400)
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: ConversationSummary.self) { conversation in
                 ChatView(

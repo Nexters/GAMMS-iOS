@@ -22,4 +22,5 @@ protocol ConversationRepository {
     func updateTitle(conversationId: Int, title: String) async throws
     
     func deleteConversations(_ ids: [Int]) async throws
+    func searchConversations(_ text: String) async throws -> SearchChatResponseDTO
 }

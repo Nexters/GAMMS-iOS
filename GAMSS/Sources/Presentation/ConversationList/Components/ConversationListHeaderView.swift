@@ -10,6 +10,7 @@ import SwiftUI
 struct ConversationListHeaderView: View {
     var currentMode: ConversationMode
     var onTappedBackButton: (() -> Void)?
+    var onTappedSearchButton: (() -> Void)?
     
     var body: some View {
         HStack(spacing: Spacing.spacing200) {
@@ -33,11 +34,15 @@ struct ConversationListHeaderView: View {
 
             Spacer()
 
-            Image(systemName: "magnifyingglass")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 24, height: 24)
-                .foregroundStyle(Color.colorGray500)
+            Button {
+                onTappedSearchButton?()
+            } label: {
+                Image(systemName: "magnifyingglass")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .foregroundStyle(Color.colorGray500)
+            }
 
             Image(.homeMenuIcon)
                 .resizable()
