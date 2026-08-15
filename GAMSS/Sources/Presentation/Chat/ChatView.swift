@@ -40,8 +40,9 @@ struct ChatView: View {
                                 )
                                 .id(message.id)
                                 .onLongPressGesture {
-                                    viewModel.startReply(to: message)
-                                    isInputFocused = true
+                                    if viewModel.startReply(to: message) {
+                                        isInputFocused = true
+                                    }
                                 }
                             }
 

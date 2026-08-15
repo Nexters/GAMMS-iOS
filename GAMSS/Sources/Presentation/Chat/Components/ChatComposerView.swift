@@ -137,7 +137,7 @@ struct ChatComposerView: View {
     return ChatComposerView(
         text: $text,
         isSendDisabled: text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-        replyTargetLabel: "불안이에게 답장",
+        replyTargetLabel: "불안에게 답장",
         replyTargetContent: "안녕하세용",
         onCancelReply: {},
         onSend: {},
