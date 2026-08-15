@@ -28,11 +28,11 @@ struct ChatComposerView: View {
         VStack(alignment: .leading, spacing: Spacing.spacing100) {
             if let replyTargetLabel, let replyTargetContent {
                 replyPreview(label: replyTargetLabel, content: replyTargetContent)
+                    .padding(.horizontal, Spacing.spacing200)
             }
 
             textFieldRow
         }
-        .padding(.horizontal, Spacing.spacing200)
         .background(Color.colorGray025)
         .overlay(
             Rectangle()
@@ -64,8 +64,9 @@ struct ChatComposerView: View {
         .tint(Color.colorGray950)
         .focused($isFocused)
         .lineLimit(1...5)
-        // 전송 버튼이 뜨면 마지막 줄 텍스트가 버튼 밑에 깔리지 않도록 오른쪽 여백을 예약한다.
-        .padding(.trailing, Self.hasText(text) ? 40 : 0)
+        .padding(.leading, Spacing.spacing200)
+        // 전송 버튼이 뜨면 텍스트가 버튼과 16px 이상 떨어지도록 오른쪽 여백을 예약한다.
+        .padding(.trailing, Self.hasText(text) ? sendButtonTrailingReservation : Spacing.spacing200)
         .onChange(of: text) { _, newValue in
             if onTextChange(newValue) {
                 isFocused = false
@@ -85,6 +86,11 @@ struct ChatComposerView: View {
 
     static func hasText(_ text: String) -> Bool {
         !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// 버튼 여백(8) + 버튼 폭(32) + 텍스트와의 간격(16).
+    private var sendButtonTrailingReservation: CGFloat {
+        Spacing.spacing100 + 32 + Spacing.spacing300
     }
 
     private func replyPreview(label: String, content: String) -> some View {
