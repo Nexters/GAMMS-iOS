@@ -58,14 +58,13 @@ final class HomeViewModel: ObservableObject {
     }
 
     var isSendDisabled: Bool {
-        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending
+        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending || selectedEmotions.isEmpty
     }
 
-    /// 감정 선택을 토글한다. 최소 1개는 항상 선택되어 있어야 하므로, 마지막 1개를
-    /// 해제하려는 시도는 무시한다.
+    /// 감정 선택을 토글한다. 전체 해제(0개)도 허용한다 — 그 경우 `isSendDisabled`가 true가
+    /// 되어 전송 버튼이 비활성화되는 방식으로 "최소 1개 선택" 제약을 강제한다.
     func toggleEmotion(_ emotion: EmotionCharacter) {
         if selectedEmotions.contains(emotion) {
-            guard selectedEmotions.count > 1 else { return }
             selectedEmotions.remove(emotion)
         } else {
             selectedEmotions.insert(emotion)
@@ -84,7 +83,8 @@ final class HomeViewModel: ObservableObject {
                 conversationId: nil,
                 content: trimmed,
                 repliesToMessageId: nil,
-                contextSummary: nil
+                contextSummary: nil,
+                excludedCharacters: Set(EmotionCharacter.allCases).subtracting(selectedEmotions)
             )
             input = ""
             createdSentMessage = sent

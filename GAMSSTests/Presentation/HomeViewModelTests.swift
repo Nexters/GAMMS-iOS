@@ -12,11 +12,13 @@ private final class MockConversationRepository: ConversationRepository {
     var stubbedSendResult: Result<SentMessage, Error> = .failure(SummaryError.inferenceFailed())
     var stubbedUpdateTitleResult: Result<Void, Error> = .success(())
     private(set) var sendCallCount = 0
+    private(set) var receivedExcludedCharacters: Set<EmotionCharacter>?
     private(set) var receivedTitleConversationId: Int?
     private(set) var receivedTitle: String?
 
-    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage {
+    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
         sendCallCount += 1
+        receivedExcludedCharacters = excludedCharacters
         return try stubbedSendResult.get()
     }
 
@@ -142,7 +144,7 @@ final class HomeViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.selectedEmotions.count, 6)
     }
 
-    func test_toggleEmotion_lastRemainingSelection_isIgnored() {
+    func test_toggleEmotion_lastRemainingSelection_isAllowed_resultsInEmptySelection() {
         let viewModel = makeViewModel()
         for emotion in EmotionCharacter.allCases where emotion != .joy {
             viewModel.toggleEmotion(emotion)
@@ -151,7 +153,7 @@ final class HomeViewModelTests: XCTestCase {
 
         viewModel.toggleEmotion(.joy)
 
-        XCTAssertEqual(viewModel.selectedEmotions, [.joy], "마지막 1개는 해제할 수 없어야 함")
+        XCTAssertTrue(viewModel.selectedEmotions.isEmpty, "전체 해제가 허용되어야 함")
     }
 
     func test_isEmotionPickerOpen_defaultsToFalse() {
@@ -224,5 +226,30 @@ final class HomeViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.createdConversationId, 10, "title 저장이 실패해도 이미 트리거된 네비게이션은 유지돼야 함")
         XCTAssertNotNil(viewModel.alertMessage)
+    }
+
+    func test_send_excludesDeselectedEmotionsOnly() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+        viewModel.toggleEmotion(.anger)
+        viewModel.toggleEmotion(.quirky)
+
+        await viewModel.send()
+
+        XCTAssertEqual(repository.receivedExcludedCharacters, [.anger, .quirky])
+    }
+
+    func test_isSendDisabled_trueWhenAllEmotionsDeselected_evenWithInput() {
+        let viewModel = makeViewModel()
+        viewModel.input = "안녕"
+        for emotion in EmotionCharacter.allCases {
+            viewModel.toggleEmotion(emotion)
+        }
+
+        XCTAssertTrue(viewModel.selectedEmotions.isEmpty, "사전 조건: 전체 해제 상태여야 함")
+        XCTAssertTrue(viewModel.isSendDisabled, "감정을 전체 제외하면 입력이 있어도 전송은 막혀야 함")
     }
 }

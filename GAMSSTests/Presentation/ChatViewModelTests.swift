@@ -14,10 +14,12 @@ private final class MockConversationRepository: ConversationRepository {
     private(set) var sendCallCount = 0
     private(set) var getMessagesCallCount = 0
     private(set) var receivedContextSummary: String?
+    private(set) var receivedExcludedCharacters: Set<EmotionCharacter>?
 
-    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage {
+    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
         sendCallCount += 1
         receivedContextSummary = contextSummary
+        receivedExcludedCharacters = excludedCharacters
         return try stubbedSendResult.get()
     }
 

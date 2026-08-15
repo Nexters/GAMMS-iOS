@@ -13,7 +13,7 @@ private final class MockConversationRepository: ConversationRepository {
     private(set) var receivedConversationId: Int?
     private(set) var receivedTitle: String?
 
-    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage {
+    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
         fatalError("not used in this test")
     }
 

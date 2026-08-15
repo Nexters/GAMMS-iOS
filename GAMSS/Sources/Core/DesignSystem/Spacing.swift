@@ -9,6 +9,7 @@ enum Spacing {
     static let spacing150: CGFloat = 10
     static let spacing200: CGFloat = 12
     static let spacing300: CGFloat = 16
+    static let spacing350: CGFloat = 18
     static let spacing400: CGFloat = 20
     static let spacing500: CGFloat = 24
     static let spacing550: CGFloat = 28

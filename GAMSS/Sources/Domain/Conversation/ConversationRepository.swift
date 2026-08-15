@@ -8,7 +8,8 @@
 protocol ConversationRepository {
     /// conversationId가 nil이면 서버가 새 채팅방을 만든다.
     /// contextSummary는 저장되지 않고 캐릭터 응답 생성 컨텍스트로만 쓰인다.
-    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage
+    /// excludedCharacters에 담긴 캐릭터는 이번 메시지에 응답하지 않도록 서버에 전달된다.
+    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage
 
     /// 작성순으로 온다. 화면이 이 순서에 의존한다.
     func getMessages(conversationId: Int) async throws -> [Message]

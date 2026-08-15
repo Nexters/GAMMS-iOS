@@ -12,13 +12,13 @@ final class DefaultConversationRepository: ConversationRepository {
         self.networkManager = networkManager
     }
 
-    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage {
+    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
         let request = CreateMessageRequestDTO(
             conversationId: conversationId,
             content: content,
             repliesToMessageId: repliesToMessageId,
             currentConversationSummary: contextSummary,
-            excludeCharacters: []
+            excludeCharacters: excludedCharacters.map { EmotionCharacterServerKeyMapping.serverKey(for: $0) }
         )
         let response = try await networkManager.request(
             ChatEndpoint.createMessage(request),
