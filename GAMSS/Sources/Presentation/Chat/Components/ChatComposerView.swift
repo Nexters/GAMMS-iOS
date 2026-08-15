@@ -56,6 +56,10 @@ struct ChatComposerView: View {
         }
         .padding(.vertical, Spacing.spacing150)
         .padding(.horizontal, Spacing.spacing200)
+        // 답장 미리보기 없이 한 줄만 입력 중일 때도 최소 48pt는 확보해야, 32pt 버튼 +
+        // 위아래 8pt 여백(=48)이 박스 밖으로 삐져나오지 않는다. 여러 줄로 늘어나거나 답장
+        // 미리보기가 붙으면 이 최소값 위로 자연스럽게 커진다.
+        .frame(minHeight: Spacing.spacing800)
         .background(Color.colorGray025)
         .overlay(
             Rectangle()
