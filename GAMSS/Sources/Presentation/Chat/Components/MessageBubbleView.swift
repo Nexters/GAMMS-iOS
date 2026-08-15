@@ -27,13 +27,13 @@ struct MessageBubbleView: View {
         self.maxWidth = maxWidth
     }
 
-    /// 전송 중인 내 메시지 전용 — 항상 사용자 발신, 인용 답장은 없다.
+    /// 전송 중인 내 메시지 전용 — 항상 사용자 발신.
     init(pendingUserMessage: PendingUserMessage, maxWidth: CGFloat) {
         self.sender = .user
         self.content = pendingUserMessage.content
         self.createdAt = pendingUserMessage.sentAt
-        self.quotedHeaderLabel = nil
-        self.quotedContent = nil
+        self.quotedHeaderLabel = pendingUserMessage.quotedSenderLabel
+        self.quotedContent = pendingUserMessage.quotedContent
         self.maxWidth = maxWidth
     }
 
@@ -74,10 +74,10 @@ struct MessageBubbleView: View {
                 if let quotedHeaderLabel, let quotedContent {
                     Text(quotedHeaderLabel)
                         .typography(.body5Medium)
-                        .foregroundStyle(Color.colorGray950)
+                        .foregroundStyle(quotedHeaderLabelColor)
                     Text(quotedContent)
                         .typography(.body4Medium)
-                        .foregroundStyle(Color.colorGray500)
+                        .foregroundStyle(quotedContentColor)
                         .lineLimit(1)
                     Rectangle()
                         .fill(Color.colorGray200)
@@ -118,10 +118,39 @@ struct MessageBubbleView: View {
         }
     }
 
+    /// 캐릭터(밝은 배경) 버블은 기존 색 그대로, 사용자(어두운 배경) 버블은 본문 텍스트와 같은
+    /// 밝은 색으로 — 그대로 두면 어두운 배경에 어두운 글자가 겹쳐 안 보이게 된다.
+    private var quotedHeaderLabelColor: Color {
+        switch sender {
+        case .user: Color.colorGray025
+        case .character: Color.colorGray950
+        }
+    }
+
+    private var quotedContentColor: Color {
+        switch sender {
+        case .user: Color.colorGray200
+        case .character: Color.colorGray500
+        }
+    }
+
     private var bubbleBackground: Color {
         switch sender {
         case .user: Color.colorGray900
         case .character: Color.colorGray025
         }
     }
+}
+
+#Preview("sentReply") {
+    MessageBubbleView(
+        pendingUserMessage: PendingUserMessage(
+            content: "고마워",
+            sentAt: Date(),
+            quotedSenderLabel: "불안에게 답장",
+            quotedContent: "안녕하세용"
+        ),
+        maxWidth: 260
+    )
+    .padding()
 }
