@@ -49,4 +49,11 @@ final class DefaultConversationRepository: ConversationRepository {
             responseType: APIResponse<EmptyResponseDTO>.self
         )
     }
+    
+    func deleteConversations(_ ids: [Int]) async throws {
+        _ = try await networkManager.request(
+            ChatEndpoint.deleteChats(.init(conversationIds: ids)),
+            responseType: APIResponse<DeleteChatsResponseDTO>.self
+        )
+    }
 }
