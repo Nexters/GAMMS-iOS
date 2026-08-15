@@ -95,7 +95,8 @@ final class ChatViewModel: ObservableObject {
                 conversationId: conversationId,
                 content: trimmed,
                 repliesToMessageId: nil,
-                contextSummary: contextSummary
+                contextSummary: contextSummary,
+                excludedCharacters: []
             )
             pendingUserMessage = nil
             seed(with: sent)

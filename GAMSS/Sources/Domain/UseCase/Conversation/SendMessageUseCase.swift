@@ -14,7 +14,7 @@ struct SendMessageUseCase {
         self.conversationRepository = conversationRepository
     }
 
-    func execute(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?) async throws -> SentMessage {
+    func execute(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
         let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             throw SendMessageValidationError.empty
@@ -27,7 +27,8 @@ struct SendMessageUseCase {
             conversationId: conversationId,
             content: content,
             repliesToMessageId: repliesToMessageId,
-            contextSummary: contextSummary
+            contextSummary: contextSummary,
+            excludedCharacters: excludedCharacters
         )
     }
 }
