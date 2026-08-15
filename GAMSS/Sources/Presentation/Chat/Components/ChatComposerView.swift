@@ -22,58 +22,65 @@ struct ChatComposerView: View {
 
     var body: some View {
         // 답장 미리보기와 텍스트 입력이 한 박스(배경+테두리) 안에 같이 들어가야 하므로, 이 VStack
-        // 하나에 박스 스타일을 적용한다. 전송 버튼은 옆에 따로 두지 않고(그러면 박스 폭이
-        // 줄어든다) 박스 위에 overlay로 얹어 홈 화면 입력창과 같은 방식으로 안쪽에 떠 있게 한다.
+        // 하나에 박스 스타일(배경/테두리)을 적용한다. 다만 "48pt 확보 + 전송 버튼 얹기"는 박스
+        // 전체가 아니라 textFieldRow 하나에만 건다 — 그래야 답장 미리보기가 위에 붙어도 버튼이
+        // 그쪽으로 넘어가지 않고 textFieldRow 안에서만 움직인다.
         VStack(alignment: .leading, spacing: Spacing.spacing100) {
             if let replyTargetLabel, let replyTargetContent {
                 replyPreview(label: replyTargetLabel, content: replyTargetContent)
             }
 
-            TextField(
-                "메시지 입력",
-                text: $text,
-                // TextField(prompt:)는 Text 타입을 요구해서 `.typography(_:)`(some View 반환)를
-                // 쓸 수 없다 — Text 자체의 font/tracking으로 직접 맞춘다. lineSpacing은 Text에
-                // 없는 API라 여기선 적용 대상이 아니다.
-                prompt: Text("메시지 입력")
-                    .font(.custom(Typography.body4Medium.metrics.weight.postScriptName(), size: Typography.body4Medium.metrics.fontSize))
-                    .tracking(Typography.body4Medium.metrics.letterSpacing)
-                    .foregroundColor(Color.colorGray400),
-                axis: .vertical
-            )
-            .typography(.body4Medium)
-            .foregroundStyle(Color.colorGray950)
-            .tint(Color.colorGray950)
-            .focused($isFocused)
-            .lineLimit(1...5)
-            // 전송 버튼이 뜨면 마지막 줄 텍스트가 버튼 밑에 깔리지 않도록 오른쪽 여백을 예약한다.
-            .padding(.trailing, Self.hasText(text) ? 40 : 0)
-            .onChange(of: text) { _, newValue in
-                if onTextChange(newValue) {
-                    isFocused = false
-                }
-            }
+            textFieldRow
         }
-        .padding(.vertical, Spacing.spacing150)
         .padding(.horizontal, Spacing.spacing200)
-        // 답장 미리보기 없이 한 줄만 입력 중일 때도 최소 48pt는 확보해야, 32pt 버튼 +
-        // 위아래 8pt 여백(=48)이 박스 밖으로 삐져나오지 않는다. 여러 줄로 늘어나거나 답장
-        // 미리보기가 붙으면 이 최소값 위로 자연스럽게 커진다.
-        .frame(minHeight: Spacing.spacing800)
         .background(Color.colorGray025)
         .overlay(
             Rectangle()
                 .strokeBorder(Color.colorGray950, lineWidth: 1)
         )
+        .padding(.horizontal, 18)
+        .padding(.vertical, Spacing.spacing200)
+        .background(Color.colorWhite)
+    }
+
+    /// 텍스트 입력 한 줄 + 전송 버튼. 이 뷰 자체가 최소 48pt 높이를 스스로 확보하고 그 안에서만
+    /// 버튼을 배치하므로, 위에 답장 미리보기가 붙어 있어도 그쪽을 침범하지 않는다 — 미리보기와의
+    /// 간격은 바깥 VStack의 spacing(8pt)이 그대로 보장해준다.
+    private var textFieldRow: some View {
+        TextField(
+            "메시지 입력",
+            text: $text,
+            // TextField(prompt:)는 Text 타입을 요구해서 `.typography(_:)`(some View 반환)를
+            // 쓸 수 없다 — Text 자체의 font/tracking으로 직접 맞춘다. lineSpacing은 Text에
+            // 없는 API라 여기선 적용 대상이 아니다.
+            prompt: Text("메시지 입력")
+                .font(.custom(Typography.body4Medium.metrics.weight.postScriptName(), size: Typography.body4Medium.metrics.fontSize))
+                .tracking(Typography.body4Medium.metrics.letterSpacing)
+                .foregroundColor(Color.colorGray400),
+            axis: .vertical
+        )
+        .typography(.body4Medium)
+        .foregroundStyle(Color.colorGray950)
+        .tint(Color.colorGray950)
+        .focused($isFocused)
+        .lineLimit(1...5)
+        // 전송 버튼이 뜨면 마지막 줄 텍스트가 버튼 밑에 깔리지 않도록 오른쪽 여백을 예약한다.
+        .padding(.trailing, Self.hasText(text) ? 40 : 0)
+        .onChange(of: text) { _, newValue in
+            if onTextChange(newValue) {
+                isFocused = false
+            }
+        }
+        .padding(.vertical, Spacing.spacing150)
+        // 한 줄만 입력 중일 때도 최소 48pt는 확보해야, 32pt 버튼 + 위아래 8pt 여백(=48)이
+        // 이 행 밖으로 삐져나오지 않는다.
+        .frame(minHeight: Spacing.spacing800)
         .overlay(alignment: .bottomTrailing) {
             if Self.hasText(text) {
                 sendButton
                     .padding(Spacing.spacing100)
             }
         }
-        .padding(.horizontal, 18)
-        .padding(.vertical, Spacing.spacing200)
-        .background(Color.colorWhite)
     }
 
     static func hasText(_ text: String) -> Bool {
@@ -101,6 +108,9 @@ struct ChatComposerView: View {
                 .foregroundStyle(Color.colorGray500)
                 .lineLimit(1)
         }
+        // textFieldRow가 자기 몫의 세로 패딩(spacing150)을 스스로 갖게 되면서, 박스 전체를
+        // 감싸던 공용 세로 패딩이 없어졌다 — 답장 미리보기는 위쪽 여백을 직접 챙긴다.
+        .padding(.top, Spacing.spacing150)
     }
 
     // 비활성화 상태는 화면에 노출되지 않는다(hasText(text)가 false면 버튼 자체가 안 뜬다) —
