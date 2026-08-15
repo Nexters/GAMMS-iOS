@@ -10,6 +10,5 @@ import Foundation
 struct ConversationSummary: Identifiable, Hashable {
     let id: Int
     let title: String?
-    let status: String
     let createdAt: Date
 }

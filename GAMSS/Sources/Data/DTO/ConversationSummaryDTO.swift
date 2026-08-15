@@ -18,6 +18,6 @@ struct ConversationSummaryDTO: Decodable {
     /// 잘못된 시간으로 표시하는 것보다 안전한 선택.
     func toDomain() -> ConversationSummary? {
         guard let createdAtDate = ISO8601FlexibleParser.date(from: createdAt) else { return nil }
-        return ConversationSummary(id: id, title: title, status: status, createdAt: createdAtDate)
+        return ConversationSummary(id: id, title: title, createdAt: createdAtDate)
     }
 }
