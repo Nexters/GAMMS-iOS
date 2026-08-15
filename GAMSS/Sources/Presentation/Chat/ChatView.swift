@@ -39,6 +39,22 @@ struct ChatView: View {
                                     )
                                 )
                                 .id(message.id)
+                                .onLongPressGesture {
+                                    if viewModel.startReply(to: message) {
+                                        isInputFocused = true
+                                    }
+                                }
+                            }
+
+                            if let pendingUserMessage = viewModel.pendingUserMessage {
+                                MessageBubbleView(
+                                    pendingUserMessage: pendingUserMessage,
+                                    maxWidth: MessageBubbleLayout.maxBubbleWidth(
+                                        availableWidth: geometry.size.width,
+                                        containerPadding: containerPadding * 2
+                                    )
+                                )
+                                .id(PendingUserMessage.scrollAnchorID)
                             }
                         }
                         .padding(containerPadding)
@@ -46,13 +62,19 @@ struct ChatView: View {
                     // ScrollView가 키보드에 의해 축소/복원될 때
                     // SwiftUI가 키보드 dismiss를 자연스럽게 처리하도록 한다.
                     .scrollDismissesKeyboard(.interactively)
-                    .onChange(of: viewModel.messages) { _, newMessages in
-                        scrollToBottom(proxy, messages: newMessages)
+                    .onChange(of: viewModel.messages) { _, _ in
+                        scrollToBottom(proxy)
+                    }
+                    .onChange(of: viewModel.pendingUserMessage) { _, _ in
+                        scrollToBottom(proxy)
                     }
                     .safeAreaInset(edge: .bottom, spacing: 0) {
                         ChatComposerView(
                             text: $viewModel.input,
                             isSendDisabled: viewModel.isSendDisabled,
+                            replyTargetLabel: viewModel.replyTarget.flatMap { QuotedReplyHeader.label(forQuotedSender: $0.sender) },
+                            replyTargetContent: viewModel.replyTarget?.content,
+                            onCancelReply: { viewModel.cancelReply() },
                             onSend: { Task { await viewModel.send() } },
                             onTextChange: { viewModel.updateInput($0) },
                             isFocused: $isInputFocused
@@ -113,19 +135,16 @@ struct ChatView: View {
         return ConversationListDateHeaderFormatter.string(from: firstMessageDate)
     }
 
-    private func scrollToBottom(
-        _ proxy: ScrollViewProxy,
-        messages: [Message]
-    ) {
-        guard let lastMessage = messages.last else {
-            return
-        }
-
+    /// 확정된 메시지 목록의 마지막 항목, 없으면 전송 중인 낙관적 메시지를 기준으로 맨 아래로
+    /// 스크롤한다. pendingUserMessage가 항상 messages보다 나중에 화면에 그려지므로, 둘 다 있을
+    /// 때는 pendingUserMessage 쪽으로 스크롤해야 실제로 맨 아래가 된다.
+    private func scrollToBottom(_ proxy: ScrollViewProxy) {
         withAnimation(.easeOut(duration: 0.2)) {
-            proxy.scrollTo(
-                lastMessage.id,
-                anchor: .bottom
-            )
+            if viewModel.pendingUserMessage != nil {
+                proxy.scrollTo(PendingUserMessage.scrollAnchorID, anchor: .bottom)
+            } else if let lastId = viewModel.messages.last?.id {
+                proxy.scrollTo(lastId, anchor: .bottom)
+            }
         }
     }
 }
