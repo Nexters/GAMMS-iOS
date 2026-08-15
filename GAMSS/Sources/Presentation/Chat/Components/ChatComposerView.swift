@@ -38,6 +38,13 @@ struct ChatComposerView: View {
             Rectangle()
                 .strokeBorder(Color.colorGray950, lineWidth: 1)
         )
+        .overlay(alignment: .topTrailing) {
+            if replyTargetLabel != nil {
+                cancelReplyButton
+                    .padding(.top, 25)
+                    .padding(.trailing, Spacing.spacing300)
+            }
+        }
         .padding(.horizontal, 18)
         .padding(.vertical, Spacing.spacing200)
         .background(Color.colorWhite)
@@ -93,21 +100,19 @@ struct ChatComposerView: View {
         Spacing.spacing100 + 32 + Spacing.spacing300
     }
 
+    /// 답장 취소 버튼 여백(16) + 아이콘 폭(20) + 라벨과의 간격(20).
+    private var cancelReplyButtonTrailingReservation: CGFloat {
+        Spacing.spacing300 + 20 + Spacing.spacing400
+    }
+
     private func replyPreview(label: String, content: String) -> some View {
         VStack(alignment: .leading, spacing: Spacing.spacing050) {
-            HStack(spacing: Spacing.spacing100) {
-                Text(label)
-                    .typography(.body5Medium)
-                    .foregroundStyle(Color.colorGray950)
-
-                Spacer(minLength: 0)
-
-                Button(action: onCancelReply) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(Color.colorGray400)
-                }
-                .accessibilityLabel("답장 취소")
-            }
+            Text(label)
+                .typography(.body5Medium)
+                .foregroundStyle(Color.colorGray950)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .padding(.trailing, cancelReplyButtonTrailingReservation)
 
             Text(content)
                 .typography(.body4Medium)
@@ -117,6 +122,15 @@ struct ChatComposerView: View {
         // textFieldRow가 자기 몫의 세로 패딩(spacing150)을 스스로 갖게 되면서, 박스 전체를
         // 감싸던 공용 세로 패딩이 없어졌다 — 답장 미리보기는 위쪽 여백을 직접 챙긴다.
         .padding(.top, Spacing.spacing150)
+    }
+
+    private var cancelReplyButton: some View {
+        Button(action: onCancelReply) {
+            Image(systemName: "xmark.circle.fill")
+                .foregroundStyle(Color.colorGray400)
+                .frame(width: 20, height: 20)
+        }
+        .accessibilityLabel("답장 취소")
     }
 
     // 비활성화 상태는 화면에 노출되지 않는다(hasText(text)가 false면 버튼 자체가 안 뜬다) —
