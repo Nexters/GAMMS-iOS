@@ -100,7 +100,7 @@ struct ChatComposerView: View {
         Spacing.spacing100 + 32 + Spacing.spacing300
     }
 
-    /// 답장 취소 버튼 여백(16) + 아이콘 폭(20) + 라벨과의 간격(20).
+    /// 답장 취소 버튼 여백(16) + 아이콘 폭(20) + 인용 메시지와의 간격(20).
     private var cancelReplyButtonTrailingReservation: CGFloat {
         Spacing.spacing300 + 20 + Spacing.spacing400
     }
@@ -111,13 +111,13 @@ struct ChatComposerView: View {
                 .typography(.body5Medium)
                 .foregroundStyle(Color.colorGray950)
                 .lineLimit(1)
-                .truncationMode(.tail)
-                .padding(.trailing, cancelReplyButtonTrailingReservation)
 
             Text(content)
                 .typography(.body4Medium)
                 .foregroundStyle(Color.colorGray500)
                 .lineLimit(1)
+                .truncationMode(.tail)
+                .padding(.trailing, cancelReplyButtonTrailingReservation)
         }
         // textFieldRow가 자기 몫의 세로 패딩(spacing150)을 스스로 갖게 되면서, 박스 전체를
         // 감싸던 공용 세로 패딩이 없어졌다 — 답장 미리보기는 위쪽 여백을 직접 챙긴다.
