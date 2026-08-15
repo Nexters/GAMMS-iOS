@@ -99,4 +99,21 @@ final class DefaultConversationRepositoryTests: XCTestCase {
         }
         XCTAssertEqual(Set(request.excludeCharacters), ["ANGER", "JOY"])
     }
+
+    func test_endConversation_callsEndChatEndpointWithConversationId() async throws {
+        let network = MockNetworkRequesting()
+        network.stubbedData = Data("""
+        {"success":true,"data":{},"error":null}
+        """.utf8)
+        let repository = DefaultConversationRepository(networkManager: network)
+
+        try await repository.endConversation(conversationId: 10)
+
+        guard case let .endChat(chatId)? = network.lastEndpoint as? ChatEndpoint else {
+            XCTFail("endChat 엔드포인트가 호출되어야 함")
+            return
+        }
+        XCTAssertEqual(chatId, 10)
+        XCTAssertEqual(network.lastEndpoint?.method, .post)
+    }
 }

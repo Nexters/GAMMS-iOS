@@ -35,6 +35,10 @@ private final class MockConversationRepository: ConversationRepository {
         receivedTitle = title
         _ = try stubbedUpdateTitleResult.get()
     }
+
+    func endConversation(conversationId: Int) async throws {
+        fatalError("not used in this test")
+    }
 }
 
 private final class MockFetchMyProfileUseCase: FetchMyProfileUseCase {

@@ -28,6 +28,10 @@ private final class MockConversationRepository: ConversationRepository {
     func updateTitle(conversationId: Int, title: String) async throws {
         fatalError("not used in this test")
     }
+
+    func endConversation(conversationId: Int) async throws {
+        fatalError("not used in this test")
+    }
 }
 
 final class GetMessagesUseCaseTests: XCTestCase {

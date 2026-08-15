@@ -26,6 +26,10 @@ private final class MockConversationRepository: ConversationRepository {
     func updateTitle(conversationId: Int, title: String) async throws {
         fatalError("사용 안 함")
     }
+
+    func endConversation(conversationId: Int) async throws {
+        fatalError("사용 안 함")
+    }
 }
 
 @MainActor

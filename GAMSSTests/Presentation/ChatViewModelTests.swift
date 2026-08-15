@@ -30,11 +30,14 @@ private final class MockConversationRepository: ConversationRepository {
     var stubbedSendResult: Result<SentMessage, Error> = .failure(SummaryError.inferenceFailed())
     var stubbedMessages: [Message] = []
     var sendGate: SendGate?
+    var stubbedEndConversationResult: Result<Void, Error> = .success(())
     private(set) var sendCallCount = 0
     private(set) var getMessagesCallCount = 0
+    private(set) var endConversationCallCount = 0
     private(set) var receivedContextSummary: String?
     private(set) var receivedExcludedCharacters: Set<EmotionCharacter>?
     private(set) var receivedRepliesToMessageId: Int?
+    private(set) var receivedEndConversationId: Int?
 
     func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
         sendCallCount += 1
@@ -57,6 +60,28 @@ private final class MockConversationRepository: ConversationRepository {
     func updateTitle(conversationId: Int, title: String) async throws {
         fatalError("not used in this test")
     }
+
+    func endConversation(conversationId: Int) async throws {
+        endConversationCallCount += 1
+        receivedEndConversationId = conversationId
+        _ = try stubbedEndConversationResult.get()
+    }
+}
+
+private final class MockCardRepository: CardRepository {
+    var stubbedResult: Result<Card, Error> = .failure(SummaryError.inferenceFailed())
+    private(set) var createCardCallCount = 0
+    private(set) var receivedConversationId: Int?
+    private(set) var receivedEmotion: EmotionCharacter?
+    private(set) var receivedSummary: String?
+
+    func createCard(conversationId: Int, emotion: EmotionCharacter?, summary: String) async throws -> Card {
+        createCardCallCount += 1
+        receivedConversationId = conversationId
+        receivedEmotion = emotion
+        receivedSummary = summary
+        return try stubbedResult.get()
+    }
 }
 
 private actor MockConversationSummaryStore: ConversationSummaryStore {
@@ -74,6 +99,7 @@ private actor MockConversationSummaryStore: ConversationSummaryStore {
 final class ChatViewModelTests: XCTestCase {
     private func makeViewModel(
         repository: MockConversationRepository = MockConversationRepository(),
+        cardRepository: MockCardRepository = MockCardRepository(),
         summaryStore: MockConversationSummaryStore = MockConversationSummaryStore(),
         conversationId: Int? = nil,
         initialSentMessage: SentMessage? = nil
@@ -81,6 +107,8 @@ final class ChatViewModelTests: XCTestCase {
         ChatViewModel(
             sendMessageUseCase: SendMessageUseCase(conversationRepository: repository),
             getMessagesUseCase: GetMessagesUseCase(conversationRepository: repository),
+            endConversationUseCase: EndConversationUseCase(conversationRepository: repository),
+            createCardUseCase: CreateCardUseCase(cardRepository: cardRepository),
             summaryStore: summaryStore,
             conversationId: conversationId,
             initialSentMessage: initialSentMessage
@@ -448,5 +476,109 @@ final class ChatViewModelTests: XCTestCase {
         viewModel.input = "안녕"
 
         XCTAssertFalse(viewModel.isSendDisabled)
+    }
+
+    func test_canEndConversation_falseWithoutConversationId() {
+        let viewModel = makeViewModel(conversationId: nil)
+
+        XCTAssertFalse(viewModel.canEndConversation)
+    }
+
+    func test_requestEndConversation_presentsConfirmation() {
+        let viewModel = makeViewModel(conversationId: 10)
+
+        viewModel.requestEndConversation()
+
+        XCTAssertTrue(viewModel.isEndConfirmationPresented)
+    }
+
+    func test_confirmEndConversation_onSuccess_endsThenCreatesCardAndDisablesComposer() async {
+        let repository = MockConversationRepository()
+        let cardRepository = MockCardRepository()
+        let card = Card(id: 1, conversationId: 10, emotion: .joy, summary: "요약", message: "메시지", date: Date(timeIntervalSince1970: 0))
+        cardRepository.stubbedResult = .success(card)
+        let summaryStore = MockConversationSummaryStore()
+        summaryStore.stubbedCurrent = "압축본"
+        let viewModel = makeViewModel(repository: repository, cardRepository: cardRepository, summaryStore: summaryStore, conversationId: 10)
+
+        await viewModel.confirmEndConversation()
+
+        XCTAssertEqual(repository.endConversationCallCount, 1)
+        XCTAssertEqual(repository.receivedEndConversationId, 10)
+        XCTAssertTrue(viewModel.isConversationEnded)
+        XCTAssertTrue(viewModel.isSendDisabled, "종료된 대화는 전송도 막혀야 함")
+        XCTAssertEqual(viewModel.createdCard, card)
+        XCTAssertEqual(cardRepository.receivedSummary, "압축본")
+    }
+
+    func test_confirmEndConversation_usesDominantCharacterEmotionFromMessages() async {
+        let repository = MockConversationRepository()
+        repository.stubbedMessages = [
+            Message(id: 1, conversationId: 10, sender: .character(.anger), content: "", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+            Message(id: 2, conversationId: 10, sender: .character(.anger), content: "", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+        ]
+        let cardRepository = MockCardRepository()
+        cardRepository.stubbedResult = .success(Card(id: 1, conversationId: 10, emotion: .anger, summary: "", message: "", date: Date(timeIntervalSince1970: 0)))
+        let viewModel = makeViewModel(repository: repository, cardRepository: cardRepository, conversationId: 10)
+        await viewModel.load(conversationId: 10)
+
+        await viewModel.confirmEndConversation()
+
+        XCTAssertEqual(cardRepository.receivedEmotion, .anger)
+    }
+
+    func test_confirmEndConversation_endConversationFails_doesNotCreateCard() async {
+        let repository = MockConversationRepository()
+        repository.stubbedEndConversationResult = .failure(SummaryError.inferenceFailed())
+        let cardRepository = MockCardRepository()
+        let viewModel = makeViewModel(repository: repository, cardRepository: cardRepository, conversationId: 10)
+
+        await viewModel.confirmEndConversation()
+
+        XCTAssertEqual(cardRepository.createCardCallCount, 0)
+        XCTAssertFalse(viewModel.isConversationEnded)
+        XCTAssertNotNil(viewModel.alertMessage)
+    }
+
+    func test_confirmEndConversation_createCardFails_keepsConversationEndedAndSetsAlert() async {
+        let repository = MockConversationRepository()
+        let cardRepository = MockCardRepository()
+        cardRepository.stubbedResult = .failure(SummaryError.inferenceFailed())
+        let viewModel = makeViewModel(repository: repository, cardRepository: cardRepository, conversationId: 10)
+
+        await viewModel.confirmEndConversation()
+
+        XCTAssertTrue(viewModel.isConversationEnded, "endConversation은 이미 성공했으므로 대화는 종료 상태로 유지되어야 함")
+        XCTAssertNil(viewModel.createdCard)
+        XCTAssertNotNil(viewModel.alertMessage)
+    }
+
+    func test_retryCreateCard_onlyRetriesCardCreationNotEndConversation() async {
+        let repository = MockConversationRepository()
+        let cardRepository = MockCardRepository()
+        cardRepository.stubbedResult = .failure(SummaryError.inferenceFailed())
+        let viewModel = makeViewModel(repository: repository, cardRepository: cardRepository, conversationId: 10)
+        await viewModel.confirmEndConversation()
+        XCTAssertEqual(repository.endConversationCallCount, 1)
+
+        let card = Card(id: 1, conversationId: 10, emotion: nil, summary: "", message: "", date: Date(timeIntervalSince1970: 0))
+        cardRepository.stubbedResult = .success(card)
+        await viewModel.retryCreateCard()
+
+        XCTAssertEqual(repository.endConversationCallCount, 1, "endConversation은 재호출되면 안 됨")
+        XCTAssertEqual(cardRepository.createCardCallCount, 2)
+        XCTAssertEqual(viewModel.createdCard, card)
+    }
+
+    func test_dismissCard_clearsCreatedCard() async {
+        let cardRepository = MockCardRepository()
+        cardRepository.stubbedResult = .success(Card(id: 1, conversationId: 10, emotion: nil, summary: "", message: "", date: Date(timeIntervalSince1970: 0)))
+        let viewModel = makeViewModel(cardRepository: cardRepository, conversationId: 10)
+        await viewModel.confirmEndConversation()
+        XCTAssertNotNil(viewModel.createdCard)
+
+        viewModel.dismissCard()
+
+        XCTAssertNil(viewModel.createdCard)
     }
 }

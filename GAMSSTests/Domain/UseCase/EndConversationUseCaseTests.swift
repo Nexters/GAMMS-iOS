@@ -1,17 +1,16 @@
 //
-//  UpdateConversationTitleUseCaseTests.swift
+//  EndConversationUseCaseTests.swift
 //  GAMSS
 //
-//  Created by cchanmi on 8/14/26.
+//  Created by cchanmi on 8/15/26.
 //
 
 import XCTest
 @testable import GAMSS
 
 private final class MockConversationRepository: ConversationRepository {
-    var stubbedUpdateTitleResult: Result<Void, Error> = .success(())
+    var stubbedEndConversationResult: Result<Void, Error> = .success(())
     private(set) var receivedConversationId: Int?
-    private(set) var receivedTitle: String?
 
     func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
         fatalError("not used in this test")
@@ -26,34 +25,32 @@ private final class MockConversationRepository: ConversationRepository {
     }
 
     func updateTitle(conversationId: Int, title: String) async throws {
-        receivedConversationId = conversationId
-        receivedTitle = title
-        _ = try stubbedUpdateTitleResult.get()
+        fatalError("not used in this test")
     }
 
     func endConversation(conversationId: Int) async throws {
-        fatalError("not used in this test")
+        receivedConversationId = conversationId
+        _ = try stubbedEndConversationResult.get()
     }
 }
 
-final class UpdateConversationTitleUseCaseTests: XCTestCase {
-    func test_execute_passesConversationIdAndTitleThrough() async throws {
+final class EndConversationUseCaseTests: XCTestCase {
+    func test_execute_passesConversationIdThrough() async throws {
         let repository = MockConversationRepository()
-        let useCase = UpdateConversationTitleUseCase(conversationRepository: repository)
+        let useCase = EndConversationUseCase(conversationRepository: repository)
 
-        try await useCase.execute(conversationId: 10, title: "안녕")
+        try await useCase.execute(conversationId: 10)
 
         XCTAssertEqual(repository.receivedConversationId, 10)
-        XCTAssertEqual(repository.receivedTitle, "안녕")
     }
 
     func test_execute_propagatesRepositoryError() async {
         let repository = MockConversationRepository()
-        repository.stubbedUpdateTitleResult = .failure(SummaryError.inferenceFailed())
-        let useCase = UpdateConversationTitleUseCase(conversationRepository: repository)
+        repository.stubbedEndConversationResult = .failure(SummaryError.inferenceFailed())
+        let useCase = EndConversationUseCase(conversationRepository: repository)
 
         do {
-            try await useCase.execute(conversationId: 10, title: "안녕")
+            try await useCase.execute(conversationId: 10)
             XCTFail("Expected error to be thrown")
         } catch {
             XCTAssertEqual(error as? SummaryError, .inferenceFailed())

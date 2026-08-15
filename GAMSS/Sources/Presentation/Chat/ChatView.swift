@@ -75,6 +75,7 @@ struct ChatView: View {
                             replyTargetLabel: viewModel.replyTarget.flatMap { QuotedReplyHeader.label(forQuotedSender: $0.sender) },
                             replyTargetContent: viewModel.replyTarget?.content,
                             onCancelReply: { viewModel.cancelReply() },
+                            isDisabled: viewModel.isConversationEnded,
                             onSend: { Task { await viewModel.send() } },
                             onTextChange: { viewModel.updateInput($0) },
                             isFocused: $isInputFocused
@@ -102,11 +103,21 @@ struct ChatView: View {
         ) {
             Button("확인", role: .cancel) {}
         }
+        .alert("대화를 끝내고 카드를 만들까요?", isPresented: $viewModel.isEndConfirmationPresented) {
+            Button("취소", role: .cancel) {}
+            Button("종료할래요") { Task { await viewModel.confirmEndConversation() } }
+        }
+        .fullScreenCover(item: Binding(
+            get: { viewModel.createdCard },
+            set: { if $0 == nil { viewModel.dismissCard() } }
+        )) { card in
+            CardResultView(card: card, onConfirm: { viewModel.dismissCard() })
+                .presentationBackground(.clear)
+        }
     }
 
-    /// 커스텀 상단 헤더: 뒤로가기 + 대화방 생성 날짜만 표시한다(메모/햄버거 아이콘은 이번 범위에서
-    /// 제외). 시스템 네비게이션 바는 `.toolbar(.hidden, for: .navigationBar)`로 숨기고 이 헤더가
-    /// 대신한다.
+    /// 커스텀 상단 헤더: 뒤로가기 + 대화방 생성 날짜 + 우측 버튼 2개(종료, 자리만 미리 만든 placeholder).
+    /// 시스템 네비게이션 바는 `.toolbar(.hidden, for: .navigationBar)`로 숨기고 이 헤더가 대신한다.
     private var header: some View {
         ZStack {
             Text(headerDateText)
@@ -120,10 +131,26 @@ struct ChatView: View {
                 }
 
                 Spacer()
+
+                HStack(spacing: Spacing.spacing300) {
+                    Button(action: { viewModel.requestEndConversation() }) {
+                        Image(systemName: "checkmark.circle")
+                            .foregroundStyle(Color.colorGray950)
+                    }
+                    .disabled(!viewModel.canEndConversation)
+                    .accessibilityLabel("대화 종료")
+
+                    // 다음 이터레이션에서 동작을 채울 자리만 미리 만든 버튼. 아이콘은 확정 전.
+                    Button(action: {}) {
+                        Image(systemName: "ellipsis")
+                            .foregroundStyle(Color.colorGray950)
+                    }
+                    .accessibilityLabel("더보기")
+                }
             }
         }
         .padding(.horizontal, Spacing.spacing400)
-        .padding(.vertical, Spacing.spacing200)
+        .padding(.vertical, Spacing.spacing400)
         .background(Color.colorWhite)
     }
 

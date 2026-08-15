@@ -49,4 +49,11 @@ final class DefaultConversationRepository: ConversationRepository {
             responseType: APIResponse<EmptyResponseDTO>.self
         )
     }
+
+    func endConversation(conversationId: Int) async throws {
+        _ = try await networkManager.request(
+            ChatEndpoint.endChat(chatId: conversationId),
+            responseType: APIResponse<EmptyResponseDTO>.self
+        )
+    }
 }

@@ -37,4 +37,36 @@ final class EmotionCharacterTests: XCTestCase {
             [.anger, .quirky, .prickly, .joy, .sadness, .anxiety]
         )
     }
+
+    func test_dominant_noMessages_returnsNil() {
+        XCTAssertNil(EmotionCharacter.dominant(in: []))
+    }
+
+    func test_dominant_onlyUserMessages_returnsNil() {
+        let messages = [makeMessage(sender: .user), makeMessage(sender: .user)]
+        XCTAssertNil(EmotionCharacter.dominant(in: messages))
+    }
+
+    func test_dominant_returnsMostFrequentCharacterEmotion() {
+        let messages = [
+            makeMessage(sender: .character(.joy)),
+            makeMessage(sender: .character(.anger)),
+            makeMessage(sender: .character(.anger)),
+            makeMessage(sender: .user),
+        ]
+        XCTAssertEqual(EmotionCharacter.dominant(in: messages), .anger)
+    }
+
+    func test_dominant_tie_prefersEarlierAllCasesOrder() {
+        // allCases 순서는 joy, sadness, anger, ... — anger와 sadness가 동률이면 sadness가 이겨야 함.
+        let messages = [
+            makeMessage(sender: .character(.anger)),
+            makeMessage(sender: .character(.sadness)),
+        ]
+        XCTAssertEqual(EmotionCharacter.dominant(in: messages), .sadness)
+    }
+
+    private func makeMessage(sender: MessageSender) -> Message {
+        Message(id: 0, conversationId: 0, sender: sender, content: "", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+    }
 }
