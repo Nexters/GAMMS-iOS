@@ -17,4 +17,6 @@ struct PendingUserMessage: Equatable {
 
     let content: String
     let sentAt: Date
+    let quotedSenderLabel: String?
+    let quotedContent: String?
 }

@@ -16,6 +16,7 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isSending = false
     @Published var alertMessage: String?
     @Published private(set) var pendingUserMessage: PendingUserMessage?
+    @Published private(set) var replyTarget: Message?
 
     private var conversationId: Int?
     private let initialSentMessage: SentMessage?
@@ -85,7 +86,13 @@ final class ChatViewModel: ObservableObject {
         isSending = true
         defer { isSending = false }
 
-        pendingUserMessage = PendingUserMessage(content: trimmed, sentAt: Date())
+        let replyTarget = replyTarget
+        pendingUserMessage = PendingUserMessage(
+            content: trimmed,
+            sentAt: Date(),
+            quotedSenderLabel: replyTarget.flatMap { QuotedReplyHeader.label(forQuotedSender: $0.sender) },
+            quotedContent: replyTarget?.content
+        )
         input = ""
 
         let contextSummary = await summaryStore.current()
@@ -94,11 +101,12 @@ final class ChatViewModel: ObservableObject {
             let sent = try await sendMessageUseCase.execute(
                 conversationId: conversationId,
                 content: trimmed,
-                repliesToMessageId: nil,
+                repliesToMessageId: replyTarget?.id,
                 contextSummary: contextSummary,
                 excludedCharacters: []
             )
             pendingUserMessage = nil
+            self.replyTarget = nil
             seed(with: sent)
 
             // 요약기(온디바이스 추론)가 끝날 때까지 다음 입력을 막지 않도록 백그라운드로 돌린다.
@@ -139,6 +147,17 @@ final class ChatViewModel: ObservableObject {
     func quotedMessage(for message: Message) -> Message? {
         guard let repliesToMessageId = message.repliesToMessageId else { return nil }
         return messages.first { $0.id == repliesToMessageId }
+    }
+
+    /// 캐릭터 말풍선을 길게 눌렀을 때 호출한다. 사용자 메시지는 답장 대상이 될 수 없으므로
+    /// 무시한다 — View는 아무 버블에나 제스처를 붙이고, 이 판단은 여기서만 한다.
+    func startReply(to message: Message) {
+        guard case .character = message.sender else { return }
+        replyTarget = message
+    }
+
+    func cancelReply() {
+        replyTarget = nil
     }
 
     private func flushPendingComments() {
