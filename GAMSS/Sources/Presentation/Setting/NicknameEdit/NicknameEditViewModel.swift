@@ -11,6 +11,8 @@ import Foundation
 final class NicknameEditViewModel: ObservableObject {
     private let updateNicknameUseCase: UpdateNicknameUseCase
     @Published var editingNickname: String = ""
+    
+    /// FIXME: - 에러 발생 시 스낵바 처리 필요
     @Published var errorMessage: String?
     
     var isEnabledSaveButton: Bool {
