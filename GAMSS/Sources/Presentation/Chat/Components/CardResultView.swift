@@ -25,9 +25,7 @@ enum CardFoldStage: Equatable {
     }
 }
 
-/// 대화 종료 후 생성된 카드를 보여주는 결과 팝업. 종이 질감 배경은 디자인 자산(cardPaperBackground)을
-/// 그대로 쓰고, 캐릭터 일러스트는 에셋이 나오기 전까지 자리만 잡아둔 더미다.
-///
+
 /// 하단 "종이를 눌러 2번 접어주세요" 안내를 누르면 종이가 접히는 단계(`CardFoldStage`)를 거쳐
 /// 화살표+쓰레기통이 나타나고, 그 상태에서 아래로 스와이프해야 카드가 사라진다. X버튼은 이
 /// 시퀀스를 거치지 않고 곧바로 같은 결과(`onComplete`)로 이어진다.
@@ -119,20 +117,28 @@ struct CardResultView: View {
         .frame(width: cardSize.width, height: cardSize.height)
     }
 
-    /// 실제 캐릭터 일러스트 에셋이 전달되기 전까지는 감정 이름을 적은 자리표시자 박스로 대체한다.
+    /// 캐릭터 답장이 하나도 없어 emotion이 nil인 카드는 감정 이름을 적은 자리표시자 박스로 대체한다.
+    @ViewBuilder
     private var emotionIllustration: some View {
-        RoundedRectangle(cornerRadius: Radius.radius200)
-            .fill(Color.colorGray025)
-            .overlay(
-                RoundedRectangle(cornerRadius: Radius.radius200)
-                    .strokeBorder(Color.colorGray300, lineWidth: 1)
-            )
-            .overlay(
-                Text(card.emotion?.displayName ?? "감정")
-                    .typography(.body4Medium)
-                    .foregroundStyle(Color.colorGray950)
-            )
-            .frame(width: illustrationSize.width, height: illustrationSize.height)
+        if let emotion = card.emotion {
+            Image(emotion.cardIllustrationImageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: illustrationSize.width, height: illustrationSize.height)
+        } else {
+            RoundedRectangle(cornerRadius: Radius.radius200)
+                .fill(Color.colorGray025)
+                .overlay(
+                    RoundedRectangle(cornerRadius: Radius.radius200)
+                        .strokeBorder(Color.colorGray300, lineWidth: 1)
+                )
+                .overlay(
+                    Text("감정")
+                        .typography(.body4Medium)
+                        .foregroundStyle(Color.colorGray950)
+                )
+                .frame(width: illustrationSize.width, height: illustrationSize.height)
+        }
     }
 
     private var closeButton: some View {

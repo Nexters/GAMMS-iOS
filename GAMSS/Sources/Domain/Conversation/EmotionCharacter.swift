@@ -51,6 +51,18 @@ enum EmotionCharacter: CaseIterable, Equatable {
         }
     }
 
+    /// 대화 종료 카드에 쓰이는 감정별 캐릭터 일러스트 에셋 이름.
+    var cardIllustrationImageName: String {
+        switch self {
+        case .joy: "cardEmotionJoy"
+        case .sadness: "cardEmotionSadness"
+        case .anger: "cardEmotionAnger"
+        case .anxiety: "cardEmotionAnxiety"
+        case .prickly: "cardEmotionPrickly"
+        case .quirky: "cardEmotionQuirky"
+        }
+    }
+
     /// 대화 종료 시 카드의 대표 감정으로 쓰인다. 캐릭터 답장에서 가장 많이 등장한 감정을 고르고,
     /// 동률이면 `allCases` 순서상 먼저 오는 쪽을 택해 항상 같은 결과가 나오게 한다.
     /// 캐릭터 답장이 하나도 없으면 nil(카드 emotion은 null로 전송).
