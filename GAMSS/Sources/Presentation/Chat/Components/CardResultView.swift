@@ -50,7 +50,7 @@ struct CardResultView: View {
 
     var body: some View {
         ZStack {
-            Color.colorGray950.opacity(0.4)
+            Color.colorBlack.opacity(0.7)
                 .ignoresSafeArea()
 
             switch stage {
