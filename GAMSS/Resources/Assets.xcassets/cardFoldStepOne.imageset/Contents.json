@@ -1,0 +1,8 @@
+{
+  "images" : [
+    { "filename" : "cardFoldStepOne.png", "idiom" : "universal", "scale" : "1x" },
+    { "filename" : "cardFoldStepOne@2x.png", "idiom" : "universal", "scale" : "2x" },
+    { "filename" : "cardFoldStepOne@3x.png", "idiom" : "universal", "scale" : "3x" }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}

@@ -22,6 +22,30 @@ struct ChatView: View {
     private let containerPadding = Spacing.spacing300
 
     var body: some View {
+        ZStack {
+            chatContent
+
+            if viewModel.isEndConfirmationPresented {
+                ModalContainerView(isPresented: $viewModel.isEndConfirmationPresented) {
+                    ModalContentView(
+                        title: "대화를 종료하고 감정 기록을 생성할게요",
+                        subtitle: "감정 기록 생성 시 대화는 종료되며,\n더 이상 대화를 이어갈 수 없어요.",
+                        actions: [
+                            .init(title: "뒤로가기", style: .secondary, action: {
+                                viewModel.isEndConfirmationPresented = false
+                            }),
+                            .init(title: "기록 생성하기", style: .primary, action: {
+                                viewModel.isEndConfirmationPresented = false
+                                Task { await viewModel.confirmEndConversation() }
+                            })
+                        ]
+                    )
+                }
+            }
+        }
+    }
+
+    private var chatContent: some View {
         VStack(spacing: 0) {
             header
 
@@ -103,16 +127,18 @@ struct ChatView: View {
         ) {
             Button("확인", role: .cancel) {}
         }
-        .alert("대화를 끝내고 카드를 만들까요?", isPresented: $viewModel.isEndConfirmationPresented) {
-            Button("취소", role: .cancel) {}
-            Button("종료할래요") { Task { await viewModel.confirmEndConversation() } }
-        }
         .fullScreenCover(item: Binding(
             get: { viewModel.createdCard },
             set: { if $0 == nil { viewModel.dismissCard() } }
         )) { card in
-            CardResultView(card: card, onConfirm: { viewModel.dismissCard() })
-                .presentationBackground(.clear)
+            CardResultView(
+                card: card,
+                onComplete: {
+                    viewModel.dismissCard()
+                    dismiss()
+                }
+            )
+            .presentationBackground(.clear)
         }
     }
 
