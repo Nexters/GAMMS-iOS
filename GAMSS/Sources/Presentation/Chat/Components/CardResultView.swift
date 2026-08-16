@@ -170,6 +170,7 @@ struct CardResultView: View {
         ZStack {
             trashBin
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .ignoresSafeArea(edges: .bottom)
 
             Color.clear
                 .frame(width: foldStepTwoSize.width, height: foldStepTwoSize.height)
@@ -184,10 +185,11 @@ struct CardResultView: View {
             Image("cardFoldStepTwo")
                 .resizable()
                 .frame(width: foldStepTwoSize.width, height: foldStepTwoSize.height)
-                .overlay {
+                .overlay(alignment: .top) {
                     Image("cardDiscardArrow")
                         .resizable()
                         .frame(width: discardArrowSize.width, height: discardArrowSize.height)
+                        .offset(y: 104)
                 }
                 .offset(y: dragOffset)
                 .opacity(Self.opacity(forDragOffset: dragOffset))
@@ -201,7 +203,6 @@ struct CardResultView: View {
             .aspectRatio(trashBinSize.width / trashBinSize.height, contentMode: .fill)
             .frame(maxWidth: .infinity)
             .frame(height: trashBinSize.height)
-            .ignoresSafeArea(edges: .bottom)
     }
 
     private var discardDragGesture: some Gesture {
