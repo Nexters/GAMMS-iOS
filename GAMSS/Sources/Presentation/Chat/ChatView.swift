@@ -136,8 +136,10 @@ struct ChatView: View {
         )) { card in
             CardResultView(
                 card: card,
+                viewModel: CardResultViewModel(),
                 onComplete: {
                     viewModel.dismissCard()
+                    
                     DispatchQueue.main.async {
                         dismiss()
                     }

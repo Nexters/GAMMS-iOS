@@ -8,29 +8,16 @@
 import SwiftUI
 
 struct CardResultView: View {
-    enum FoldStage: Equatable {
-        case unfolded
-        case foldedOnce
-        case foldedTwice
-        case readyToDiscard
-
-        var next: FoldStage? {
-            switch self {
-            case .unfolded: .foldedOnce
-            case .foldedOnce: .foldedTwice
-            case .foldedTwice: .readyToDiscard
-            case .readyToDiscard: nil
-            }
-        }
-    }
-
     let card: Card
     let onComplete: () -> Void
 
-    @State private var stage: FoldStage = .unfolded
-    @State private var dragOffset: CGFloat = 0
+    @StateObject private var viewModel: CardResultViewModel
 
-    static let discardThreshold: CGFloat = 120
+    init(card: Card, viewModel: CardResultViewModel, onComplete: @escaping () -> Void) {
+        self.card = card
+        self.onComplete = onComplete
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
 
     private let cardSize = CGSize(width: 342, height: 505)
     private let illustrationSize = CGSize(width: 270, height: 156)
@@ -45,7 +32,7 @@ struct CardResultView: View {
             Color.colorBlack.opacity(0.7)
                 .ignoresSafeArea()
 
-            switch stage {
+            switch viewModel.stage {
             case .unfolded:
                 cardContent
             case .foldedOnce:
@@ -114,7 +101,7 @@ struct CardResultView: View {
     @ViewBuilder
     private var emotionIllustration: some View {
         if let emotion = card.emotion {
-            Image(emotion.cardIllustrationImageName)
+            Image(CardResultViewModel.illustrationImageName(for: emotion))
                 .resizable()
                 .scaledToFit()
                 .frame(width: illustrationSize.width, height: illustrationSize.height)
@@ -146,7 +133,7 @@ struct CardResultView: View {
     }
 
     private var foldGuideButton: some View {
-        Button(action: advanceStage) {
+        Button(action: viewModel.advanceStage) {
             Image("cardFoldGuide")
                 .resizable()
                 .frame(width: foldGuideSize.width, height: foldGuideSize.height)
@@ -155,7 +142,7 @@ struct CardResultView: View {
     }
 
     private func foldStepImage(_ imageName: String, size: CGSize) -> some View {
-        Button(action: advanceStage) {
+        Button(action: viewModel.advanceStage) {
             Image(imageName)
                 .resizable()
                 .frame(width: size.width, height: size.height)
@@ -188,8 +175,8 @@ struct CardResultView: View {
                         .frame(width: discardArrowSize.width, height: discardArrowSize.height)
                         .offset(y: 104)
                 }
-                .offset(y: dragOffset)
-                .opacity(Self.opacity(forDragOffset: dragOffset))
+                .offset(y: viewModel.dragOffset)
+                .opacity(CardResultViewModel.opacity(forDragOffset: viewModel.dragOffset))
                 .gesture(discardDragGesture)
         }
     }
@@ -205,33 +192,17 @@ struct CardResultView: View {
     private var discardDragGesture: some Gesture {
         DragGesture()
             .onChanged { value in
-                dragOffset = max(0, value.translation.height)
+                viewModel.updateDrag(translationHeight: value.translation.height)
             }
             .onEnded { value in
-                if Self.shouldDiscard(dragOffset: max(0, value.translation.height)) {
+                if CardResultViewModel.shouldDiscard(dragOffset: max(0, value.translation.height)) {
                     onComplete()
                 } else {
                     withAnimation(.spring()) {
-                        dragOffset = 0
+                        viewModel.resetDrag()
                     }
                 }
             }
-    }
-
-    private func advanceStage() {
-        guard let next = stage.next else { return }
-        stage = next
-    }
-
-    static let fadeDistance: CGFloat = 240
-
-    static func shouldDiscard(dragOffset: CGFloat) -> Bool {
-        dragOffset > discardThreshold
-    }
-
-    static func opacity(forDragOffset dragOffset: CGFloat) -> Double {
-        let progress = min(max(dragOffset / fadeDistance, 0), 1)
-        return 1.0 - progress * 0.7
     }
 }
 
@@ -252,15 +223,10 @@ private struct DashedLine: Shape {
     }
 }
 
-private extension EmotionCharacter {
-    var cardIllustrationImageName: String {
-        switch self {
-        case .joy: "cardEmotionJoy"
-        case .sadness: "cardEmotionSadness"
-        case .anger: "cardEmotionAnger"
-        case .anxiety: "cardEmotionAnxiety"
-        case .prickly: "cardEmotionPrickly"
-        case .quirky: "cardEmotionQuirky"
-        }
-    }
+#Preview {
+    CardResultView(
+        card: Card(id: 1, conversationId: 1, emotion: .anger, summary: "오늘 비가 와서 짜증나고 찝찝하다", message: "얘 오늘 건들면 안 됨.", date: Date()),
+        viewModel: CardResultViewModel(),
+        onComplete: {}
+    )
 }
