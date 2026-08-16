@@ -28,7 +28,8 @@ struct ConversationListView: View {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         viewModel.startSearching()
                     }
-                }).frame(height: 64)
+                })
+                .frame(height: 64)
                 
                 if viewModel.isSearching {
                     ConversationSearchView(onTappedCancelButton: {

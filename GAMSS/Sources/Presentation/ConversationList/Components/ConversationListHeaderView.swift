@@ -25,30 +25,22 @@ struct ConversationListHeaderView: View {
                     onTappedBackButton?()
                 } label: {
                     Image(systemName: "chevron.left")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
                         .foregroundStyle(Color.colorGray900)
                 }
             }
-
+            
             Spacer()
-
+            
             Button {
                 onTappedSearchButton?()
             } label: {
                 Image(systemName: "magnifyingglass")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-                    .foregroundStyle(Color.colorGray500)
+                    .foregroundStyle(Color.colorGray900)
             }
-
+            
             Image(.homeMenuIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 24, height: 24)
-                .foregroundStyle(Color.colorGray500)
+                .foregroundStyle(Color.colorGray900)
         }
+        .padding(.vertical, Spacing.spacing400)
     }
 }

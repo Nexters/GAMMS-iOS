@@ -113,15 +113,17 @@ struct AccountView: View {
             trailingText: trailingText(for: item)
         )
         
-        switch item.action {
-        case .navigate:
+        switch item {
+        case .changeNickname:
             NavigationLink {
-                Text("\(item.title) 화면 이동")
+                NicknameEditView(viewModel: NicknameEditViewModel(updateNicknameUseCase: DefaultUpdateNicknameUseCase(memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: TokenStorage.shared), userManager: UserManager.shared)))
+                    .toolbar(.hidden, for: .navigationBar)
             } label: {
                 row
             }
             .buttonStyle(.plain)
-            
+        case .email:
+            row
         case .logout:
             Button {
                 isLogoutModalPresented = true
@@ -129,9 +131,6 @@ struct AccountView: View {
                 row
             }
             .buttonStyle(.plain)
-            
-        case .none:
-            row
         case .withdraw:
             Button {
                 isWithdrawModalPresented = true
