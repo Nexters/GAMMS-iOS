@@ -21,11 +21,13 @@ final class NicknameEditViewModel: ObservableObject {
         self.updateNicknameUseCase = updateNicknameUseCase
     }
     
-    func updateNickname() async {
+    func updateNickname() async -> Bool {
         do {
             try await updateNicknameUseCase.execute(editingNickname)
+            return true
         } catch {
             errorMessage = error.localizedDescription
+            return false
         }
     }
 }

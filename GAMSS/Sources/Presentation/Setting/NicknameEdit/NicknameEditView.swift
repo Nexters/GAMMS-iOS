@@ -40,8 +40,10 @@ struct NicknameEditView: View {
             
             Button {
                 Task {
-                    await viewModel.updateNickname()
-                    dismiss()
+                    let success = await viewModel.updateNickname()
+                    if success {
+                        dismiss()
+                    }
                 }
             } label: {
                 Text("저장하기")
