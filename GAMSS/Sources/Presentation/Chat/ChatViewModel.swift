@@ -93,6 +93,10 @@ final class ChatViewModel: ObservableObject {
         conversationId != nil && !isConversationEnded
     }
 
+    var isCardCreationFailureAlert: Bool {
+        isConversationEnded && createdCard == nil && alertMessage != nil
+    }
+
     func send() async {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !isSending else { return }

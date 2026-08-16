@@ -10,13 +10,13 @@ import XCTest
 
 final class CardResultViewTests: XCTestCase {
     func test_foldStage_next_advancesThroughEachStageInOrder() {
-        XCTAssertEqual(CardFoldStage.unfolded.next, .foldedOnce)
-        XCTAssertEqual(CardFoldStage.foldedOnce.next, .foldedTwice)
-        XCTAssertEqual(CardFoldStage.foldedTwice.next, .readyToDiscard)
+        XCTAssertEqual(CardResultView.FoldStage.unfolded.next, .foldedOnce)
+        XCTAssertEqual(CardResultView.FoldStage.foldedOnce.next, .foldedTwice)
+        XCTAssertEqual(CardResultView.FoldStage.foldedTwice.next, .readyToDiscard)
     }
 
     func test_foldStage_next_readyToDiscard_returnsNil() {
-        XCTAssertNil(CardFoldStage.readyToDiscard.next)
+        XCTAssertNil(CardResultView.FoldStage.readyToDiscard.next)
     }
 
     func test_shouldDiscard_belowThreshold_returnsFalse() {

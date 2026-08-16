@@ -39,7 +39,6 @@ enum EmotionCharacter: CaseIterable, Equatable {
     /// `allCases` 선언 순서와는 다르다.
     static let pickerOrder: [EmotionCharacter] = [.anger, .quirky, .prickly, .joy, .sadness, .anxiety]
 
-    /// 대화 종료 카드의 타이틀 문구. 서버가 내려주는 값이 아니라 감정별 고정 가이드 문구다.
     var cardTitle: String {
         switch self {
         case .joy: "오늘 기~쁘네"
@@ -48,18 +47,6 @@ enum EmotionCharacter: CaseIterable, Equatable {
         case .anxiety: "오늘 불~안하네"
         case .prickly: "오늘 까~칠하네"
         case .quirky: "오늘 엉~뚱하네"
-        }
-    }
-
-    /// 대화 종료 카드에 쓰이는 감정별 캐릭터 일러스트 에셋 이름.
-    var cardIllustrationImageName: String {
-        switch self {
-        case .joy: "cardEmotionJoy"
-        case .sadness: "cardEmotionSadness"
-        case .anger: "cardEmotionAnger"
-        case .anxiety: "cardEmotionAnxiety"
-        case .prickly: "cardEmotionPrickly"
-        case .quirky: "cardEmotionQuirky"
         }
     }
 

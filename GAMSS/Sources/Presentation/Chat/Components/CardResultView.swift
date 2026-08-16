@@ -7,33 +7,27 @@
 
 import SwiftUI
 
-/// 종이 접기 인터랙션의 진행 단계. 탭으로만 앞으로 진행하고 되돌아가지 않는다 —
-/// `readyToDiscard`에 도달하면 더 이상 탭에 반응하지 않고 스와이프로만 끝낼 수 있다.
-enum CardFoldStage: Equatable {
-    case unfolded
-    case foldedOnce
-    case foldedTwice
-    case readyToDiscard
+struct CardResultView: View {
+    enum FoldStage: Equatable {
+        case unfolded
+        case foldedOnce
+        case foldedTwice
+        case readyToDiscard
 
-    var next: CardFoldStage? {
-        switch self {
-        case .unfolded: .foldedOnce
-        case .foldedOnce: .foldedTwice
-        case .foldedTwice: .readyToDiscard
-        case .readyToDiscard: nil
+        var next: FoldStage? {
+            switch self {
+            case .unfolded: .foldedOnce
+            case .foldedOnce: .foldedTwice
+            case .foldedTwice: .readyToDiscard
+            case .readyToDiscard: nil
+            }
         }
     }
-}
 
-
-/// 하단 "종이를 눌러 2번 접어주세요" 안내를 누르면 종이가 접히는 단계(`CardFoldStage`)를 거쳐
-/// 화살표+쓰레기통이 나타나고, 그 상태에서 아래로 스와이프해야 카드가 사라진다. X버튼은 이
-/// 시퀀스를 거치지 않고 곧바로 같은 결과(`onComplete`)로 이어진다.
-struct CardResultView: View {
     let card: Card
     let onComplete: () -> Void
 
-    @State private var stage: CardFoldStage = .unfolded
+    @State private var stage: FoldStage = .unfolded
     @State private var dragOffset: CGFloat = 0
 
     static let discardThreshold: CGFloat = 120
@@ -117,7 +111,6 @@ struct CardResultView: View {
         .frame(width: cardSize.width, height: cardSize.height)
     }
 
-    /// 캐릭터 답장이 하나도 없어 emotion이 nil인 카드는 감정 이름을 적은 자리표시자 박스로 대체한다.
     @ViewBuilder
     private var emotionIllustration: some View {
         if let emotion = card.emotion {
@@ -161,7 +154,6 @@ struct CardResultView: View {
         .accessibilityLabel("종이를 눌러 2번 접어주세요")
     }
 
-    /// `foldedOnce`/`foldedTwice` 단계에서 보여주는, 탭하면 다음 단계로 넘어가는 종이 이미지.
     private func foldStepImage(_ imageName: String, size: CGSize) -> some View {
         Button(action: advanceStage) {
             Image(imageName)
@@ -171,7 +163,6 @@ struct CardResultView: View {
         .accessibilityLabel("종이 접기")
     }
 
-    /// `readyToDiscard` 단계: 접힌 종이(스와이프 가능) + 화살표 + 화면 하단에 고정된 쓰레기통.
     private var discardableCard: some View {
         ZStack {
             trashBin
@@ -258,5 +249,18 @@ private struct DashedLine: Shape {
         path.move(to: CGPoint(x: rect.minX, y: rect.midY))
         path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
         return path
+    }
+}
+
+private extension EmotionCharacter {
+    var cardIllustrationImageName: String {
+        switch self {
+        case .joy: "cardEmotionJoy"
+        case .sadness: "cardEmotionSadness"
+        case .anger: "cardEmotionAnger"
+        case .anxiety: "cardEmotionAnxiety"
+        case .prickly: "cardEmotionPrickly"
+        case .quirky: "cardEmotionQuirky"
+        }
     }
 }

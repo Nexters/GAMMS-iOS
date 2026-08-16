@@ -125,6 +125,9 @@ struct ChatView: View {
                 }
             )
         ) {
+            if viewModel.isCardCreationFailureAlert {
+                Button("다시 시도") { Task { await viewModel.retryCreateCard() } }
+            }
             Button("확인", role: .cancel) {}
         }
         .fullScreenCover(item: Binding(
@@ -135,7 +138,9 @@ struct ChatView: View {
                 card: card,
                 onComplete: {
                     viewModel.dismissCard()
-                    dismiss()
+                    DispatchQueue.main.async {
+                        dismiss()
+                    }
                 }
             )
             .presentationBackground(.clear)
