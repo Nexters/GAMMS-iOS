@@ -39,6 +39,14 @@ private final class MockConversationRepository: ConversationRepository {
     func endConversation(conversationId: Int) async throws {
         fatalError("not used in this test")
     }
+
+    func deleteConversations(_ ids: [Int]) async throws {
+        fatalError("not used in this test")
+    }
+
+    func searchConversations(_ text: String) async throws -> SearchChatResponseDTO {
+        fatalError("not used in this test")
+    }
 }
 
 private final class MockFetchMyProfileUseCase: FetchMyProfileUseCase {

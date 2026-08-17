@@ -30,23 +30,35 @@ private final class MockConversationRepository: ConversationRepository {
     func endConversation(conversationId: Int) async throws {
         fatalError("사용 안 함")
     }
+
+    func deleteConversations(_ ids: [Int]) async throws {
+        fatalError("사용 안 함")
+    }
+
+    func searchConversations(_ text: String) async throws -> SearchChatResponseDTO {
+        fatalError("사용 안 함")
+    }
 }
 
 @MainActor
 final class ConversationListViewModelTests: XCTestCase {
     private func makeViewModel(repository: MockConversationRepository = MockConversationRepository()) -> ConversationListViewModel {
-        ConversationListViewModel(getIncompleteConversationsUseCase: GetIncompleteConversationsUseCase(conversationRepository: repository))
+        ConversationListViewModel(
+            getIncompleteConversationsUseCase: GetIncompleteConversationsUseCase(conversationRepository: repository),
+            deleteConversationsUseCase: DefaultDeleteConversationsUseCase(conversationRepository: repository),
+            searchConversationUseCase: DefaultSearchConversationUseCase(conversationRepository: repository)
+        )
     }
 
     func test_load_onSuccess_setsConversationsAndClearsLoading() async {
         let repository = MockConversationRepository()
-        let summary = ConversationSummary(id: 1, title: "제목", status: "ACTIVE", createdAt: Date(timeIntervalSince1970: 0))
+        let summary = ConversationSummary(id: 1, title: "제목", createdAt: Date(timeIntervalSince1970: 0))
         repository.stubbedGetConversationsResult = .success([summary])
         let viewModel = makeViewModel(repository: repository)
 
         await viewModel.load()
 
-        XCTAssertEqual(viewModel.conversations, [summary])
+        XCTAssertEqual(viewModel.displayedConversations, [summary])
         XCTAssertFalse(viewModel.isLoading)
     }
 

@@ -18,6 +18,10 @@ private final class MockMemberRepository: MemberRepository {
         fetchMyProfileCallCount += 1
         return try stubbedResult.get()
     }
+
+    func updateNickname(_ nickname: String) async throws -> User {
+        fatalError("not used in this test")
+    }
 }
 
 final class DefaultFetchMyProfileUseCaseTests: XCTestCase {

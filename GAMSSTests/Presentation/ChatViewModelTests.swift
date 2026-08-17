@@ -66,6 +66,14 @@ private final class MockConversationRepository: ConversationRepository {
         receivedEndConversationId = conversationId
         _ = try stubbedEndConversationResult.get()
     }
+
+    func deleteConversations(_ ids: [Int]) async throws {
+        fatalError("not used in this test")
+    }
+
+    func searchConversations(_ text: String) async throws -> SearchChatResponseDTO {
+        fatalError("not used in this test")
+    }
 }
 
 private final class MockCardRepository: CardRepository {
