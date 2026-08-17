@@ -203,9 +203,9 @@ struct ChatView: View {
         return ConversationListDateHeaderFormatter.string(from: firstMessageDate)
     }
 
-    /// 확정된 메시지 목록의 마지막 항목, 없으면 전송 중인 낙관적 메시지를 기준으로 맨 아래로
-    /// 스크롤한다. pendingUserMessage가 항상 messages보다 나중에 화면에 그려지므로, 둘 다 있을
-    /// 때는 pendingUserMessage 쪽으로 스크롤해야 실제로 맨 아래가 된다.
+    /// 화면에 그려지는 순서(메시지 → 낙관적 메시지 → 입력중 인디케이터) 중 가장 아래에 있는
+    /// 항목을 기준으로 맨 아래로 스크롤한다. 셋 중 실제로 보이는 것 중 가장 나중에 그려지는
+    /// 항목으로 스크롤해야 실제로 맨 아래가 된다.
     private func scrollToBottom(_ proxy: ScrollViewProxy) {
         withAnimation(.easeOut(duration: 0.2)) {
             if viewModel.isWaitingForReply {
