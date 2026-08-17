@@ -47,8 +47,9 @@ struct CardDetailView: View {
             )
         ) {
             Button("다시 시도") {
+                let isLoadFailure = viewModel.isLoadFailureAlert
                 Task {
-                    if viewModel.isLoadFailureAlert {
+                    if isLoadFailure {
                         await viewModel.loadCard()
                     } else {
                         await discardCard()
