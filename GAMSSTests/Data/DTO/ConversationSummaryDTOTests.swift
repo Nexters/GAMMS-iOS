@@ -35,13 +35,12 @@ final class ConversationSummaryDTOTests: XCTestCase {
         XCTAssertNil(dto.toDomain(), "createdAt 파싱에 실패하면 잘못된 시간으로 표시하는 대신 목록에서 제외되어야 함")
     }
 
-    func test_toDomain_mapsIdTitleAndStatus() throws {
+    func test_toDomain_mapsIdAndTitle() throws {
         let dto = makeDTO(createdAt: "2026-08-07T00:00:00Z")
 
         let summary = try XCTUnwrap(dto.toDomain())
 
         XCTAssertEqual(summary.id, 1)
         XCTAssertEqual(summary.title, "제목")
-        XCTAssertEqual(summary.status, "ACTIVE")
     }
 }

@@ -17,11 +17,17 @@ final class ChatViewModel: ObservableObject {
     @Published var alertMessage: String?
     @Published private(set) var pendingUserMessage: PendingUserMessage?
     @Published private(set) var replyTarget: Message?
+    @Published var isEndConfirmationPresented = false
+    @Published private(set) var isEnding = false
+    @Published private(set) var isConversationEnded = false
+    @Published private(set) var createdCard: Card?
 
     private var conversationId: Int?
     private let initialSentMessage: SentMessage?
     private let sendMessageUseCase: SendMessageUseCase
     private let getMessagesUseCase: GetMessagesUseCase
+    private let endConversationUseCase: EndConversationUseCase
+    private let createCardUseCase: CreateCardUseCase
     private let summaryStore: ConversationSummaryStore
     private var revealTask: Task<Void, Never>?
     /// 테스트에서 백그라운드 요약 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
@@ -30,12 +36,16 @@ final class ChatViewModel: ObservableObject {
     init(
         sendMessageUseCase: SendMessageUseCase,
         getMessagesUseCase: GetMessagesUseCase,
+        endConversationUseCase: EndConversationUseCase,
+        createCardUseCase: CreateCardUseCase,
         summaryStore: ConversationSummaryStore,
         conversationId: Int? = nil,
         initialSentMessage: SentMessage? = nil
     ) {
         self.sendMessageUseCase = sendMessageUseCase
         self.getMessagesUseCase = getMessagesUseCase
+        self.endConversationUseCase = endConversationUseCase
+        self.createCardUseCase = createCardUseCase
         self.summaryStore = summaryStore
         self.conversationId = conversationId
         self.initialSentMessage = initialSentMessage
@@ -75,7 +85,16 @@ final class ChatViewModel: ObservableObject {
     }
 
     var isSendDisabled: Bool {
-        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending
+        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending || isConversationEnded
+    }
+
+    /// 아직 대화방이 만들어지지 않았거나(첫 메시지 전) 이미 종료된 대화는 다시 종료할 수 없다.
+    var canEndConversation: Bool {
+        conversationId != nil && !isConversationEnded
+    }
+
+    var isCardCreationFailureAlert: Bool {
+        isConversationEnded && createdCard == nil && alertMessage != nil
     }
 
     func send() async {
@@ -162,6 +181,55 @@ final class ChatViewModel: ObservableObject {
 
     func cancelReply() {
         replyTarget = nil
+    }
+
+    /// 헤더의 종료 버튼이 누르는 진입점. 확인 팝업만 띄우고 실제 종료는 confirmEndConversation()에서.
+    func requestEndConversation() {
+        guard canEndConversation else { return }
+        isEndConfirmationPresented = true
+    }
+
+    /// 종료 확인 팝업에서 "종료할래요"를 눌렀을 때. endConversation → createCard 순서로 호출한다.
+    /// endConversation이 성공하면 서버에서는 이미 대화가 끝난 상태이므로, 뒤이은 createCard가
+    /// 실패해도 입력창은 다시 열어주지 않는다 — retryCreateCard()로만 재시도한다.
+    func confirmEndConversation() async {
+        guard let conversationId, !isEnding else { return }
+        isEnding = true
+        defer { isEnding = false }
+
+        do {
+            try await endConversationUseCase.execute(conversationId: conversationId)
+        } catch {
+            alertMessage = "대화를 종료하지 못했어요"
+            return
+        }
+
+        isConversationEnded = true
+        await createCard(conversationId: conversationId)
+    }
+
+    /// createCard만 다시 시도한다. endConversation은 이미 성공했으므로 재호출하지 않는다.
+    func retryCreateCard() async {
+        guard let conversationId, isConversationEnded, !isEnding else { return }
+        isEnding = true
+        defer { isEnding = false }
+        await createCard(conversationId: conversationId)
+    }
+
+    func dismissCard() {
+        createdCard = nil
+    }
+
+    /// summary는 채팅 압축본(ConversationSummaryStore)을 그대로 재사용한다 — 카드 전용 요약을
+    /// 따로 만들지 않는다. emotion은 지금까지 등장한 캐릭터 답장의 최빈값.
+    private func createCard(conversationId: Int) async {
+        let summary = await summaryStore.current() ?? ""
+        let emotion = EmotionCharacter.dominant(in: messages)
+        do {
+            createdCard = try await createCardUseCase.execute(conversationId: conversationId, emotion: emotion, summary: summary)
+        } catch {
+            alertMessage = "카드를 만들지 못했어요. 다시 시도해주세요"
+        }
     }
 
     private func flushPendingComments() {

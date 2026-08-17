@@ -22,6 +22,30 @@ struct ChatView: View {
     private let containerPadding = Spacing.spacing300
 
     var body: some View {
+        ZStack {
+            chatContent
+
+            if viewModel.isEndConfirmationPresented {
+                ModalContainerView(isPresented: $viewModel.isEndConfirmationPresented) {
+                    ModalContentView(
+                        title: "대화를 종료하고 감정 기록을 생성할게요",
+                        subtitle: "감정 기록 생성 시 대화는 종료되며,\n더 이상 대화를 이어갈 수 없어요.",
+                        actions: [
+                            .init(title: "뒤로가기", style: .secondary, action: {
+                                viewModel.isEndConfirmationPresented = false
+                            }),
+                            .init(title: "기록 생성하기", style: .primary, action: {
+                                viewModel.isEndConfirmationPresented = false
+                                Task { await viewModel.confirmEndConversation() }
+                            })
+                        ]
+                    )
+                }
+            }
+        }
+    }
+
+    private var chatContent: some View {
         VStack(spacing: 0) {
             header
 
@@ -75,6 +99,7 @@ struct ChatView: View {
                             replyTargetLabel: viewModel.replyTarget.flatMap { QuotedReplyHeader.label(forQuotedSender: $0.sender) },
                             replyTargetContent: viewModel.replyTarget?.content,
                             onCancelReply: { viewModel.cancelReply() },
+                            isDisabled: viewModel.isConversationEnded,
                             onSend: { Task { await viewModel.send() } },
                             onTextChange: { viewModel.updateInput($0) },
                             isFocused: $isInputFocused
@@ -100,13 +125,32 @@ struct ChatView: View {
                 }
             )
         ) {
+            if viewModel.isCardCreationFailureAlert {
+                Button("다시 시도") { Task { await viewModel.retryCreateCard() } }
+            }
             Button("확인", role: .cancel) {}
+        }
+        .fullScreenCover(item: Binding(
+            get: { viewModel.createdCard },
+            set: { if $0 == nil { viewModel.dismissCard() } }
+        )) { card in
+            CardResultView(
+                card: card,
+                viewModel: CardResultViewModel(),
+                onComplete: {
+                    viewModel.dismissCard()
+                    
+                    DispatchQueue.main.async {
+                        dismiss()
+                    }
+                }
+            )
+            .presentationBackground(.clear)
         }
     }
 
-    /// 커스텀 상단 헤더: 뒤로가기 + 대화방 생성 날짜만 표시한다(메모/햄버거 아이콘은 이번 범위에서
-    /// 제외). 시스템 네비게이션 바는 `.toolbar(.hidden, for: .navigationBar)`로 숨기고 이 헤더가
-    /// 대신한다.
+    /// 커스텀 상단 헤더: 뒤로가기 + 대화방 생성 날짜 + 우측 버튼 2개(종료, 자리만 미리 만든 placeholder).
+    /// 시스템 네비게이션 바는 `.toolbar(.hidden, for: .navigationBar)`로 숨기고 이 헤더가 대신한다.
     private var header: some View {
         ZStack {
             Text(headerDateText)
@@ -120,10 +164,26 @@ struct ChatView: View {
                 }
 
                 Spacer()
+
+                HStack(spacing: Spacing.spacing300) {
+                    Button(action: { viewModel.requestEndConversation() }) {
+                        Image(systemName: "checkmark.circle")
+                            .foregroundStyle(Color.colorGray950)
+                    }
+                    .disabled(!viewModel.canEndConversation)
+                    .accessibilityLabel("대화 종료")
+
+                    // 다음 이터레이션에서 동작을 채울 자리만 미리 만든 버튼. 아이콘은 확정 전.
+                    Button(action: {}) {
+                        Image(systemName: "ellipsis")
+                            .foregroundStyle(Color.colorGray950)
+                    }
+                    .accessibilityLabel("더보기")
+                }
             }
         }
         .padding(.horizontal, Spacing.spacing400)
-        .padding(.vertical, Spacing.spacing200)
+        .padding(.vertical, Spacing.spacing400)
         .background(Color.colorWhite)
     }
 

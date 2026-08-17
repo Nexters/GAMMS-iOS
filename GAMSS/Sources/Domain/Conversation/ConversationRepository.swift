@@ -20,7 +20,10 @@ protocol ConversationRepository {
     /// 대화방 제목을 설정한다. 홈에서 첫 메시지로 새 대화가 만들어진 직후, 그 메시지 내용을
     /// 그대로 제목으로 저장하는 데 쓰인다.
     func updateTitle(conversationId: Int, title: String) async throws
-    
+
+    /// 대화를 종료 처리한다. 이후 대화방 정리(감정 카드 생성 대상에서 제외 등)는 서버가 담당한다.
+    func endConversation(conversationId: Int) async throws
+
     func deleteConversations(_ ids: [Int]) async throws
     func searchConversations(_ text: String) async throws -> SearchChatResponseDTO
 }

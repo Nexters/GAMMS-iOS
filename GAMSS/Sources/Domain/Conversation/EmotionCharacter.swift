@@ -38,4 +38,29 @@ enum EmotionCharacter: CaseIterable, Equatable {
     /// 홈 화면 감정 선택 그리드(2행 3열)에 표시할 순서. Figma 시안 순서를 그대로 따르며,
     /// `allCases` 선언 순서와는 다르다.
     static let pickerOrder: [EmotionCharacter] = [.anger, .quirky, .prickly, .joy, .sadness, .anxiety]
+
+    var cardTitle: String {
+        switch self {
+        case .joy: "오늘 기~쁘네"
+        case .sadness: "오늘 슬~프네"
+        case .anger: "오늘 화~나네"
+        case .anxiety: "오늘 불~안하네"
+        case .prickly: "오늘 까~칠하네"
+        case .quirky: "오늘 엉~뚱하네"
+        }
+    }
+
+    /// 대화 종료 시 카드의 대표 감정으로 쓰인다. 캐릭터 답장에서 가장 많이 등장한 감정을 고르고,
+    /// 동률이면 `allCases` 순서상 먼저 오는 쪽을 택해 항상 같은 결과가 나오게 한다.
+    /// 캐릭터 답장이 하나도 없으면 nil(카드 emotion은 null로 전송).
+    static func dominant(in messages: [Message]) -> EmotionCharacter? {
+        var counts: [EmotionCharacter: Int] = [:]
+        for message in messages {
+            if case let .character(emotion) = message.sender {
+                counts[emotion, default: 0] += 1
+            }
+        }
+        guard !counts.isEmpty else { return nil }
+        return allCases.max { (counts[$0] ?? 0) < (counts[$1] ?? 0) }
+    }
 }

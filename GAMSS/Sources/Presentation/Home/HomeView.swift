@@ -79,6 +79,8 @@ struct HomeView: View {
                     viewModel: ChatViewModel(
                         sendMessageUseCase: SendMessageUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
                         getMessagesUseCase: GetMessagesUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
+                        endConversationUseCase: EndConversationUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
+                        createCardUseCase: CreateCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)),
                         summaryStore: LazyConversationSummaryStore(),
                         conversationId: conversationId,
                         initialSentMessage: viewModel.createdSentMessage
