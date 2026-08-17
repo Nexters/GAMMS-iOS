@@ -53,15 +53,4 @@ final class CardResultViewModel: ObservableObject {
         let progress = min(max(dragOffset / fadeDistance, 0), 1)
         return 1.0 - progress * 0.7
     }
-
-    static func illustrationImageName(for emotion: EmotionCharacter) -> String {
-        switch emotion {
-        case .joy: "cardEmotionJoy"
-        case .sadness: "cardEmotionSadness"
-        case .anger: "cardEmotionAnger"
-        case .anxiety: "cardEmotionAnxiety"
-        case .prickly: "cardEmotionPrickly"
-        case .quirky: "cardEmotionQuirky"
-        }
-    }
 }

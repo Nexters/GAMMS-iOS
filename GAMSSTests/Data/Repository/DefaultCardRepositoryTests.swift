@@ -71,4 +71,43 @@ final class DefaultCardRepositoryTests: XCTestCase {
         XCTAssertNil(request.emotion)
         XCTAssertNil(card.emotion)
     }
+
+    func test_getCard_decodesResponseAndMapsToDomain() async throws {
+        let network = MockNetworkRequesting()
+        network.stubbedData = Data("""
+        {"success":true,"data":{"id":1,"conversationId":10,"emotion":"ANGER","emotionLabel":"분노","summary":"오늘 비가 와서 짜증나고 찝찝하다","message":"얘 오늘 건들면 안 됨.","date":"2026-07-23"},"error":null}
+        """.utf8)
+        let repository = DefaultCardRepository(networkManager: network)
+
+        let card = try await repository.getCard(cardId: 1)
+
+        XCTAssertEqual(card.id, 1)
+        XCTAssertEqual(card.conversationId, 10)
+        XCTAssertEqual(card.emotion, .anger)
+        XCTAssertEqual(card.message, "얘 오늘 건들면 안 됨.")
+
+        guard case let .fetchCard(cardId)? = network.lastEndpoint as? CardEndpoint else {
+            XCTFail("fetchCard 엔드포인트가 호출되어야 함")
+            return
+        }
+        XCTAssertEqual(cardId, "1")
+        XCTAssertEqual(network.lastEndpoint?.method, .get)
+    }
+
+    func test_deleteCard_callsDeleteCardEndpointWithCardId() async throws {
+        let network = MockNetworkRequesting()
+        network.stubbedData = Data("""
+        {"success":true,"data":{},"error":null}
+        """.utf8)
+        let repository = DefaultCardRepository(networkManager: network)
+
+        try await repository.deleteCard(cardId: 1)
+
+        guard case let .deleteCard(cardId)? = network.lastEndpoint as? CardEndpoint else {
+            XCTFail("deleteCard 엔드포인트가 호출되어야 함")
+            return
+        }
+        XCTAssertEqual(cardId, "1")
+        XCTAssertEqual(network.lastEndpoint?.method, .delete)
+    }
 }

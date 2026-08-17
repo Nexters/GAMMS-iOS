@@ -40,6 +40,15 @@ final class EmotionCharacterTests: XCTestCase {
         XCTAssertEqual(EmotionCharacter.quirky.cardTitle, "오늘 엉~뚱하네")
     }
 
+    func test_cardIllustrationImageName_isFixedAssetNameForEveryCase() {
+        XCTAssertEqual(EmotionCharacter.joy.cardIllustrationImageName, "cardEmotionJoy")
+        XCTAssertEqual(EmotionCharacter.sadness.cardIllustrationImageName, "cardEmotionSadness")
+        XCTAssertEqual(EmotionCharacter.anger.cardIllustrationImageName, "cardEmotionAnger")
+        XCTAssertEqual(EmotionCharacter.anxiety.cardIllustrationImageName, "cardEmotionAnxiety")
+        XCTAssertEqual(EmotionCharacter.prickly.cardIllustrationImageName, "cardEmotionPrickly")
+        XCTAssertEqual(EmotionCharacter.quirky.cardIllustrationImageName, "cardEmotionQuirky")
+    }
+
     func test_pickerOrder_matchesFigmaGridOrder() {
         XCTAssertEqual(
             EmotionCharacter.pickerOrder,

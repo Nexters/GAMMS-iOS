@@ -19,8 +19,6 @@ struct CardResultView: View {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
-    private let cardSize = CGSize(width: 342, height: 505)
-    private let illustrationSize = CGSize(width: 270, height: 156)
     private let foldGuideSize = CGSize(width: 190, height: 68)
     private let foldStepOneSize = CGSize(width: 353, height: 273)
     private let foldStepTwoSize = CGSize(width: 237, height: 253)
@@ -47,87 +45,21 @@ struct CardResultView: View {
 
     private var cardContent: some View {
         ZStack(alignment: .topTrailing) {
-            Image("cardPaperBackground")
-                .resizable()
-                .frame(width: cardSize.width, height: cardSize.height)
-
-            VStack(spacing: 0) {
-                Text(ConversationListDateHeaderFormatter.string(from: card.date))
-                    .typography(.subtitle3)
-                    .foregroundStyle(Color.colorGray950)
-
-                Spacer().frame(height: Spacing.spacing350)
-
-                emotionIllustration
-
-                Spacer().frame(height: Spacing.spacing350)
-
-                DashedDivider()
-
-                Spacer().frame(height: Spacing.spacing500)
-
-                VStack(spacing: Spacing.spacing200) {
-                    Text(card.emotion?.cardTitle ?? "오늘 하루를 기록했어요")
-                        .typography(.title2)
-                        .foregroundStyle(Color.colorGray950)
-                        .multilineTextAlignment(.center)
-
-                    Text(card.message)
-                        .typography(.body4Regular)
-                        .foregroundStyle(Color.colorGray800)
-                        .multilineTextAlignment(.center)
-                }
-
-                Spacer().frame(height: Spacing.spacing500)
-
-                DashedDivider()
-
-                Spacer().frame(height: 29)
-
+            CardView(card: card) {
                 foldGuideButton
-
-                Spacer(minLength: 0)
             }
-            .padding(.horizontal, Spacing.spacing400)
-            .padding(.vertical, Spacing.spacing500)
-            .frame(width: cardSize.width, height: cardSize.height)
 
             closeButton
-                .padding(Spacing.spacing300)
-        }
-        .frame(width: cardSize.width, height: cardSize.height)
-    }
-
-    @ViewBuilder
-    private var emotionIllustration: some View {
-        if let emotion = card.emotion {
-            Image(CardResultViewModel.illustrationImageName(for: emotion))
-                .resizable()
-                .scaledToFit()
-                .frame(width: illustrationSize.width, height: illustrationSize.height)
-        } else {
-            RoundedRectangle(cornerRadius: Radius.radius200)
-                .fill(Color.colorGray025)
-                .overlay(
-                    RoundedRectangle(cornerRadius: Radius.radius200)
-                        .strokeBorder(Color.colorGray300, lineWidth: 1)
-                )
-                .overlay(
-                    Text("감정")
-                        .typography(.body4Medium)
-                        .foregroundStyle(Color.colorGray950)
-                )
-                .frame(width: illustrationSize.width, height: illustrationSize.height)
+                .padding([.top, .trailing], Spacing.spacing300)
         }
     }
 
     private var closeButton: some View {
         Button(action: onComplete) {
-            Image(systemName: "xmark")
+            Image("cardCloseButton")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 20, height: 20)
-                .foregroundStyle(Color.colorGray950)
         }
         .accessibilityLabel("닫기")
     }
@@ -203,23 +135,6 @@ struct CardResultView: View {
                     }
                 }
             }
-    }
-}
-
-private struct DashedDivider: View {
-    var body: some View {
-        DashedLine()
-            .stroke(Color.colorGray950, style: StrokeStyle(lineWidth: 1.3, dash: [4]))
-            .frame(height: 1)
-    }
-}
-
-private struct DashedLine: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.minX, y: rect.midY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
-        return path
     }
 }
 

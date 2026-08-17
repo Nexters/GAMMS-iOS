@@ -34,6 +34,10 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
+            ArchiveView()
+                .tabItem { tabLabel(for: .archive) }
+                .tag(MainTab.archive)
+
             HomeView(
                 viewModel: HomeViewModel(
                     sendMessageUseCase: SendMessageUseCase(
@@ -59,10 +63,6 @@ struct MainTabView: View {
             )
             .tabItem { tabLabel(for: .chat) }
             .tag(MainTab.chat)
-
-            // 보관함 탭은 아직 노출하지 않음 — Figma 시안에서 당장 필요 없다고 확인됨.
-            // MainTab.archive case와 ArchiveView는 그대로 남겨두었으니, 실제 기능이 붙는 시점에
-            // 여기 .tabItem을 추가하기만 하면 된다 (임의로 다시 추가하지 말 것).
         }
     }
 
