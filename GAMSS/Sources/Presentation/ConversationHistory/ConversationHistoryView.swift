@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-/// 카드에 연결된 대화를 읽기 전용으로 보여준다. CardDetailView 안에서 CardView와 자리를
-/// 바꿔가며 쓰인다 — 입력창/답장/자동 스크롤 같은 라이브 채팅 기능은 없다.
 struct ConversationHistoryView: View {
     let card: Card
     let onBack: () -> Void
@@ -17,6 +15,11 @@ struct ConversationHistoryView: View {
     @ObservedObject private var viewModel: ConversationHistoryViewModel
 
     private let panelSize = CGSize(width: 342, height: 505)
+
+    private let headerSideInset: CGFloat = 36
+    private let dividerHorizontalInset: CGFloat = 36
+    private let bottomDividerInset: CGFloat = 30
+    private let topContentOffset: CGFloat = 64
 
     init(card: Card, viewModel: ConversationHistoryViewModel, onBack: @escaping () -> Void, onClose: @escaping () -> Void) {
         self.card = card
@@ -32,18 +35,21 @@ struct ConversationHistoryView: View {
                 .frame(width: panelSize.width, height: panelSize.height)
 
             VStack(spacing: 0) {
-                header
-
-                Spacer().frame(height: Spacing.spacing350)
+                Spacer().frame(height: topContentOffset)
 
                 DashedDivider()
+                    .padding(.horizontal, dividerHorizontalInset)
 
-                Spacer().frame(height: Spacing.spacing300)
+                Spacer().frame(height: Spacing.spacing200)
 
                 messageList
+
+                Spacer().frame(height: Spacing.spacing200)
+
+                DashedDivider()
+                    .padding(.horizontal, dividerHorizontalInset)
             }
-            .padding(.horizontal, Spacing.spacing400)
-            .padding(.vertical, Spacing.spacing500)
+            .padding(.bottom, bottomDividerInset)
             .frame(width: panelSize.width, height: panelSize.height)
 
             if viewModel.isLoading && viewModel.messages.isEmpty {
@@ -52,6 +58,20 @@ struct ConversationHistoryView: View {
             }
         }
         .frame(width: panelSize.width, height: panelSize.height)
+        .overlay(alignment: .topLeading) {
+            backButton
+                .padding(.top, Spacing.spacing550)
+                .padding(.leading, headerSideInset)
+        }
+        .overlay(alignment: .top) {
+            dateText
+                .padding(.top, Spacing.spacing550)
+        }
+        .overlay(alignment: .topTrailing) {
+            closeButton
+                .padding(.top, Spacing.spacing300)
+                .padding(.trailing, Spacing.spacing300)
+        }
         .task {
             await viewModel.loadMessagesIfNeeded(conversationId: card.conversationId)
         }
@@ -69,30 +89,28 @@ struct ConversationHistoryView: View {
         }
     }
 
-    private var header: some View {
-        HStack {
-            Button(action: onBack) {
-                Image(systemName: "chevron.left")
-                    .foregroundStyle(Color.colorGray900)
-            }
-            .accessibilityLabel("뒤로가기")
-
-            Spacer()
-
-            Text(ConversationListDateHeaderFormatter.string(from: card.date))
-                .typography(.subtitle3)
+    private var backButton: some View {
+        Button(action: onBack) {
+            Image(systemName: "chevron.left")
                 .foregroundStyle(Color.colorGray900)
-
-            Spacer()
-
-            Button(action: onClose) {
-                Image("cardCloseButton")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 20, height: 20)
-            }
-            .accessibilityLabel("닫기")
         }
+        .accessibilityLabel("뒤로가기")
+    }
+
+    private var dateText: some View {
+        Text(ConversationListDateHeaderFormatter.string(from: card.date))
+            .typography(.subtitle3)
+            .foregroundStyle(Color.colorGray900)
+    }
+
+    private var closeButton: some View {
+        Button(action: onClose) {
+            Image("cardCloseButton")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 20, height: 20)
+        }
+        .accessibilityLabel("닫기")
     }
 
     private var messageList: some View {
@@ -112,7 +130,9 @@ struct ConversationHistoryView: View {
                     }
                 }
             }
+            .scrollIndicators(.hidden)
         }
+        .padding(.horizontal, Spacing.spacing400)
     }
 }
 
