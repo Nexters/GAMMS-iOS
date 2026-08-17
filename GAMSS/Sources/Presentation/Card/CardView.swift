@@ -51,7 +51,7 @@ struct CardView<BottomContent: View>: View {
 
                 DashedDivider()
 
-                Spacer().frame(height: 29)
+                Spacer().frame(height: 33)
 
                 bottomContent()
 

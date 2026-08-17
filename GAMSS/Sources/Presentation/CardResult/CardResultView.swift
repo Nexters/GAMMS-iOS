@@ -50,17 +50,16 @@ struct CardResultView: View {
             }
 
             closeButton
-                .padding(Spacing.spacing300)
+                .padding([.top, .trailing], Spacing.spacing300)
         }
     }
 
     private var closeButton: some View {
         Button(action: onComplete) {
-            Image(systemName: "xmark")
+            Image("cardCloseButton")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 20, height: 20)
-                .foregroundStyle(Color.colorGray950)
         }
         .accessibilityLabel("닫기")
     }

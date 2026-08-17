@@ -29,7 +29,7 @@ struct CardDetailView: View {
                     }
 
                     closeButton
-                        .padding(Spacing.spacing300)
+                        .padding([.top, .trailing], Spacing.spacing300)
                 }
             } else if viewModel.isLoading {
                 ProgressView()
@@ -66,29 +66,37 @@ struct CardDetailView: View {
 
     private var bottomActions: some View {
         VStack(spacing: Spacing.spacing200) {
-            HStack(spacing: Spacing.spacing100) {
+            HStack(spacing: Spacing.spacing050) {
                 OutlineButton(title: "기록 버리기") {
                     Task { await discardCard() }
                 }
+                .frame(width: 97)
                 // 대화보기는 이번 스코프에서 UI만 존재 — 탭해도 동작 없음.
                 OutlineButton(title: "대화보기") {}
+                    .frame(width: 97)
             }
             .disabled(viewModel.isLoading)
 
             // 공유하기도 이번 스코프에서 UI만 존재.
-            Text("공유하기 >")
-                .typography(.caption2)
-                .foregroundStyle(Color.colorGray600)
+            HStack(spacing: Spacing.spacing025) {
+                Text("공유하기")
+                    .typography(.caption2)
+                    .foregroundStyle(Color.colorGray600)
+
+                Image("cardShareChevron")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 12, height: 12)
+            }
         }
     }
 
     private var closeButton: some View {
         Button(action: onClose) {
-            Image(systemName: "xmark")
+            Image("cardCloseButton")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 20, height: 20)
-                .foregroundStyle(Color.colorGray950)
         }
         .accessibilityLabel("닫기")
     }
