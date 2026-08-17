@@ -21,6 +21,7 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isEnding = false
     @Published private(set) var isConversationEnded = false
     @Published private(set) var createdCard: Card?
+    @Published private(set) var isWaitingForReply = false
 
     private var conversationId: Int?
     private let initialSentMessage: SentMessage?
@@ -29,7 +30,8 @@ final class ChatViewModel: ObservableObject {
     private let endConversationUseCase: EndConversationUseCase
     private let createCardUseCase: CreateCardUseCase
     private let summaryStore: ConversationSummaryStore
-    private var revealTask: Task<Void, Never>?
+    /// 테스트에서 순차 노출이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
+    private(set) var revealTask: Task<Void, Never>?
     /// 테스트에서 백그라운드 요약 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
     private(set) var pendingSummaryUpdateTask: Task<Void, Never>?
 
@@ -103,6 +105,7 @@ final class ChatViewModel: ObservableObject {
 
         flushPendingComments()
         isSending = true
+        isWaitingForReply = true
         defer { isSending = false }
 
         let replyTarget = replyTarget
@@ -136,10 +139,12 @@ final class ChatViewModel: ObservableObject {
             pendingSummaryUpdateTask = Task { await summaryStore.add(trimmed) }
         } catch let error as SendMessageValidationError {
             pendingUserMessage = nil
+            isWaitingForReply = false
             if input.isEmpty { input = trimmed }
             alertMessage = error.errorDescription
         } catch {
             pendingUserMessage = nil
+            isWaitingForReply = false
             if input.isEmpty { input = trimmed }
             alertMessage = "메시지를 보내지 못했어요"
         }
@@ -156,6 +161,8 @@ final class ChatViewModel: ObservableObject {
             messages.append(first)
         }
         pendingComments = Array(sent.comments.dropFirst())
+        // 남은 댓글이 없으면(0~1개 응답) 여기서 바로 대기 표시를 끈다.
+        isWaitingForReply = !pendingComments.isEmpty
         revealRemainingComments()
 
         if sent.commentStatus != .done {
@@ -254,6 +261,9 @@ final class ChatViewModel: ObservableObject {
                 await MainActor.run {
                     guard !self.pendingComments.isEmpty else { return }
                     self.messages.append(self.pendingComments.removeFirst())
+                    if self.pendingComments.isEmpty {
+                        self.isWaitingForReply = false
+                    }
                 }
             }
         }
