@@ -67,7 +67,7 @@ struct CardView<BottomContent: View>: View {
     @ViewBuilder
     private var emotionIllustration: some View {
         if let emotion = card.emotion {
-            Image(CardResultViewModel.illustrationImageName(for: emotion))
+            Image(emotion.cardIllustrationImageName)
                 .resizable()
                 .scaledToFit()
                 .frame(width: illustrationSize.width, height: illustrationSize.height)
