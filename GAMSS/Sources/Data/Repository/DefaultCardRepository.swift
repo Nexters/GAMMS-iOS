@@ -24,4 +24,19 @@ final class DefaultCardRepository: CardRepository {
         )
         return response.data.toDomain()
     }
+
+    func getCard(cardId: Int) async throws -> Card {
+        let response = try await networkManager.request(
+            CardEndpoint.fetchCard(cardId: String(cardId)),
+            responseType: APIResponse<CardResponseDTO>.self
+        )
+        return response.data.toDomain()
+    }
+
+    func deleteCard(cardId: Int) async throws {
+        _ = try await networkManager.request(
+            CardEndpoint.deleteCard(cardId: String(cardId)),
+            responseType: APIResponse<EmptyResponseDTO>.self
+        )
+    }
 }

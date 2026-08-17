@@ -20,6 +20,14 @@ private final class MockCardRepository: CardRepository {
         receivedSummary = summary
         return try stubbedResult.get()
     }
+
+    func getCard(cardId: Int) async throws -> Card {
+        fatalError("사용 안 함")
+    }
+
+    func deleteCard(cardId: Int) async throws {
+        fatalError("사용 안 함")
+    }
 }
 
 final class CreateCardUseCaseTests: XCTestCase {
