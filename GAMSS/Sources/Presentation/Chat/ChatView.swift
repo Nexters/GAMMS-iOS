@@ -80,6 +80,11 @@ struct ChatView: View {
                                 )
                                 .id(PendingUserMessage.scrollAnchorID)
                             }
+
+                            if viewModel.isWaitingForReply {
+                                TypingIndicatorView()
+                                    .id(TypingIndicatorView.scrollAnchorID)
+                            }
                         }
                         .padding(containerPadding)
                     }
@@ -90,6 +95,9 @@ struct ChatView: View {
                         scrollToBottom(proxy)
                     }
                     .onChange(of: viewModel.pendingUserMessage) { _, _ in
+                        scrollToBottom(proxy)
+                    }
+                    .onChange(of: viewModel.isWaitingForReply) { _, _ in
                         scrollToBottom(proxy)
                     }
                     .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -200,7 +208,9 @@ struct ChatView: View {
     /// 때는 pendingUserMessage 쪽으로 스크롤해야 실제로 맨 아래가 된다.
     private func scrollToBottom(_ proxy: ScrollViewProxy) {
         withAnimation(.easeOut(duration: 0.2)) {
-            if viewModel.pendingUserMessage != nil {
+            if viewModel.isWaitingForReply {
+                proxy.scrollTo(TypingIndicatorView.scrollAnchorID, anchor: .bottom)
+            } else if viewModel.pendingUserMessage != nil {
                 proxy.scrollTo(PendingUserMessage.scrollAnchorID, anchor: .bottom)
             } else if let lastId = viewModel.messages.last?.id {
                 proxy.scrollTo(lastId, anchor: .bottom)
