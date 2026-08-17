@@ -55,6 +55,7 @@
 		CC604C7607382102024E0FA1 /* ConversationSummaryPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CCBD8A019CAA37319E7984 /* ConversationSummaryPolicyTests.swift */; };
 		DC1369FEAE93D794107D5373 /* Color_GAMSSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596EE0F239D37460A7BA389D /* Color_GAMSSTests.swift */; };
 		E3A3BE7330A1CCAB9E144B41 /* DefaultEmotionAnalysisRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */; };
+		E834952DEF0A3543F80CB9A2 /* CardDetailViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74B79C2FD49617A221FCA7C5 /* CardDetailViewModelTests.swift */; };
 		EA9C48AD6033E92B4734D506 /* MessageTimestampFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5370238416571DC93C29121 /* MessageTimestampFormatterTests.swift */; };
 		EE5555555555555555555555 /* TypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4444444444444444444444 /* TypographyTests.swift */; };
 		F1D4E5A20F2B3C4D5E6F7A8B /* SpacingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D4E5A30F2B3C4D5E6F7A8C /* SpacingTests.swift */; };
@@ -97,6 +98,7 @@
 		6EF457567BE11A68704DC4FE /* MessageBubbleLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MessageBubbleLayoutTests.swift; sourceTree = "<group>"; };
 		706922C280295136993F80AC /* GetCardUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GetCardUseCaseTests.swift; sourceTree = "<group>"; };
 		708F57F33003C651008DF433 /* GAMSS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GAMSS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		74B79C2FD49617A221FCA7C5 /* CardDetailViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardDetailViewModelTests.swift; sourceTree = "<group>"; };
 		7674D757C326ABEDB6302AA6 /* GAMSSTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GAMSSTests.swift; sourceTree = "<group>"; };
 		79F056320618BF2744EAC909 /* EmotionTestViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionTestViewModelTests.swift; sourceTree = "<group>"; };
 		7BB1A4112363D93ED3AD1598 /* EmotionCharacterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionCharacterTests.swift; sourceTree = "<group>"; };
@@ -343,6 +345,7 @@
 				5EA0CD379D5E578049585DD1 /* ConversationPreviewTextFormatterTests.swift */,
 				279ECD6F38C25ADFF48996F2 /* ConversationListDateHeaderFormatterTests.swift */,
 				3A26CAC1BD5FA5DF19D14615 /* ConversationListViewModelTests.swift */,
+				74B79C2FD49617A221FCA7C5 /* CardDetailViewModelTests.swift */,
 			);
 			path = Presentation;
 			sourceTree = "<group>";
@@ -672,6 +675,7 @@
 				29260DC1DEE437ADC8399405 /* CreateCardRequestDTOTests.swift in Sources */,
 				6247F063C637FED7F28DDE79 /* GetCardUseCaseTests.swift in Sources */,
 				86117F35EFDB7052CCD724B1 /* DeleteCardUseCaseTests.swift in Sources */,
+				E834952DEF0A3543F80CB9A2 /* CardDetailViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
