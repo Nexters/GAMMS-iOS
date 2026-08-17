@@ -25,4 +25,14 @@ final class DefaultMemberRepository: MemberRepository {
         let response = try await networkManager.request(MemberEndpoint.fetchMyProfile, responseType: APIResponse<MemberProfileResponseDTO>.self)
         return response.data.toDomain()
     }
+    
+    func updateNickname(_ nickname: String) async throws -> User {
+        let response = try await networkManager.request(MemberEndpoint.updateNickname(.init(nickname: nickname)), responseType: APIResponse<UpdateNicknameResponseDTO>.self)
+        return User(
+            id: response.data.id,
+            email: response.data.email,
+            name: response.data.name,
+            nickname: response.data.nickname
+        )
+    }
 }

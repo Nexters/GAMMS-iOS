@@ -5,14 +5,16 @@
 //  Created by cchanmi on 8/13/26.
 //
 
+import Foundation
+
 struct GetIncompleteConversationsUseCase {
     private let conversationRepository: ConversationRepository
-
+    
     init(conversationRepository: ConversationRepository) {
         self.conversationRepository = conversationRepository
     }
-
+    
     func execute() async throws -> [ConversationSummary] {
-        try await conversationRepository.getIncompleteConversations()
+        return try await conversationRepository.getIncompleteConversations()
     }
 }

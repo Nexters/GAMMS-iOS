@@ -23,4 +23,7 @@ protocol ConversationRepository {
 
     /// 대화를 종료 처리한다. 이후 대화방 정리(감정 카드 생성 대상에서 제외 등)는 서버가 담당한다.
     func endConversation(conversationId: Int) async throws
+
+    func deleteConversations(_ ids: [Int]) async throws
+    func searchConversations(_ text: String) async throws -> SearchChatResponseDTO
 }

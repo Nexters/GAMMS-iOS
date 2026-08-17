@@ -36,24 +36,4 @@ enum AccountItem: CaseIterable, Identifiable {
             .colorGray950
         }
     }
-    
-    enum Action {
-        case navigate
-        case logout
-        case withdraw
-        case none
-    }
-    
-    var action: Action {
-        switch self {
-        case .changeNickname:
-            .navigate
-        case .email:
-            .none
-        case .logout:
-            .logout
-        case .withdraw:
-            .withdraw
-        }
-    }
 }
