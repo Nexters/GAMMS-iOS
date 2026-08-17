@@ -48,6 +48,7 @@
 		ABF5C91182F3B409C1AA9E8E /* GetMessagesUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A67D7BECCB85A88C969AD7 /* GetMessagesUseCaseTests.swift */; };
 		B32ACCF04698A89364EDDECE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 316EA002FAC5D3328796EF90 /* Foundation.framework */; };
 		B6A398A4770795906F2B9DD0 /* DefaultMemberRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7199AB4FF706448FF5C6F3 /* DefaultMemberRepositoryTests.swift */; };
+		B80C3F0EF4C82027FE1BA377 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = AC51C7CD8AAE4998794DF213 /* Lottie */; };
 		BA7748118B0D2759E0F6A207 /* Pods_GAMSSTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1CC8FA289575E4B98C41539 /* Pods_GAMSSTests.framework */; };
 		C63AB33F1424E4237FF76F6B /* SummaryErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162D28B313B7D3B6D79FE039 /* SummaryErrorTests.swift */; };
 		C8DE812C64C04B4EE47E3636 /* DefaultConversationRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDBFC0FF1B12BFFA1F771ADA /* DefaultConversationRepositoryTests.swift */; };
@@ -174,6 +175,7 @@
 				70248DCD300D429100857369 /* FirebaseAuth in Frameworks */,
 				26A84A0255BB5BB7139414C5 /* Tokenizers in Frameworks */,
 				A8948FBCA4DF4E43F2C582EA /* Pods_GAMSS.framework in Frameworks */,
+				B80C3F0EF4C82027FE1BA377 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -446,6 +448,7 @@
 				70248D84300794C800857369 /* FirebaseCrashlytics */,
 				70248DCC300D429100857369 /* FirebaseAuth */,
 				4F92A4F86371ED0E8E85D78F /* Tokenizers */,
+				AC51C7CD8AAE4998794DF213 /* Lottie */,
 			);
 			productName = GAMSS;
 			productReference = 708F57F33003C651008DF433 /* GAMSS.app */;
@@ -500,6 +503,7 @@
 			packageReferences = (
 				70248D83300794C800857369 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				1D962D6FF84B1C7ED5A40445 /* XCRemoteSwiftPackageReference "swift-transformers" */,
+				91E9EADA9D9B87C6EA814A75 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 708F57F43003C651008DF433 /* Products */;
@@ -988,6 +992,14 @@
 				minimumVersion = 12.16.0;
 			};
 		};
+		91E9EADA9D9B87C6EA814A75 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.4.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1010,6 +1022,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1D962D6FF84B1C7ED5A40445 /* XCRemoteSwiftPackageReference "swift-transformers" */;
 			productName = Tokenizers;
+		};
+		AC51C7CD8AAE4998794DF213 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 91E9EADA9D9B87C6EA814A75 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
