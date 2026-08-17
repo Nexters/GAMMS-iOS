@@ -26,11 +26,11 @@ struct ArchiveView: View {
             .padding(.top, Spacing.spacing300)
 
             Spacer()
-        }
+        } // TODO: cardId 값 바인딩 필요
         .fullScreenCover(isPresented: $isShowingCardDetail) {
             CardDetailView(
                 viewModel: CardDetailViewModel(
-                    cardId: 1,
+                    cardId: 28,
                     getCardUseCase: GetCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)),
                     deleteCardUseCase: DeleteCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared))
                 ),
