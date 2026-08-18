@@ -35,4 +35,9 @@ final class DefaultMemberRepository: MemberRepository {
             nickname: response.data.nickname
         )
     }
+
+    func fetchTokenUsage() async throws -> TokenUsage {
+        let response = try await networkManager.request(MemberEndpoint.fetchMyTokenUsage, responseType: APIResponse<TokenUsageResponseDTO>.self)
+        return response.data.toDomain()
+    }
 }
