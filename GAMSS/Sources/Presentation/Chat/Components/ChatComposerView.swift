@@ -18,6 +18,7 @@ struct ChatComposerView: View {
     let onCancelReply: () -> Void
     /// 대화가 종료된 뒤에는 true — 입력 자체를 막고 전송 버튼도 숨긴다.
     let isDisabled: Bool
+    let disabledPlaceholder: String
     let onSend: () -> Void
     let onTextChange: (String) -> Bool
     @FocusState.Binding var isFocused: Bool
@@ -57,12 +58,12 @@ struct ChatComposerView: View {
     /// 간격은 바깥 VStack의 spacing(8pt)이 그대로 보장해준다.
     private var textFieldRow: some View {
         TextField(
-            isDisabled ? "대화가 종료됐어요" : "메시지 입력",
+            isDisabled ? disabledPlaceholder : "메시지 입력",
             text: $text,
             // TextField(prompt:)는 Text 타입을 요구해서 `.typography(_:)`(some View 반환)를
             // 쓸 수 없다 — Text 자체의 font/tracking으로 직접 맞춘다. lineSpacing은 Text에
             // 없는 API라 여기선 적용 대상이 아니다.
-            prompt: Text(isDisabled ? "대화가 종료됐어요" : "메시지 입력")
+            prompt: Text(isDisabled ? disabledPlaceholder : "메시지 입력")
                 .font(.custom(Typography.body4Medium.metrics.weight.postScriptName(), size: Typography.body4Medium.metrics.fontSize))
                 .tracking(Typography.body4Medium.metrics.letterSpacing)
                 .foregroundColor(Color.colorGray400),
@@ -160,6 +161,7 @@ struct ChatComposerView: View {
         replyTargetContent: nil,
         onCancelReply: {},
         isDisabled: false,
+        disabledPlaceholder: "대화가 종료됐어요",
         onSend: {},
         onTextChange: { _ in false },
         isFocused: $isFocused
@@ -177,6 +179,7 @@ struct ChatComposerView: View {
         replyTargetContent: "안녕하세용",
         onCancelReply: {},
         isDisabled: false,
+        disabledPlaceholder: "대화가 종료됐어요",
         onSend: {},
         onTextChange: { _ in false },
         isFocused: $isFocused

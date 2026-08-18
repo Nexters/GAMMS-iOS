@@ -100,6 +100,7 @@ struct ChatView: View {
                             replyTargetContent: viewModel.replyTarget?.content,
                             onCancelReply: { viewModel.cancelReply() },
                             isDisabled: viewModel.isConversationEnded,
+                            disabledPlaceholder: "대화가 종료됐어요",
                             onSend: { Task { await viewModel.send() } },
                             onTextChange: { viewModel.updateInput($0) },
                             isFocused: $isInputFocused
