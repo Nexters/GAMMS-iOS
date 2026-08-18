@@ -43,14 +43,17 @@ private extension ArchiveView {
             Image("logoGamss")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 80)
+                .frame(height: 24)
             
             Spacer()
             
             Button {
                 
             } label: {
-                Image(systemName: "homeMenuIcon")
+                Image("gear")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
                     .foregroundStyle(Color.colorGray900)
             }
         }
@@ -68,7 +71,7 @@ private extension ArchiveView {
         ) {
             ForEach(viewModel.emotions) { emotion in
                 NavigationLink {
-                    Text("쓰레기화면 이동: \(emotion.rawValue)")
+                    ArchiveDetailView(title: emotion.name, viewModel: ArchiveDetailViewModel(fetchMonthlyCardsUseCase: DefaultFetchMonthlyCardsUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared))))
                 } label: {
                     TrashItemView(imageNamed: emotion.trashImageNamed)
                         .frame(width: 132, height: 172)
