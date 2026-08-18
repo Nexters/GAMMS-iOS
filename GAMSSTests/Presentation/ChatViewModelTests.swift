@@ -688,7 +688,7 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.messages, [userMessage], "토큰 조회와 무관하게 메시지 히스토리도 정상 로드되어야 함")
     }
 
-    func test_loadTokenUsage_calledAgainWithNotExceededResult_flipsFlagBackToFalse() async {
+    func test_loadTokenUsage_calledAgainAfterNewMessage_refetchesAndFlipsFlagBackToFalse() async {
         let memberRepository = MockMemberRepository()
         memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 100000, dailyLimit: 100000, exceeded: true))
         let viewModel = makeViewModel(memberRepository: memberRepository)
@@ -696,9 +696,29 @@ final class ChatViewModelTests: XCTestCase {
         await viewModel.loadTokenUsage()
         XCTAssertTrue(viewModel.isTokenExceeded)
 
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        viewModel.seed(with: SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+
         memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 12000, dailyLimit: 100000, exceeded: false))
         await viewModel.loadTokenUsage()
 
-        XCTAssertFalse(viewModel.isTokenExceeded, "재조회 결과가 더 이상 초과가 아니면 다시 false로 내려가야 함")
+        XCTAssertFalse(viewModel.isTokenExceeded, "새 메시지가 오간 뒤 재조회 결과가 더 이상 초과가 아니면 다시 false로 내려가야 함")
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 2, "새 메시지가 있었으면 캐시를 쓰지 않고 다시 API를 불러야 함")
+    }
+
+    func test_loadTokenUsage_calledAgainWithoutNewMessage_skipsRefetchAndKeepsCachedValue() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 12000, dailyLimit: 100000, exceeded: false))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+
+        await viewModel.loadTokenUsage()
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 1)
+
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 99000, dailyLimit: 100000, exceeded: true))
+        await viewModel.loadTokenUsage()
+
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 1, "그 사이 새 메시지가 없었으면 API를 다시 부르면 안 됨")
+        XCTAssertEqual(viewModel.tokenUsage?.usedTokens, 12000, "마지막으로 받아온 값을 그대로 보여줘야 함")
+        XCTAssertFalse(viewModel.isTokenExceeded, "캐시된 값 기준 상태를 그대로 유지해야 함")
     }
 }

@@ -36,6 +36,7 @@ final class ChatViewModel: ObservableObject {
     private let getTokenUsageUseCase: GetTokenUsageUseCase
     private let summaryStore: ConversationSummaryStore
     private var revealTask: Task<Void, Never>?
+    private var isTokenUsageStale = true
     /// 테스트에서 백그라운드 요약 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
     private(set) var pendingSummaryUpdateTask: Task<Void, Never>?
 
@@ -116,6 +117,8 @@ final class ChatViewModel: ObservableObject {
     }
 
     func loadTokenUsage() async {
+        guard isTokenUsageStale else { return }
+
         isLoadingTokenUsage = true
         tokenUsageErrorMessage = nil
         defer { isLoadingTokenUsage = false }
@@ -123,6 +126,7 @@ final class ChatViewModel: ObservableObject {
             let usage = try await getTokenUsageUseCase.execute()
             tokenUsage = usage
             isTokenExceeded = usage.exceeded
+            isTokenUsageStale = false
         } catch {
             tokenUsageErrorMessage = "토큰 사용량을 불러오지 못했어요"
         }
@@ -180,6 +184,7 @@ final class ChatViewModel: ObservableObject {
     /// getMessages로 조회하지 않기 위한 용도.
     func seed(with sent: SentMessage) {
         conversationId = sent.message.conversationId
+        isTokenUsageStale = true
 
         // 첫 댓글은 즉시, 나머지는 순차 노출 큐로.
         messages.append(sent.message)
