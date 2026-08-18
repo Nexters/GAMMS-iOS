@@ -61,9 +61,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     /// 화면 진입 시 한 번 호출한다. 다른 화면에서 이미 받아온 응답이 있으면 그걸로 채우고,
-    /// 없으면 기존 대화의 히스토리를 불러온다. 토큰 사용량 조회는 메시지 로딩과 서로 독립적인
-    /// 작업이라 async let으로 동시에 시작한다 — 이미 한도를 초과한 사용자가 화면에 들어오자마자
-    /// 입력창이 비활성화되도록, 아이콘을 누르거나 전송을 시도할 때까지 기다리지 않는다.
+    /// 없으면 기존 대화의 히스토리를 불러온다.
     func start() async {
         async let tokenUsageFetch: Void = loadTokenUsage()
 
