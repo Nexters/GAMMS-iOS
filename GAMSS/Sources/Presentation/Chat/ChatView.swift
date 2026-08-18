@@ -110,7 +110,8 @@ struct ChatView: View {
                         guard newHeight != keyboardHeight else { return }
                         keyboardHeight = newHeight
                         if viewModel.isAtBottom {
-                            scrollToBottom(proxy)
+                            let duration = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double) ?? 0.25
+                            scrollToBottom(proxy, animation: .easeInOut(duration: duration))
                         }
                     }
                     .onChange(of: viewModel.replyTarget) { _, _ in
@@ -246,8 +247,8 @@ struct ChatView: View {
         }
     }
 
-    private func scrollToBottom(_ proxy: ScrollViewProxy) {
-        withAnimation(.easeOut(duration: 0.2)) {
+    private func scrollToBottom(_ proxy: ScrollViewProxy, animation: Animation = .easeOut(duration: 0.2)) {
+        withAnimation(animation) {
             if viewModel.pendingUserMessage != nil {
                 proxy.scrollTo(PendingUserMessage.scrollAnchorID, anchor: .bottom)
             } else if let lastId = viewModel.messages.last?.id {
