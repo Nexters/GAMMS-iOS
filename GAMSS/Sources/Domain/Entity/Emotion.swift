@@ -23,4 +23,21 @@ extension Emotion {
     static let orderedByModelIndex: [Emotion] = [
         .angry, .anxious, .embarrassed, .happy, .heartache, .sad,
     ]
+    
+    var name: String {
+        switch self {
+        case .angry:
+            return "분노"
+        case .happy:
+            return "기쁨"
+        case .anxious:
+            return "불안"
+        case .embarrassed:
+            return "엉뚱"
+        case .sad:
+            return "슬픔"
+        case .heartache:
+            return "까칠"
+        }
+    }
 }
