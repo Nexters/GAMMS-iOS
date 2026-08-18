@@ -199,10 +199,9 @@ struct ChatView: View {
 
                 Spacer()
 
-                HStack(spacing: Spacing.spacing300) {
+                HStack(spacing: Spacing.spacing400) {
                     Button(action: { viewModel.requestEndConversation() }) {
-                        Image(systemName: "checkmark.circle")
-                            .foregroundStyle(Color.colorGray950)
+                        Image("iconCardGenerate")
                     }
                     .disabled(!viewModel.canEndConversation)
                     .accessibilityLabel("대화 종료")
