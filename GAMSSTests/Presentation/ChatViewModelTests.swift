@@ -672,4 +672,33 @@ final class ChatViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.composerDisabledPlaceholder, "대화가 종료됐어요")
     }
+
+    func test_start_fetchesTokenUsageAndSetsExceededFlagWithoutExplicitLoadCall() async {
+        let repository = MockConversationRepository()
+        let userMessage = Message(id: 1, conversationId: 10, sender: .user, content: "사용자 발화", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedMessages = [userMessage]
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 100000, dailyLimit: 100000, exceeded: true))
+        let viewModel = makeViewModel(repository: repository, memberRepository: memberRepository, conversationId: 10)
+
+        await viewModel.start()
+
+        XCTAssertTrue(viewModel.isTokenExceeded, "start() 하나만으로 토큰 초과 상태가 반영되어야 함")
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 1)
+        XCTAssertEqual(viewModel.messages, [userMessage], "토큰 조회와 무관하게 메시지 히스토리도 정상 로드되어야 함")
+    }
+
+    func test_loadTokenUsage_calledAgainWithNotExceededResult_flipsFlagBackToFalse() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 100000, dailyLimit: 100000, exceeded: true))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+
+        await viewModel.loadTokenUsage()
+        XCTAssertTrue(viewModel.isTokenExceeded)
+
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 12000, dailyLimit: 100000, exceeded: false))
+        await viewModel.loadTokenUsage()
+
+        XCTAssertFalse(viewModel.isTokenExceeded, "재조회 결과가 더 이상 초과가 아니면 다시 false로 내려가야 함")
+    }
 }

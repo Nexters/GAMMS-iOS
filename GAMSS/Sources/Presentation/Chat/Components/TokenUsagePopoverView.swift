@@ -56,6 +56,7 @@ struct TokenUsagePopoverView: View {
             Button("다시 시도", action: onRetry)
                 .typography(.body5Medium)
                 .foregroundStyle(Color.colorGray900)
+                .buttonStyle(.plain)
         }
     }
 

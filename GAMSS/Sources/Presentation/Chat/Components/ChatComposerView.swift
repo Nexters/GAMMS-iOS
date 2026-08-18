@@ -16,7 +16,7 @@ struct ChatComposerView: View {
     let replyTargetLabel: String?
     let replyTargetContent: String?
     let onCancelReply: () -> Void
-    /// 대화가 종료된 뒤에는 true — 입력 자체를 막고 전송 버튼도 숨긴다.
+    /// 대화가 종료됐거나 토큰 사용량을 다 썼으면 true — 입력 자체를 막고 전송 버튼도 숨긴다.
     let isDisabled: Bool
     let disabledPlaceholder: String
     let onSend: () -> Void

@@ -176,9 +176,6 @@ struct ChatView: View {
 
                     Button(action: {
                         viewModel.isTokenUsagePopoverPresented.toggle()
-                        if viewModel.isTokenUsagePopoverPresented {
-                            Task { await viewModel.loadTokenUsage() }
-                        }
                     }) {
                         Image("iconTokenUsage")
                     }
@@ -191,6 +188,11 @@ struct ChatView: View {
                             onRetry: { Task { await viewModel.loadTokenUsage() } }
                         )
                         .presentationCompactAdaptation(.popover)
+                        // 버튼 탭이 아니라 popover가 실제로 나타날 때 새로 조회한다 — 진입 시
+                        // start()에서 이미 한 번 채워둔 값이 잠깐이라도 화면에 비치지 않도록.
+                        .task {
+                            await viewModel.loadTokenUsage()
+                        }
                     }
                 }
             }
