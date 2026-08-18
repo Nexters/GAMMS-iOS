@@ -74,6 +74,9 @@ struct HomeView: View {
             // 줄어들면 같이 움직여 보인다 — 키보드에 반응해 레이아웃이 줄어들지 않게 한다.
             .ignoresSafeArea(.keyboard, edges: .bottom)
             .navigationBarHidden(true)
+            .onChange(of: viewModel.createdConversationId) { _, newValue in
+                if newValue != nil { isInputFocused = false }
+            }
             .navigationDestination(item: $viewModel.createdConversationId) { conversationId in
                 ChatView(
                     viewModel: ChatViewModel(
@@ -112,6 +115,7 @@ struct HomeView: View {
             Spacer()
 
             Button {
+                isInputFocused = false
                 isSettingPresented = true
             } label: {
                 Image("gear")

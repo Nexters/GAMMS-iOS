@@ -49,20 +49,22 @@ struct MessageComposerView: View {
 
             if input.isEmpty {
                 Text("무슨 이야기를 버려볼까요?")
-                    .typography(.body3Regular)
-                    .foregroundStyle(Color.colorGray400)
+                    .typography(.subtitle3)
+                    .foregroundStyle(Color.colorGray500)
                     .lineLimit(1)
                     .padding(.leading, Spacing.spacing300)
                     .padding(.top, Spacing.spacing300)
             }
 
             TextEditor(text: $input)
-                .typography(.body3Regular)
+                .typography(.subtitle3)
                 .foregroundStyle(Color.colorGray950)
                 .scrollContentBackground(.hidden)
-                .padding(.leading, Spacing.spacing200)
+                // TextEditor는 내부에 자체 여백(대략 top 8pt, leading 5pt)이 이미 있어서,
+                // placeholder Text와 같은 위치(leading/top 16)에 커서가 오도록 그만큼 뺀 값을 준다.
+                .padding(.leading, 11)
                 .padding(.trailing, Spacing.spacing200)
-                .padding(.top, Spacing.spacing200)
+                .padding(.top, 8)
                 .padding(.bottom, controlsRowHeight)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 .focused(isFocused)
@@ -101,16 +103,18 @@ struct MessageComposerView: View {
         } label: {
             HStack(spacing: Spacing.spacing025) {
                 Text("감정")
-                    .typography(.body4Regular)
+                    .typography(.body4Medium)
+                    .foregroundStyle(Color.colorGray800)
                 Image(systemName: isEmotionPickerOpen ? "chevron.up" : "chevron.down")
                     .font(.system(size: 10))
+                    .foregroundStyle(Color.colorGray700)
             }
-            .foregroundStyle(Color.colorGray500)
         }
         .overlay(alignment: .topLeading) {
             if isEmotionPickerOpen {
                 emotionGrid
-                    .padding(.top, controlsRowHeight) // 트리거 버튼 아래(박스 바깥)로 밀어냄
+                    // 박스 하단과 10px 겹치도록 controlsRowHeight보다 살짝 덜 밀어냄.
+                    .padding(.top, controlsRowHeight - 10)
             }
         }
     }
@@ -141,9 +145,8 @@ struct MessageComposerView: View {
         }
         .padding(Spacing.spacing400)
         .background(Color.colorWhite)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.radius200))
         .overlay(
-            RoundedRectangle(cornerRadius: Radius.radius200)
+            Rectangle()
                 .stroke(Color.colorGray950, lineWidth: 1.5)
         )
     }
@@ -155,11 +158,12 @@ struct MessageComposerView: View {
             onToggleEmotion(emotion)
         } label: {
             HStack(spacing: Spacing.spacing050) {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "checkmark.circle")
-                    .foregroundStyle(isSelected ? Color.colorGray950 : Color.colorGray300)
+                Image(isSelected ? "emotionCheckSelected" : "emotionCheckUnselected")
+                    .resizable()
+                    .frame(width: 18, height: 18)
                 Text(emotion.pickerLabel)
-                    .typography(.body4Regular)
-                    .foregroundStyle(Color.colorGray800)
+                    .typography(.body5Medium)
+                    .foregroundStyle(Color.colorGray700)
                     .fixedSize(horizontal: true, vertical: false)
             }
         }
