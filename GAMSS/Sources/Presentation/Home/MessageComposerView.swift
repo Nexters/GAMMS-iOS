@@ -13,8 +13,8 @@ import SwiftUI
 ///
 /// TextEditor는 collapsed/expanded 어느 상태에서든 항상 같은 인스턴스로 유지한다 — 상태 전환마다
 /// TextEditor를 새로 만들면 그 순간 키보드 포커스가 끊길 수 있다. 대신 감정 트리거/전송 버튼을
-/// `.overlay(alignment: .bottom...)`로 박스 하단에 얹어, collapsed(박스 높이가 한 줄 높이와 같음)일
-/// 때는 자연스럽게 텍스트와 한 줄에 겹쳐 보이고 expanded일 때는 텍스트 아래 별도 줄로 보이게 한다.
+/// `.overlay(alignment: .bottom...)`로 박스 하단에 얹는다 — 두 상태 모두 박스가 한 줄 텍스트보다
+/// 충분히 커서, 텍스트는 항상 상단에 컨트롤 행은 항상 하단 별도 줄에 보인다.
 struct MessageComposerView: View {
     @Binding var input: String
     let selectedEmotions: Set<EmotionCharacter>
