@@ -22,7 +22,7 @@ struct ChatView: View {
     private let containerPadding = Spacing.spacing300
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .topTrailing) {
             chatContent
 
             if viewModel.isEndConfirmationPresented {
@@ -42,8 +42,31 @@ struct ChatView: View {
                     )
                 }
             }
+
+            if viewModel.isTokenUsagePopoverPresented {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        viewModel.isTokenUsagePopoverPresented = false
+                    }
+
+                TokenUsagePopoverView(
+                    tokenUsage: viewModel.tokenUsage,
+                    isLoading: viewModel.isLoadingTokenUsage,
+                    errorMessage: viewModel.tokenUsageErrorMessage,
+                    onRetry: { Task { await viewModel.loadTokenUsage() } }
+                )
+                .task {
+                    await viewModel.loadTokenUsage()
+                }
+                .padding(.top, tokenUsagePopoverTopOffset)
+                .padding(.trailing, Spacing.spacing400)
+            }
         }
     }
+
+    private let tokenUsagePopoverTopOffset: CGFloat = Spacing.spacing400 + 24 + Spacing.spacing200
 
     private var chatContent: some View {
         VStack(spacing: 0) {
@@ -107,7 +130,8 @@ struct ChatView: View {
                             replyTargetLabel: viewModel.replyTarget.flatMap { QuotedReplyHeader.label(forQuotedSender: $0.sender) },
                             replyTargetContent: viewModel.replyTarget?.content,
                             onCancelReply: { viewModel.cancelReply() },
-                            isDisabled: viewModel.isConversationEnded,
+                            isDisabled: viewModel.isConversationEnded || viewModel.isTokenExceeded,
+                            disabledPlaceholder: viewModel.composerDisabledPlaceholder,
                             onSend: { Task { await viewModel.send() } },
                             onTextChange: { viewModel.updateInput($0) },
                             isFocused: $isInputFocused
@@ -157,7 +181,7 @@ struct ChatView: View {
         }
     }
 
-    /// 커스텀 상단 헤더: 뒤로가기 + 대화방 생성 날짜 + 우측 버튼 2개(종료, 자리만 미리 만든 placeholder).
+    /// 커스텀 상단 헤더: 뒤로가기 + 대화방 생성 날짜 + 우측 버튼 2개(종료, 토큰 사용량).
     /// 시스템 네비게이션 바는 `.toolbar(.hidden, for: .navigationBar)`로 숨기고 이 헤더가 대신한다.
     private var header: some View {
         ZStack {
@@ -181,12 +205,12 @@ struct ChatView: View {
                     .disabled(!viewModel.canEndConversation)
                     .accessibilityLabel("대화 종료")
 
-                    // 다음 이터레이션에서 동작을 채울 자리만 미리 만든 버튼. 아이콘은 확정 전.
-                    Button(action: {}) {
-                        Image(systemName: "ellipsis")
-                            .foregroundStyle(Color.colorGray950)
+                    Button(action: {
+                        viewModel.isTokenUsagePopoverPresented.toggle()
+                    }) {
+                        Image("iconTokenUsage")
                     }
-                    .accessibilityLabel("더보기")
+                    .accessibilityLabel("토큰 사용량")
                 }
             }
         }

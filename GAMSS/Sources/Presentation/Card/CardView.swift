@@ -88,23 +88,6 @@ struct CardView<BottomContent: View>: View {
     }
 }
 
-private struct DashedDivider: View {
-    var body: some View {
-        DashedLine()
-            .stroke(Color.colorGray950, style: StrokeStyle(lineWidth: 1.3, dash: [5]))
-            .frame(height: 1)
-    }
-}
-
-private struct DashedLine: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.minX, y: rect.midY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
-        return path
-    }
-}
-
 #Preview {
     ZStack {
         Color.colorBlack.opacity(0.7).ignoresSafeArea()
