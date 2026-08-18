@@ -101,6 +101,16 @@ struct ChatView: View {
                     .onChange(of: viewModel.pendingUserMessage) { _, _ in
                         scrollToBottom(proxy)
                     }
+                    .onChange(of: geometry.safeAreaInsets.bottom) { _, _ in
+                        if viewModel.isAtBottom {
+                            scrollToBottom(proxy)
+                        }
+                    }
+                    .onChange(of: viewModel.replyTarget) { _, _ in
+                        if viewModel.isAtBottom {
+                            scrollToBottom(proxy)
+                        }
+                    }
                     .safeAreaInset(edge: .bottom, spacing: 0) {
                         VStack(spacing: 0) {
                             bottomIndicator(proxy: proxy)
