@@ -11,6 +11,11 @@ struct ChatView: View {
     @StateObject private var viewModel: ChatViewModel
     @FocusState private var isInputFocused: Bool
     @SwiftUI.Environment(\.dismiss) private var dismiss
+    @State private var keyboardHeight: CGFloat = 0
+
+    private let keyboardWillChange = NotificationCenter.default.publisher(
+        for: UIResponder.keyboardWillChangeFrameNotification
+    )
 
     init(viewModel: ChatViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -99,7 +104,11 @@ struct ChatView: View {
                     .onChange(of: viewModel.pendingUserMessage) { _, _ in
                         scrollToBottom(proxy)
                     }
-                    .onChange(of: geometry.safeAreaInsets.bottom) { _, _ in
+                    .onReceive(keyboardWillChange) { notification in
+                        guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+                        let newHeight = max(0, UIScreen.main.bounds.height - frame.origin.y)
+                        guard newHeight != keyboardHeight else { return }
+                        keyboardHeight = newHeight
                         if viewModel.isAtBottom {
                             scrollToBottom(proxy)
                         }
