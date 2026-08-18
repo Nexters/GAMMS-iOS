@@ -668,6 +668,8 @@ final class ChatViewModelTests: XCTestCase {
         let repository = MockConversationRepository()
         let viewModel = makeViewModel(repository: repository, conversationId: 10)
 
+        await viewModel.confirmEndConversation()
+
         XCTAssertEqual(viewModel.composerDisabledPlaceholder, "대화가 종료됐어요")
     }
 }
