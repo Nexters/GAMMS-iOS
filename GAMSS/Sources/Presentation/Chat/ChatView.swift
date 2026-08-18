@@ -83,9 +83,11 @@ struct ChatView: View {
                         }
                         .padding(containerPadding)
                     }
-                    // ScrollView가 키보드에 의해 축소/복원될 때
-                    // SwiftUI가 키보드 dismiss를 자연스럽게 처리하도록 한다.
-                    .scrollDismissesKeyboard(.interactively)
+                    .background(
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .onTapGesture { isInputFocused = false }
+                    )
                     .onChange(of: viewModel.messages) { _, _ in
                         scrollToBottom(proxy)
                     }
