@@ -5,13 +5,15 @@
 //  Created by cchanmi on 7/24/26.
 //
 
-enum Emotion: String, CaseIterable, Equatable {
+enum Emotion: String, CaseIterable, Equatable, Identifiable {
     case angry
     case happy
     case anxious
     case embarrassed
     case sad
     case heartache
+    
+    var id: Self { self }
 }
 
 extension Emotion {

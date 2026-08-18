@@ -34,7 +34,7 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            ArchiveView()
+            ArchiveView(viewModel: ArchiveViewModel())
                 .tabItem { tabLabel(for: .archive) }
                 .tag(MainTab.archive)
 
