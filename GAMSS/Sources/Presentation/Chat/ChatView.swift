@@ -107,8 +107,10 @@ struct ChatView: View {
                             if viewModel.isWaitingForReply {
                                 TypingIndicatorView()
                                     .id(TypingIndicatorView.scrollAnchorID)
+                                    .transition(.opacity)
                             }
                         }
+                        .animation(.easeOut(duration: 0.2), value: viewModel.isWaitingForReply)
                         .padding(containerPadding)
                     }
                     // ScrollView가 키보드에 의해 축소/복원될 때
