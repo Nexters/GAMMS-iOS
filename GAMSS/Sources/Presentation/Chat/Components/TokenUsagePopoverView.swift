@@ -29,10 +29,9 @@ struct TokenUsagePopoverView: View {
         .frame(width: 220)
         .background(Color.colorWhite)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            Rectangle()
                 .strokeBorder(Color.colorGray950, lineWidth: 1)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private var loadingContent: some View {
@@ -85,17 +84,17 @@ struct TokenUsagePopoverView: View {
     private func progressBar(percent: Int) -> some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 4)
+                Rectangle()
                     .fill(Color.colorGray075)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 4)
+                        Rectangle()
                             .strokeBorder(Color.colorGray900, lineWidth: 1)
                     )
 
-                RoundedRectangle(cornerRadius: 4)
+                Rectangle()
                     .fill(Color.colorGray800)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 4)
+                        Rectangle()
                             .strokeBorder(Color.colorGray900, lineWidth: 1)
                     )
                     .frame(width: geometry.size.width * CGFloat(percent) / 100)

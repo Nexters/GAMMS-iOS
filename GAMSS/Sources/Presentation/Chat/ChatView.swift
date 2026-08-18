@@ -22,7 +22,7 @@ struct ChatView: View {
     private let containerPadding = Spacing.spacing300
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .topTrailing) {
             chatContent
 
             if viewModel.isEndConfirmationPresented {
@@ -42,8 +42,36 @@ struct ChatView: View {
                     )
                 }
             }
+
+            if viewModel.isTokenUsagePopoverPresented {
+                // 팝오버 바깥 아무 곳이나 누르면 닫힌다 — 아이콘 재클릭과 동일한 효과.
+                Color.clear
+                    .contentShape(Rectangle())
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        viewModel.isTokenUsagePopoverPresented = false
+                    }
+
+                TokenUsagePopoverView(
+                    tokenUsage: viewModel.tokenUsage,
+                    isLoading: viewModel.isLoadingTokenUsage,
+                    errorMessage: viewModel.tokenUsageErrorMessage,
+                    onRetry: { Task { await viewModel.loadTokenUsage() } }
+                )
+                // 버튼 탭이 아니라 popover가 실제로 나타날 때 새로 조회한다 — 진입 시
+                // start()에서 이미 한 번 채워둔 값이 잠깐이라도 화면에 비치지 않도록.
+                .task {
+                    await viewModel.loadTokenUsage()
+                }
+                .padding(.top, tokenUsagePopoverTopOffset)
+                .padding(.trailing, Spacing.spacing400)
+            }
         }
     }
+
+    /// 헤더 위쪽 패딩(20) + 아이콘 높이(24) + 버튼과의 간격(12) — 아이콘 바로 아래 12px
+    /// 떨어진 자리에 팝오버가 붙도록.
+    private let tokenUsagePopoverTopOffset: CGFloat = Spacing.spacing400 + 24 + Spacing.spacing200
 
     private var chatContent: some View {
         VStack(spacing: 0) {
@@ -180,20 +208,6 @@ struct ChatView: View {
                         Image("iconTokenUsage")
                     }
                     .accessibilityLabel("토큰 사용량")
-                    .popover(isPresented: $viewModel.isTokenUsagePopoverPresented) {
-                        TokenUsagePopoverView(
-                            tokenUsage: viewModel.tokenUsage,
-                            isLoading: viewModel.isLoadingTokenUsage,
-                            errorMessage: viewModel.tokenUsageErrorMessage,
-                            onRetry: { Task { await viewModel.loadTokenUsage() } }
-                        )
-                        .presentationCompactAdaptation(.popover)
-                        // 버튼 탭이 아니라 popover가 실제로 나타날 때 새로 조회한다 — 진입 시
-                        // start()에서 이미 한 번 채워둔 값이 잠깐이라도 화면에 비치지 않도록.
-                        .task {
-                            await viewModel.loadTokenUsage()
-                        }
-                    }
                 }
             }
         }
