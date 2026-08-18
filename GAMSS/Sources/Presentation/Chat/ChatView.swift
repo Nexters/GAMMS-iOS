@@ -102,17 +102,21 @@ struct ChatView: View {
                         scrollToBottom(proxy)
                     }
                     .safeAreaInset(edge: .bottom, spacing: 0) {
-                        ChatComposerView(
-                            text: $viewModel.input,
-                            isSendDisabled: viewModel.isSendDisabled,
-                            replyTargetLabel: viewModel.replyTarget.flatMap { QuotedReplyHeader.label(forQuotedSender: $0.sender) },
-                            replyTargetContent: viewModel.replyTarget?.content,
-                            onCancelReply: { viewModel.cancelReply() },
-                            isDisabled: viewModel.isConversationEnded,
-                            onSend: { Task { await viewModel.send() } },
-                            onTextChange: { viewModel.updateInput($0) },
-                            isFocused: $isInputFocused
-                        )
+                        VStack(spacing: 0) {
+                            bottomIndicator(proxy: proxy)
+
+                            ChatComposerView(
+                                text: $viewModel.input,
+                                isSendDisabled: viewModel.isSendDisabled,
+                                replyTargetLabel: viewModel.replyTarget.flatMap { QuotedReplyHeader.label(forQuotedSender: $0.sender) },
+                                replyTargetContent: viewModel.replyTarget?.content,
+                                onCancelReply: { viewModel.cancelReply() },
+                                isDisabled: viewModel.isConversationEnded,
+                                onSend: { Task { await viewModel.send() } },
+                                onTextChange: { viewModel.updateInput($0) },
+                                isFocused: $isInputFocused
+                            )
+                        }
                     }
                 }
             }
@@ -207,6 +211,18 @@ struct ChatView: View {
     /// 확정된 메시지 목록의 마지막 항목, 없으면 전송 중인 낙관적 메시지를 기준으로 맨 아래로
     /// 스크롤한다. pendingUserMessage가 항상 messages보다 나중에 화면에 그려지므로, 둘 다 있을
     /// 때는 pendingUserMessage 쪽으로 스크롤해야 실제로 맨 아래가 된다.
+    @ViewBuilder
+    private func bottomIndicator(proxy: ScrollViewProxy) -> some View {
+        if viewModel.unseenIncomingMessage == nil, !viewModel.isAtBottom {
+            HStack {
+                Spacer()
+                ScrollDownButtonView { scrollToBottom(proxy) }
+                    .padding(.trailing, Spacing.spacing300)
+                    .padding(.bottom, Spacing.spacing100)
+            }
+        }
+    }
+
     private func scrollToBottom(_ proxy: ScrollViewProxy) {
         withAnimation(.easeOut(duration: 0.2)) {
             if viewModel.pendingUserMessage != nil {
