@@ -88,10 +88,8 @@ struct ChatView: View {
                         }
                         .padding(containerPadding)
                     }
-                    .background(
-                        Color.clear
-                            .contentShape(Rectangle())
-                            .onTapGesture { isInputFocused = false }
+                    .simultaneousGesture(
+                        TapGesture().onEnded { isInputFocused = false }
                     )
                     .onChange(of: viewModel.messages) { _, newValue in
                         if let last = newValue.last, viewModel.handleNewLastMessage(last) {
