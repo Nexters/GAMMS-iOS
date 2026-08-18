@@ -599,6 +599,23 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(cardRepository.receivedEmotion, .anger)
     }
 
+    func test_confirmEndConversation_summaryStoreReturnsNil_usesJoinedUserMessagesAsSummary() async {
+        let repository = MockConversationRepository()
+        repository.stubbedMessages = [
+            Message(id: 1, conversationId: 10, sender: .user, content: "오늘 힘들었어", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+            Message(id: 2, conversationId: 10, sender: .character(.sadness), content: "무슨 일이야?", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+            Message(id: 3, conversationId: 10, sender: .user, content: "그냥 그랬어", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+        ]
+        let cardRepository = MockCardRepository()
+        cardRepository.stubbedResult = .success(Card(id: 1, conversationId: 10, emotion: .sadness, summary: "", message: "", date: Date(timeIntervalSince1970: 0)))
+        let viewModel = makeViewModel(repository: repository, cardRepository: cardRepository, conversationId: 10)
+        await viewModel.load(conversationId: 10)
+
+        await viewModel.confirmEndConversation()
+
+        XCTAssertEqual(cardRepository.receivedSummary, "오늘 힘들었어 그냥 그랬어", "압축본이 없으면(대화가 너무 짧은 경우 등) 사용자 원문을 이어붙여 대신 보내야 함")
+    }
+
     func test_confirmEndConversation_endConversationFails_doesNotCreateCard() async {
         let repository = MockConversationRepository()
         repository.stubbedEndConversationResult = .failure(SummaryError.inferenceFailed())

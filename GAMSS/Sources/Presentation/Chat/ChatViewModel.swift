@@ -293,13 +293,23 @@ final class ChatViewModel: ObservableObject {
     /// summary는 채팅 압축본(ConversationSummaryStore)을 그대로 재사용한다 — 카드 전용 요약을
     /// 따로 만들지 않는다. emotion은 지금까지 등장한 캐릭터 답장의 최빈값.
     private func createCard(conversationId: Int) async {
-        let summary = await summaryStore.current() ?? ""
+        let summary = await summaryStore.current() ?? rawUserMessagesSummary()
         let emotion = EmotionCharacter.dominant(in: messages)
         do {
             createdCard = try await createCardUseCase.execute(conversationId: conversationId, emotion: emotion, summary: summary)
         } catch {
             alertMessage = "카드를 만들지 못했어요. 다시 시도해주세요"
         }
+    }
+
+    /// summaryStore가 압축본을 못 내놓는 경우(대화가 너무 짧아 add()가 반영되기 전에
+    /// 종료된 경우 등)의 대비책 — 서버에 빈 summary를 보내면 카드 생성이 실패하므로,
+    /// 사용자가 실제로 보낸 원문을 그대로 이어붙여 대신 보낸다.
+    private func rawUserMessagesSummary() -> String {
+        messages
+            .filter { $0.sender == .user }
+            .map(\.content)
+            .joined(separator: " ")
     }
 
     private func flushPendingComments() {
