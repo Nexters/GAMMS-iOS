@@ -461,13 +461,13 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(repository.getMessagesCallCount, 0)
     }
 
-    func test_updateInput_trailingNewline_stripsNewlineAndSignalsKeyboardDismiss() {
+    func test_updateInput_trailingNewline_keepsNewlineAndDoesNotSignalKeyboardDismiss() {
         let viewModel = makeViewModel()
 
         let shouldDismiss = viewModel.updateInput("안녕\n")
 
-        XCTAssertTrue(shouldDismiss)
-        XCTAssertEqual(viewModel.input, "안녕")
+        XCTAssertFalse(shouldDismiss)
+        XCTAssertEqual(viewModel.input, "안녕\n")
     }
 
     func test_updateInput_overMaxLength_truncatesToMaxLength() {
