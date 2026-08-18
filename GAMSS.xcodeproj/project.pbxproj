@@ -19,13 +19,14 @@
 		24EED49AAB4C574B02E9C077 /* EmotionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB4219C48B0B2A51FA9457C /* EmotionTests.swift */; };
 		26A84A0255BB5BB7139414C5 /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = 4F92A4F86371ED0E8E85D78F /* Tokenizers */; };
 		29260DC1DEE437ADC8399405 /* CreateCardRequestDTOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411F8C36A4F71C3D2F78D616 /* CreateCardRequestDTOTests.swift */; };
-		34F9001EAF385037DD9F30BC /* TokenUsageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917AD3CE2188BF3D5DCBEBF7 /* TokenUsageTests.swift */; };
 		297733B706A213A8E068FB70 /* ConversationHistoryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C393632C8A4F12516549D4 /* ConversationHistoryViewModelTests.swift */; };
+		34F9001EAF385037DD9F30BC /* TokenUsageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917AD3CE2188BF3D5DCBEBF7 /* TokenUsageTests.swift */; };
 		37CC583C76082794EA8ED2C3 /* ConversationListDateHeaderFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 279ECD6F38C25ADFF48996F2 /* ConversationListDateHeaderFormatterTests.swift */; };
 		3D1B542CB60C3958D3F16702 /* EmotionCharacterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BB1A4112363D93ED3AD1598 /* EmotionCharacterTests.swift */; };
 		3EA1E967FD5758D439B9562F /* EndConversationUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 022C2DDBA5CC65F023C72625 /* EndConversationUseCaseTests.swift */; };
 		3EF2F6DB34A2276C2C9FD746 /* diary_samples.json in Resources */ = {isa = PBXBuildFile; fileRef = ED231F0A80BD3A4AF9E50BBC /* diary_samples.json */; };
 		49CAEB1FBF568E55C6C648B7 /* ConversationListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A26CAC1BD5FA5DF19D14615 /* ConversationListViewModelTests.swift */; };
+		4F5858CDEFD69E5C60230EB3 /* MessageComposerLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B130F9698EB71973DB961378 /* MessageComposerLayoutTests.swift */; };
 		573CFD0A1638F27B889EF865 /* SendMessageUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DDF78D0118869F3D9E1E269 /* SendMessageUseCaseTests.swift */; };
 		58652E08F4413DEA2016C082 /* MessageBubbleLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF457567BE11A68704DC4FE /* MessageBubbleLayoutTests.swift */; };
 		59B8600C3D1B9FD86501884C /* CreateCardUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F98692DAD0EFA3A362F10A /* CreateCardUseCaseTests.swift */; };
@@ -119,6 +120,7 @@
 		95BC0A2F902BCC45D7A387D1 /* EmotionCharacterServerKeyMappingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmotionCharacterServerKeyMappingTests.swift; sourceTree = "<group>"; };
 		9F31305F9DDE03A304202C57 /* DefaultFetchMyProfileUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultFetchMyProfileUseCaseTests.swift; sourceTree = "<group>"; };
 		A17C099A15F7D9B1481998D0 /* DefaultSummaryRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultSummaryRepositoryTests.swift; sourceTree = "<group>"; };
+		B130F9698EB71973DB961378 /* MessageComposerLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MessageComposerLayoutTests.swift; sourceTree = "<group>"; };
 		B35175B780592B411BDD6B82 /* ConversationMessageDTOTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConversationMessageDTOTests.swift; sourceTree = "<group>"; };
 		B57C94EC067D840B994A661B /* UpdateConversationTitleUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdateConversationTitleUseCaseTests.swift; sourceTree = "<group>"; };
 		B816EE4A02D0B23C50F35FF9 /* DefaultEmotionAnalysisRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultEmotionAnalysisRepositoryTests.swift; sourceTree = "<group>"; };
@@ -359,6 +361,7 @@
 				3A26CAC1BD5FA5DF19D14615 /* ConversationListViewModelTests.swift */,
 				74B79C2FD49617A221FCA7C5 /* CardDetailViewModelTests.swift */,
 				02C393632C8A4F12516549D4 /* ConversationHistoryViewModelTests.swift */,
+				B130F9698EB71973DB961378 /* MessageComposerLayoutTests.swift */,
 			);
 			path = Presentation;
 			sourceTree = "<group>";
@@ -705,6 +708,7 @@
 				7A4795156579633496BE4C49 /* TokenUsageResponseDTOTests.swift in Sources */,
 				CF4E42B9AC7C49293DFDE9D0 /* GetTokenUsageUseCaseTests.swift in Sources */,
 				297733B706A213A8E068FB70 /* ConversationHistoryViewModelTests.swift in Sources */,
+				4F5858CDEFD69E5C60230EB3 /* MessageComposerLayoutTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
