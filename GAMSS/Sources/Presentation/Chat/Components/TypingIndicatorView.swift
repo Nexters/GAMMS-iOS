@@ -16,8 +16,7 @@ struct TypingIndicatorView: View {
     /// ChatView가 스크롤 대상으로 삼는 고정 id.
     static let scrollAnchorID = "typingIndicator"
 
-    /// 로티 원본 비율(745×514)을 유지한 표시 크기.
-    private let animationSize = CGSize(width: 58, height: 40)
+    private let animationSize = CGSize(width: 54, height: 36)
 
     var body: some View {
         HStack(alignment: .bottom, spacing: Spacing.spacing100) {
@@ -40,8 +39,6 @@ struct TypingIndicatorView: View {
             .resizable()
             .scaledToFit()
             .frame(width: animationSize.width, height: animationSize.height)
-            .padding(.vertical, Spacing.spacing100)
-            .padding(.horizontal, Spacing.spacing200)
             .background(Color.colorGray025)
             .overlay(
                 Rectangle()
