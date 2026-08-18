@@ -62,6 +62,18 @@ enum EmotionCharacter: CaseIterable, Equatable {
         }
     }
 
+    /// 채팅 메시지 헤더/입력중 인디케이터에 쓰이는 캐릭터 프로필 아바타 이미지 에셋 이름.
+    var avatarImageName: String {
+        switch self {
+        case .joy: "emotionAvatarJoy"
+        case .sadness: "emotionAvatarSadness"
+        case .anger: "emotionAvatarAnger"
+        case .anxiety: "emotionAvatarAnxiety"
+        case .prickly: "emotionAvatarPrickly"
+        case .quirky: "emotionAvatarQuirky"
+        }
+    }
+
     /// 대화 종료 시 카드의 대표 감정으로 쓰인다. 캐릭터 답장에서 가장 많이 등장한 감정을 고르고,
     /// 동률이면 `allCases` 순서상 먼저 오는 쪽을 택해 항상 같은 결과가 나오게 한다.
     /// 캐릭터 답장이 하나도 없으면 nil(카드 emotion은 null로 전송).

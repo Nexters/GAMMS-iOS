@@ -26,6 +26,9 @@ final class ChatViewModel: ObservableObject {
     @Published var tokenUsageErrorMessage: String?
     @Published var isTokenUsagePopoverPresented = false
     @Published private(set) var isTokenExceeded = false
+    /// 답장 하나가 막 노출된 직후, 다음 캐릭터의 입력중 표시가 뜨기 전까지의 짧은 정적 구간.
+    /// 이 동안은 `nextReplyCharacter`가 nil을 돌려줘 인디케이터가 잠깐 사라진다.
+    @Published private(set) var isRevealPaused = false
 
     private var conversationId: Int?
     private let initialSentMessage: SentMessage?
@@ -35,7 +38,8 @@ final class ChatViewModel: ObservableObject {
     private let createCardUseCase: CreateCardUseCase
     private let getTokenUsageUseCase: GetTokenUsageUseCase
     private let summaryStore: ConversationSummaryStore
-    private var revealTask: Task<Void, Never>?
+    /// 테스트에서 순차 노출이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
+    private(set) var revealTask: Task<Void, Never>?
     private var isTokenUsageStale = true
     /// 테스트에서 백그라운드 요약 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
     private(set) var pendingSummaryUpdateTask: Task<Void, Never>?
@@ -114,6 +118,14 @@ final class ChatViewModel: ObservableObject {
         isConversationEnded ? "대화가 종료됐어요" : "오늘의 토큰을 모두 사용했어요"
     }
 
+    /// 다음으로 순차 노출될 답장의 발신자. 서버 응답(SentMessage.comments)이 이미 다 도착해
+    /// pendingComments에 담겨있는 상태라 다음 캐릭터가 누구인지 미리 알 수 있다 — 첫 응답이
+    /// 오기 전(네트워크 대기 중)에는 pendingComments가 비어있어 nil.
+    var nextReplyCharacter: EmotionCharacter? {
+        guard !isRevealPaused, case let .character(emotion) = pendingComments.first?.sender else { return nil }
+        return emotion
+    }
+
     func loadTokenUsage() async {
         guard isTokenUsageStale else { return }
 
@@ -184,12 +196,9 @@ final class ChatViewModel: ObservableObject {
         conversationId = sent.message.conversationId
         isTokenUsageStale = true
 
-        // 첫 댓글은 즉시, 나머지는 순차 노출 큐로.
         messages.append(sent.message)
-        if let first = sent.comments.first {
-            messages.append(first)
-        }
-        pendingComments = Array(sent.comments.dropFirst())
+        // 첫 댓글을 포함해 전부 순차 노출 큐로 — 모든 답장 앞에 로티가 한 번씩 뜬다.
+        pendingComments = sent.comments
         revealRemainingComments()
 
         if sent.commentStatus != .done {
@@ -272,6 +281,7 @@ final class ChatViewModel: ObservableObject {
     private func flushPendingComments() {
         revealTask?.cancel()
         revealTask = nil
+        isRevealPaused = false
         guard !pendingComments.isEmpty else { return }
         messages.append(contentsOf: pendingComments)
         pendingComments.removeAll()
@@ -288,10 +298,18 @@ final class ChatViewModel: ObservableObject {
                 guard hasNext else { break }
                 try? await Task.sleep(nanoseconds: UInt64(CommentRevealPolicy.nextGapSeconds() * 1_000_000_000))
                 guard !Task.isCancelled else { break }
-                await MainActor.run {
-                    guard !self.pendingComments.isEmpty else { return }
+                let hasMore: Bool = await MainActor.run {
+                    guard !self.pendingComments.isEmpty else { return false }
                     self.messages.append(self.pendingComments.removeFirst())
+                    let hasMore = !self.pendingComments.isEmpty
+                    self.isRevealPaused = hasMore
+                    return hasMore
                 }
+                // 다음 캐릭터가 남아있을 때만 정적 구간을 둔다 — 마지막 답장 뒤에는 쉴 필요 없음.
+                guard hasMore else { break }
+                try? await Task.sleep(nanoseconds: UInt64(CommentRevealPolicy.postRevealGapSeconds * 1_000_000_000))
+                guard !Task.isCancelled else { break }
+                await MainActor.run { self.isRevealPaused = false }
             }
         }
     }
