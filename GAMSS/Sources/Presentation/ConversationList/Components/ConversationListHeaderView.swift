@@ -38,7 +38,7 @@ struct ConversationListHeaderView: View {
                     .foregroundStyle(Color.colorGray900)
             }
             
-            Image(.homeMenuIcon)
+            Image(.gear)
                 .foregroundStyle(Color.colorGray900)
         }
         .padding(.vertical, Spacing.spacing400)

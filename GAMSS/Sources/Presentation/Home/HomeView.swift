@@ -114,10 +114,11 @@ struct HomeView: View {
             Button {
                 isSettingPresented = true
             } label: {
-                Image("homeMenuIcon")
+                Image("gear")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 24, height: 24)
+                    .foregroundStyle(Color.colorGray900)
             }
         }
     }
