@@ -132,9 +132,9 @@ struct ConversationListView: View {
                 )
                 .toolbar(.hidden, for: .tabBar)
             }
-        }
-        .task {
-            await viewModel.load()
+            .onAppear {
+                Task { await viewModel.load() }
+            }
         }
         .alert(viewModel.alertMessage ?? "", isPresented: Binding(
             get: { viewModel.alertMessage != nil },
