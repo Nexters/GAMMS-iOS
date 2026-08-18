@@ -21,6 +21,8 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isEnding = false
     @Published private(set) var isConversationEnded = false
     @Published private(set) var createdCard: Card?
+    @Published private(set) var isAtBottom = true
+    @Published private(set) var unseenIncomingMessage: Message?
 
     private var conversationId: Int?
     private let initialSentMessage: SentMessage?
@@ -82,6 +84,23 @@ final class ChatViewModel: ObservableObject {
         let result = ConversationSummaryPolicy.normalizeInput(rawValue)
         input = result.value
         return result.shouldDismissKeyboard
+    }
+
+    func markAtBottom(_ atBottom: Bool) {
+        isAtBottom = atBottom
+        if atBottom {
+            unseenIncomingMessage = nil
+        }
+    }
+
+    @discardableResult
+    func handleNewLastMessage(_ message: Message) -> Bool {
+        guard case .character = message.sender else { return true }
+        if isAtBottom {
+            return true
+        }
+        unseenIncomingMessage = message
+        return false
     }
 
     var isSendDisabled: Bool {

@@ -597,4 +597,76 @@ final class ChatViewModelTests: XCTestCase {
 
         XCTAssertNil(viewModel.createdCard)
     }
+
+    func test_isAtBottom_defaultsToTrue() {
+        let viewModel = makeViewModel()
+
+        XCTAssertTrue(viewModel.isAtBottom)
+    }
+
+    func test_markAtBottom_true_clearsUnseenIncomingMessage() {
+        let viewModel = makeViewModel()
+        let characterMessage = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        viewModel.markAtBottom(false)
+        viewModel.handleNewLastMessage(characterMessage)
+        XCTAssertNotNil(viewModel.unseenIncomingMessage)
+
+        viewModel.markAtBottom(true)
+
+        XCTAssertTrue(viewModel.isAtBottom)
+        XCTAssertNil(viewModel.unseenIncomingMessage)
+    }
+
+    func test_markAtBottom_false_doesNotTouchUnseenIncomingMessage() {
+        let viewModel = makeViewModel()
+
+        viewModel.markAtBottom(false)
+
+        XCTAssertFalse(viewModel.isAtBottom)
+        XCTAssertNil(viewModel.unseenIncomingMessage)
+    }
+
+    func test_handleNewLastMessage_whenAtBottom_returnsTrueAndDoesNotSetUnseen() {
+        let viewModel = makeViewModel()
+        let characterMessage = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+
+        let shouldScroll = viewModel.handleNewLastMessage(characterMessage)
+
+        XCTAssertTrue(shouldScroll)
+        XCTAssertNil(viewModel.unseenIncomingMessage)
+    }
+
+    func test_handleNewLastMessage_whenNotAtBottom_characterMessage_returnsFalseAndSetsUnseen() {
+        let viewModel = makeViewModel()
+        let characterMessage = Message(id: 2, conversationId: 10, sender: .character(.sadness), content: "무슨 일이야", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        viewModel.markAtBottom(false)
+
+        let shouldScroll = viewModel.handleNewLastMessage(characterMessage)
+
+        XCTAssertFalse(shouldScroll)
+        XCTAssertEqual(viewModel.unseenIncomingMessage, characterMessage)
+    }
+
+    func test_handleNewLastMessage_whenNotAtBottom_secondCharacterMessage_updatesToLatestWithoutAccumulating() {
+        let viewModel = makeViewModel()
+        let first = Message(id: 2, conversationId: 10, sender: .character(.sadness), content: "무슨 일이야", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        let second = Message(id: 3, conversationId: 10, sender: .character(.joy), content: "괜찮아?", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        viewModel.markAtBottom(false)
+        viewModel.handleNewLastMessage(first)
+
+        viewModel.handleNewLastMessage(second)
+
+        XCTAssertEqual(viewModel.unseenIncomingMessage, second, "누적 없이 항상 최신 1개만 유지해야 함")
+    }
+
+    func test_handleNewLastMessage_whenNotAtBottom_userMessage_returnsTrueAndDoesNotSetUnseen() {
+        let viewModel = makeViewModel()
+        let userMessage = Message(id: 2, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        viewModel.markAtBottom(false)
+
+        let shouldScroll = viewModel.handleNewLastMessage(userMessage)
+
+        XCTAssertTrue(shouldScroll, "내 메시지는 최하단 여부와 무관하게 항상 스크롤 신호를 줘야 함")
+        XCTAssertNil(viewModel.unseenIncomingMessage)
+    }
 }
