@@ -63,6 +63,15 @@ struct ChatView: View {
                 .padding(.top, tokenUsagePopoverTopOffset)
                 .padding(.trailing, Spacing.spacing400)
             }
+
+            if viewModel.isEnding {
+                Color.colorBlack.opacity(0.7)
+                    .ignoresSafeArea()
+
+                ProgressView()
+                    .tint(Color.colorWhite)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
     }
 
