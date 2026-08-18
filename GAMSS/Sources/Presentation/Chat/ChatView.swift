@@ -213,7 +213,13 @@ struct ChatView: View {
     /// 때는 pendingUserMessage 쪽으로 스크롤해야 실제로 맨 아래가 된다.
     @ViewBuilder
     private func bottomIndicator(proxy: ScrollViewProxy) -> some View {
-        if viewModel.unseenIncomingMessage == nil, !viewModel.isAtBottom {
+        if let unseen = viewModel.unseenIncomingMessage {
+            NewMessageToastView(message: unseen) {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    proxy.scrollTo(unseen.id, anchor: .bottom)
+                }
+            }
+        } else if !viewModel.isAtBottom {
             HStack {
                 Spacer()
                 ScrollDownButtonView { scrollToBottom(proxy) }
