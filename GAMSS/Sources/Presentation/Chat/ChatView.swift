@@ -80,6 +80,11 @@ struct ChatView: View {
                                 )
                                 .id(PendingUserMessage.scrollAnchorID)
                             }
+
+                            Color.clear
+                                .frame(height: 0)
+                                .onAppear { viewModel.markAtBottom(true) }
+                                .onDisappear { viewModel.markAtBottom(false) }
                         }
                         .padding(containerPadding)
                     }
@@ -88,8 +93,10 @@ struct ChatView: View {
                             .contentShape(Rectangle())
                             .onTapGesture { isInputFocused = false }
                     )
-                    .onChange(of: viewModel.messages) { _, _ in
-                        scrollToBottom(proxy)
+                    .onChange(of: viewModel.messages) { _, newValue in
+                        if let last = newValue.last, viewModel.handleNewLastMessage(last) {
+                            scrollToBottom(proxy)
+                        }
                     }
                     .onChange(of: viewModel.pendingUserMessage) { _, _ in
                         scrollToBottom(proxy)
