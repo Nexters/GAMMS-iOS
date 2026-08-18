@@ -26,6 +26,20 @@ private actor SendGate {
     }
 }
 
+private final class MockMemberRepository: MemberRepository {
+    var stubbedTokenUsageResult: Result<TokenUsage, Error> = .failure(SummaryError.inferenceFailed())
+    private(set) var fetchTokenUsageCallCount = 0
+
+    func deleteMember() async throws { fatalError("not used in this test") }
+    func fetchMyProfile() async throws -> User { fatalError("not used in this test") }
+    func updateNickname(_ nickname: String) async throws -> User { fatalError("not used in this test") }
+
+    func fetchTokenUsage() async throws -> TokenUsage {
+        fetchTokenUsageCallCount += 1
+        return try stubbedTokenUsageResult.get()
+    }
+}
+
 private final class MockConversationRepository: ConversationRepository {
     var stubbedSendResult: Result<SentMessage, Error> = .failure(SummaryError.inferenceFailed())
     var stubbedMessages: [Message] = []
@@ -116,6 +130,7 @@ final class ChatViewModelTests: XCTestCase {
     private func makeViewModel(
         repository: MockConversationRepository = MockConversationRepository(),
         cardRepository: MockCardRepository = MockCardRepository(),
+        memberRepository: MockMemberRepository = MockMemberRepository(),
         summaryStore: MockConversationSummaryStore = MockConversationSummaryStore(),
         conversationId: Int? = nil,
         initialSentMessage: SentMessage? = nil
@@ -125,6 +140,7 @@ final class ChatViewModelTests: XCTestCase {
             getMessagesUseCase: GetMessagesUseCase(conversationRepository: repository),
             endConversationUseCase: EndConversationUseCase(conversationRepository: repository),
             createCardUseCase: CreateCardUseCase(cardRepository: cardRepository),
+            getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: memberRepository),
             summaryStore: summaryStore,
             conversationId: conversationId,
             initialSentMessage: initialSentMessage
@@ -596,5 +612,113 @@ final class ChatViewModelTests: XCTestCase {
         viewModel.dismissCard()
 
         XCTAssertNil(viewModel.createdCard)
+    }
+
+    func test_loadTokenUsage_onSuccess_setsTokenUsageAndExceededFlag() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 100000, dailyLimit: 100000, exceeded: true))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+
+        await viewModel.loadTokenUsage()
+
+        XCTAssertEqual(viewModel.tokenUsage?.percent, 100)
+        XCTAssertTrue(viewModel.isTokenExceeded)
+        XCTAssertTrue(viewModel.isSendDisabled)
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 1)
+    }
+
+    func test_loadTokenUsage_onSuccess_notExceeded_leavesComposerEnabled() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 12000, dailyLimit: 100000, exceeded: false))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+        viewModel.input = "안녕"
+
+        await viewModel.loadTokenUsage()
+
+        XCTAssertFalse(viewModel.isTokenExceeded)
+        XCTAssertFalse(viewModel.isSendDisabled)
+    }
+
+    func test_loadTokenUsage_onFailure_setsErrorMessage() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .failure(SummaryError.inferenceFailed())
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+
+        await viewModel.loadTokenUsage()
+
+        XCTAssertNotNil(viewModel.tokenUsageErrorMessage)
+        XCTAssertNil(viewModel.tokenUsage)
+    }
+
+    func test_send_commentStatusLimitExceeded_disablesComposerAndSetsPlaceholder() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .limitExceeded, comments: []))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+
+        XCTAssertTrue(viewModel.isTokenExceeded)
+        XCTAssertTrue(viewModel.isSendDisabled)
+        XCTAssertEqual(viewModel.composerDisabledPlaceholder, "오늘의 토큰을 모두 사용했어요")
+    }
+
+    func test_composerDisabledPlaceholder_conversationEnded_returnsEndedMessage() async {
+        let repository = MockConversationRepository()
+        let viewModel = makeViewModel(repository: repository, conversationId: 10)
+
+        await viewModel.confirmEndConversation()
+
+        XCTAssertEqual(viewModel.composerDisabledPlaceholder, "대화가 종료됐어요")
+    }
+
+    func test_start_fetchesTokenUsageAndSetsExceededFlagWithoutExplicitLoadCall() async {
+        let repository = MockConversationRepository()
+        let userMessage = Message(id: 1, conversationId: 10, sender: .user, content: "사용자 발화", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedMessages = [userMessage]
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 100000, dailyLimit: 100000, exceeded: true))
+        let viewModel = makeViewModel(repository: repository, memberRepository: memberRepository, conversationId: 10)
+
+        await viewModel.start()
+
+        XCTAssertTrue(viewModel.isTokenExceeded, "start() 하나만으로 토큰 초과 상태가 반영되어야 함")
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 1)
+        XCTAssertEqual(viewModel.messages, [userMessage], "토큰 조회와 무관하게 메시지 히스토리도 정상 로드되어야 함")
+    }
+
+    func test_loadTokenUsage_calledAgainAfterNewMessage_refetchesAndFlipsFlagBackToFalse() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 100000, dailyLimit: 100000, exceeded: true))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+
+        await viewModel.loadTokenUsage()
+        XCTAssertTrue(viewModel.isTokenExceeded)
+
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        viewModel.seed(with: SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 12000, dailyLimit: 100000, exceeded: false))
+        await viewModel.loadTokenUsage()
+
+        XCTAssertFalse(viewModel.isTokenExceeded, "새 메시지가 오간 뒤 재조회 결과가 더 이상 초과가 아니면 다시 false로 내려가야 함")
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 2, "새 메시지가 있었으면 캐시를 쓰지 않고 다시 API를 불러야 함")
+    }
+
+    func test_loadTokenUsage_calledAgainWithoutNewMessage_skipsRefetchAndKeepsCachedValue() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 12000, dailyLimit: 100000, exceeded: false))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+
+        await viewModel.loadTokenUsage()
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 1)
+
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 99000, dailyLimit: 100000, exceeded: true))
+        await viewModel.loadTokenUsage()
+
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 1, "그 사이 새 메시지가 없었으면 API를 다시 부르면 안 됨")
+        XCTAssertEqual(viewModel.tokenUsage?.usedTokens, 12000, "마지막으로 받아온 값을 그대로 보여줘야 함")
+        XCTAssertFalse(viewModel.isTokenExceeded, "캐시된 값 기준 상태를 그대로 유지해야 함")
     }
 }

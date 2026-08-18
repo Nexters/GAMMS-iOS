@@ -21,6 +21,11 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isEnding = false
     @Published private(set) var isConversationEnded = false
     @Published private(set) var createdCard: Card?
+    @Published private(set) var tokenUsage: TokenUsage?
+    @Published private(set) var isLoadingTokenUsage = false
+    @Published var tokenUsageErrorMessage: String?
+    @Published var isTokenUsagePopoverPresented = false
+    @Published private(set) var isTokenExceeded = false
 
     private var conversationId: Int?
     private let initialSentMessage: SentMessage?
@@ -28,8 +33,10 @@ final class ChatViewModel: ObservableObject {
     private let getMessagesUseCase: GetMessagesUseCase
     private let endConversationUseCase: EndConversationUseCase
     private let createCardUseCase: CreateCardUseCase
+    private let getTokenUsageUseCase: GetTokenUsageUseCase
     private let summaryStore: ConversationSummaryStore
     private var revealTask: Task<Void, Never>?
+    private var isTokenUsageStale = true
     /// 테스트에서 백그라운드 요약 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
     private(set) var pendingSummaryUpdateTask: Task<Void, Never>?
 
@@ -38,6 +45,7 @@ final class ChatViewModel: ObservableObject {
         getMessagesUseCase: GetMessagesUseCase,
         endConversationUseCase: EndConversationUseCase,
         createCardUseCase: CreateCardUseCase,
+        getTokenUsageUseCase: GetTokenUsageUseCase,
         summaryStore: ConversationSummaryStore,
         conversationId: Int? = nil,
         initialSentMessage: SentMessage? = nil
@@ -46,6 +54,7 @@ final class ChatViewModel: ObservableObject {
         self.getMessagesUseCase = getMessagesUseCase
         self.endConversationUseCase = endConversationUseCase
         self.createCardUseCase = createCardUseCase
+        self.getTokenUsageUseCase = getTokenUsageUseCase
         self.summaryStore = summaryStore
         self.conversationId = conversationId
         self.initialSentMessage = initialSentMessage
@@ -54,11 +63,15 @@ final class ChatViewModel: ObservableObject {
     /// 화면 진입 시 한 번 호출한다. 다른 화면에서 이미 받아온 응답이 있으면 그걸로 채우고,
     /// 없으면 기존 대화의 히스토리를 불러온다.
     func start() async {
+        async let tokenUsageFetch: Void = loadTokenUsage()
+
         if let initialSentMessage {
             seed(with: initialSentMessage)
         } else if let conversationId {
             await load(conversationId: conversationId)
         }
+
+        await tokenUsageFetch
     }
 
     /// 재진입 시 히스토리를 불러온다. 순차 노출은 적용하지 않고 한 번에 표시한다.
@@ -85,7 +98,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     var isSendDisabled: Bool {
-        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending || isConversationEnded
+        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending || isConversationEnded || isTokenExceeded
     }
 
     /// 아직 대화방이 만들어지지 않았거나(첫 메시지 전) 이미 종료된 대화는 다시 종료할 수 없다.
@@ -95,6 +108,26 @@ final class ChatViewModel: ObservableObject {
 
     var isCardCreationFailureAlert: Bool {
         isConversationEnded && createdCard == nil && alertMessage != nil
+    }
+
+    var composerDisabledPlaceholder: String {
+        isConversationEnded ? "대화가 종료됐어요" : "오늘의 토큰을 모두 사용했어요"
+    }
+
+    func loadTokenUsage() async {
+        guard isTokenUsageStale else { return }
+
+        isLoadingTokenUsage = true
+        tokenUsageErrorMessage = nil
+        defer { isLoadingTokenUsage = false }
+        do {
+            let usage = try await getTokenUsageUseCase.execute()
+            tokenUsage = usage
+            isTokenExceeded = usage.exceeded
+            isTokenUsageStale = false
+        } catch {
+            tokenUsageErrorMessage = "토큰 사용량을 불러오지 못했어요"
+        }
     }
 
     func send() async {
@@ -149,6 +182,7 @@ final class ChatViewModel: ObservableObject {
     /// getMessages로 조회하지 않기 위한 용도.
     func seed(with sent: SentMessage) {
         conversationId = sent.message.conversationId
+        isTokenUsageStale = true
 
         // 첫 댓글은 즉시, 나머지는 순차 노출 큐로.
         messages.append(sent.message)
@@ -160,6 +194,9 @@ final class ChatViewModel: ObservableObject {
 
         if sent.commentStatus != .done {
             alertMessage = sent.commentStatus.toUserMessage()
+        }
+        if sent.commentStatus == .limitExceeded {
+            isTokenExceeded = true
         }
     }
 

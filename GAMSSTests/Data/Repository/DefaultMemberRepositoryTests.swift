@@ -65,4 +65,31 @@ final class DefaultMemberRepositoryTests: XCTestCase {
             XCTAssertEqual(error as? SummaryError, .inferenceFailed())
         }
     }
+
+    func test_fetchTokenUsage_decodesResponseAndMapsToDomain() async throws {
+        let network = MockNetworkRequesting()
+        network.stubbedData = Data("""
+        {"success":true,"data":{"usedTokens":12000,"dailyLimit":100000,"exceeded":false},"error":null}
+        """.utf8)
+        let repository = DefaultMemberRepository(networkManager: network, tokenStorage: .shared)
+
+        let usage = try await repository.fetchTokenUsage()
+
+        XCTAssertEqual(usage, TokenUsage(usedTokens: 12000, dailyLimit: 100000, exceeded: false))
+        XCTAssertEqual(network.lastEndpoint?.path, "/api/members/me/token-usage")
+        XCTAssertEqual(network.lastEndpoint?.method, .get)
+    }
+
+    func test_fetchTokenUsage_propagatesNetworkError() async {
+        let network = MockNetworkRequesting()
+        network.stubbedError = SummaryError.inferenceFailed()
+        let repository = DefaultMemberRepository(networkManager: network, tokenStorage: .shared)
+
+        do {
+            _ = try await repository.fetchTokenUsage()
+            XCTFail("Expected error to be thrown")
+        } catch {
+            XCTAssertEqual(error as? SummaryError, .inferenceFailed())
+        }
+    }
 }
