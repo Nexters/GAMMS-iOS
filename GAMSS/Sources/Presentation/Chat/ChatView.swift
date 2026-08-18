@@ -104,13 +104,13 @@ struct ChatView: View {
                                 .id(PendingUserMessage.scrollAnchorID)
                             }
 
-                            if viewModel.isWaitingForReply {
-                                TypingIndicatorView()
+                            if let nextReplyCharacter = viewModel.nextReplyCharacter {
+                                TypingIndicatorView(emotion: nextReplyCharacter)
                                     .id(TypingIndicatorView.scrollAnchorID)
                                     .transition(.opacity)
                             }
                         }
-                        .animation(.easeOut(duration: 0.2), value: viewModel.isWaitingForReply)
+                        .animation(.easeOut(duration: 0.2), value: viewModel.nextReplyCharacter)
                         .padding(containerPadding)
                     }
                     // ScrollView가 키보드에 의해 축소/복원될 때
@@ -122,7 +122,7 @@ struct ChatView: View {
                     .onChange(of: viewModel.pendingUserMessage) { _, _ in
                         scrollToBottom(proxy)
                     }
-                    .onChange(of: viewModel.isWaitingForReply) { _, _ in
+                    .onChange(of: viewModel.nextReplyCharacter) { _, _ in
                         scrollToBottom(proxy)
                     }
                     .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -234,7 +234,7 @@ struct ChatView: View {
     /// 항목으로 스크롤해야 실제로 맨 아래가 된다.
     private func scrollToBottom(_ proxy: ScrollViewProxy) {
         withAnimation(.easeOut(duration: 0.2)) {
-            if viewModel.isWaitingForReply {
+            if viewModel.nextReplyCharacter != nil {
                 proxy.scrollTo(TypingIndicatorView.scrollAnchorID, anchor: .bottom)
             } else if viewModel.pendingUserMessage != nil {
                 proxy.scrollTo(PendingUserMessage.scrollAnchorID, anchor: .bottom)

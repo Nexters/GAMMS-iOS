@@ -147,21 +147,21 @@ final class ChatViewModelTests: XCTestCase {
         )
     }
 
-    func test_send_onSuccess_appendsSentMessageAndFirstCommentImmediately() async {
+    func test_send_onSuccess_queuesAllCommentsForSequentialReveal() async {
         let repository = MockConversationRepository()
         let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
         let comment1 = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
-        let comment2 = Message(id: 3, conversationId: 10, sender: .character(.joy), content: "오늘 어때?", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        let comment2 = Message(id: 3, conversationId: 10, sender: .character(.sadness), content: "오늘 어때?", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
         repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: [comment1, comment2]))
         let viewModel = makeViewModel(repository: repository)
         viewModel.input = "안녕"
 
         await viewModel.send()
 
-        XCTAssertEqual(viewModel.messages, [sentMessage, comment1])
-        XCTAssertEqual(viewModel.pendingComments, [comment2])
+        XCTAssertEqual(viewModel.messages, [sentMessage], "첫 댓글도 즉시 붙이지 않고 순차 노출 큐로 넘어가야 함")
+        XCTAssertEqual(viewModel.pendingComments, [comment1, comment2])
         XCTAssertEqual(viewModel.input, "")
-        XCTAssertTrue(viewModel.isWaitingForReply, "아직 노출 안 된 답장(comment2)이 남아있으면 계속 떠 있어야 함")
+        XCTAssertEqual(viewModel.nextReplyCharacter, .joy, "첫 댓글(comment1)의 발신자를 가리켜야 함")
     }
 
     func test_send_onSuccess_addsContentToSummaryStoreAfterUpdatingMessages() async {
@@ -230,7 +230,7 @@ final class ChatViewModelTests: XCTestCase {
 
         XCTAssertEqual(repository.sendCallCount, 0, "최종 검증에 걸리면 네트워크 호출까지 가면 안 됨")
         XCTAssertEqual(viewModel.alertMessage, SendMessageValidationError.tooLong.errorDescription)
-        XCTAssertFalse(viewModel.isWaitingForReply, "검증 실패로 응답 자체를 못 받으면 로티도 꺼져야 함")
+        XCTAssertNil(viewModel.nextReplyCharacter, "검증 실패로 응답 자체를 못 받으면 다음 발신자도 없어야 함")
     }
 
     func test_send_beforeNetworkResponds_showsPendingUserMessageAndClearsInput() async {
@@ -616,7 +616,7 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.createdCard)
     }
 
-    func test_send_beforeNetworkResponds_setsIsWaitingForReply() async {
+    func test_send_beforeNetworkResponds_hasNoNextReplyCharacter() async {
         let repository = MockConversationRepository()
         let gate = SendGate()
         repository.sendGate = gate
@@ -630,15 +630,15 @@ final class ChatViewModelTests: XCTestCase {
             await Task.yield()
         }
 
-        XCTAssertTrue(viewModel.isWaitingForReply, "응답을 기다리는 동안에는 로티가 떠 있어야 함")
+        XCTAssertNil(viewModel.nextReplyCharacter, "서버 응답 자체가 아직 안 왔으면(pendingComments 없음) 다음 발신자를 알 수 없어야 함")
 
         await gate.open()
         await sendTask.value
 
-        XCTAssertFalse(viewModel.isWaitingForReply, "답장이 0개면 응답 도착 즉시 꺼져야 함")
+        XCTAssertNil(viewModel.nextReplyCharacter, "답장이 0개면 응답 도착 후에도 다음 발신자가 없어야 함")
     }
 
-    func test_send_onSuccess_singleComment_clearsIsWaitingForReplyImmediately() async {
+    func test_send_onSuccess_singleComment_queuesItForRevealThenClearsNextReplyCharacter() async {
         let repository = MockConversationRepository()
         let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
         let comment = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
@@ -648,28 +648,34 @@ final class ChatViewModelTests: XCTestCase {
 
         await viewModel.send()
 
-        XCTAssertFalse(viewModel.isWaitingForReply, "남은 답장이 없으면 첫 답장과 함께 바로 꺼져야 함")
+        XCTAssertEqual(viewModel.messages, [sentMessage], "댓글이 1개뿐이어도 즉시 붙이지 않고 순차 노출 큐로 넘어가야 함")
+        XCTAssertEqual(viewModel.nextReplyCharacter, .joy, "노출 대기 중인 댓글의 발신자를 가리켜야 함")
+
+        await viewModel.revealTask?.value
+
+        XCTAssertEqual(viewModel.messages, [sentMessage, comment])
+        XCTAssertNil(viewModel.nextReplyCharacter, "노출이 끝나면 다음 발신자가 없어야 함")
     }
 
-    func test_send_onSuccess_withRemainingComments_keepsIsWaitingForReplyUntilRevealCompletes() async {
+    func test_send_onSuccess_withRemainingComments_clearsNextReplyCharacterOnceRevealCompletes() async {
         let repository = MockConversationRepository()
         let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
         let comment1 = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
-        let comment2 = Message(id: 3, conversationId: 10, sender: .character(.joy), content: "오늘 어때?", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        let comment2 = Message(id: 3, conversationId: 10, sender: .character(.sadness), content: "오늘 어때?", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
         repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: [comment1, comment2]))
         let viewModel = makeViewModel(repository: repository)
         viewModel.input = "안녕"
 
         await viewModel.send()
-        XCTAssertTrue(viewModel.isWaitingForReply)
+        XCTAssertEqual(viewModel.nextReplyCharacter, .joy, "아직 아무 댓글도 노출 전이므로 첫 댓글(comment1)의 발신자를 가리켜야 함")
 
         await viewModel.revealTask?.value
 
-        XCTAssertFalse(viewModel.isWaitingForReply, "마지막 답장까지 다 노출되면 꺼져야 함")
+        XCTAssertNil(viewModel.nextReplyCharacter, "마지막 답장까지 다 노출되면 다음 발신자가 없어야 함")
         XCTAssertEqual(viewModel.messages, [sentMessage, comment1, comment2])
     }
 
-    func test_send_onFailure_clearsIsWaitingForReply() async {
+    func test_send_onFailure_hasNoNextReplyCharacter() async {
         let repository = MockConversationRepository()
         repository.stubbedSendResult = .failure(SummaryError.inferenceFailed())
         let viewModel = makeViewModel(repository: repository)
@@ -677,7 +683,7 @@ final class ChatViewModelTests: XCTestCase {
 
         await viewModel.send()
 
-        XCTAssertFalse(viewModel.isWaitingForReply)
+        XCTAssertNil(viewModel.nextReplyCharacter)
     }
 
     func test_loadTokenUsage_onSuccess_setsTokenUsageAndExceededFlag() async {
