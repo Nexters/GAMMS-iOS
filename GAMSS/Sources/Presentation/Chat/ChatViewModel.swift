@@ -21,6 +21,11 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isEnding = false
     @Published private(set) var isConversationEnded = false
     @Published private(set) var createdCard: Card?
+    @Published private(set) var tokenUsage: TokenUsage?
+    @Published private(set) var isLoadingTokenUsage = false
+    @Published var tokenUsageErrorMessage: String?
+    @Published var isTokenUsagePopoverPresented = false
+    @Published private(set) var isTokenExceeded = false
 
     private var conversationId: Int?
     private let initialSentMessage: SentMessage?
@@ -28,6 +33,7 @@ final class ChatViewModel: ObservableObject {
     private let getMessagesUseCase: GetMessagesUseCase
     private let endConversationUseCase: EndConversationUseCase
     private let createCardUseCase: CreateCardUseCase
+    private let getTokenUsageUseCase: GetTokenUsageUseCase
     private let summaryStore: ConversationSummaryStore
     private var revealTask: Task<Void, Never>?
     /// 테스트에서 백그라운드 요약 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
@@ -38,6 +44,7 @@ final class ChatViewModel: ObservableObject {
         getMessagesUseCase: GetMessagesUseCase,
         endConversationUseCase: EndConversationUseCase,
         createCardUseCase: CreateCardUseCase,
+        getTokenUsageUseCase: GetTokenUsageUseCase,
         summaryStore: ConversationSummaryStore,
         conversationId: Int? = nil,
         initialSentMessage: SentMessage? = nil
@@ -46,6 +53,7 @@ final class ChatViewModel: ObservableObject {
         self.getMessagesUseCase = getMessagesUseCase
         self.endConversationUseCase = endConversationUseCase
         self.createCardUseCase = createCardUseCase
+        self.getTokenUsageUseCase = getTokenUsageUseCase
         self.summaryStore = summaryStore
         self.conversationId = conversationId
         self.initialSentMessage = initialSentMessage
@@ -85,7 +93,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     var isSendDisabled: Bool {
-        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending || isConversationEnded
+        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending || isConversationEnded || isTokenExceeded
     }
 
     /// 아직 대화방이 만들어지지 않았거나(첫 메시지 전) 이미 종료된 대화는 다시 종료할 수 없다.
@@ -95,6 +103,23 @@ final class ChatViewModel: ObservableObject {
 
     var isCardCreationFailureAlert: Bool {
         isConversationEnded && createdCard == nil && alertMessage != nil
+    }
+
+    var composerDisabledPlaceholder: String {
+        isConversationEnded ? "대화가 종료됐어요" : "오늘의 토큰을 모두 사용했어요"
+    }
+
+    func loadTokenUsage() async {
+        isLoadingTokenUsage = true
+        tokenUsageErrorMessage = nil
+        defer { isLoadingTokenUsage = false }
+        do {
+            let usage = try await getTokenUsageUseCase.execute()
+            tokenUsage = usage
+            isTokenExceeded = usage.exceeded
+        } catch {
+            tokenUsageErrorMessage = "토큰 사용량을 불러오지 못했어요"
+        }
     }
 
     func send() async {
@@ -160,6 +185,9 @@ final class ChatViewModel: ObservableObject {
 
         if sent.commentStatus != .done {
             alertMessage = sent.commentStatus.toUserMessage()
+        }
+        if sent.commentStatus == .limitExceeded {
+            isTokenExceeded = true
         }
     }
 
