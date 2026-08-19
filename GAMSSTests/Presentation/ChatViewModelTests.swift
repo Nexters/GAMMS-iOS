@@ -26,6 +26,20 @@ private actor SendGate {
     }
 }
 
+private final class MockMemberRepository: MemberRepository {
+    var stubbedTokenUsageResult: Result<TokenUsage, Error> = .failure(SummaryError.inferenceFailed())
+    private(set) var fetchTokenUsageCallCount = 0
+
+    func deleteMember() async throws { fatalError("not used in this test") }
+    func fetchMyProfile() async throws -> User { fatalError("not used in this test") }
+    func updateNickname(_ nickname: String) async throws -> User { fatalError("not used in this test") }
+
+    func fetchTokenUsage() async throws -> TokenUsage {
+        fetchTokenUsageCallCount += 1
+        return try stubbedTokenUsageResult.get()
+    }
+}
+
 private final class MockConversationRepository: ConversationRepository {
     var stubbedSendResult: Result<SentMessage, Error> = .failure(SummaryError.inferenceFailed())
     var stubbedMessages: [Message] = []
@@ -38,6 +52,10 @@ private final class MockConversationRepository: ConversationRepository {
     private(set) var receivedExcludedCharacters: Set<EmotionCharacter>?
     private(set) var receivedRepliesToMessageId: Int?
     private(set) var receivedEndConversationId: Int?
+    var stubbedUpdateTitleResult: Result<Void, Error> = .success(())
+    private(set) var updateTitleCallCount = 0
+    private(set) var receivedTitleConversationId: Int?
+    private(set) var receivedTitle: String?
 
     func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
         sendCallCount += 1
@@ -58,7 +76,10 @@ private final class MockConversationRepository: ConversationRepository {
     }
 
     func updateTitle(conversationId: Int, title: String) async throws {
-        fatalError("not used in this test")
+        updateTitleCallCount += 1
+        receivedTitleConversationId = conversationId
+        receivedTitle = title
+        _ = try stubbedUpdateTitleResult.get()
     }
 
     func endConversation(conversationId: Int) async throws {
@@ -116,35 +137,39 @@ final class ChatViewModelTests: XCTestCase {
     private func makeViewModel(
         repository: MockConversationRepository = MockConversationRepository(),
         cardRepository: MockCardRepository = MockCardRepository(),
+        memberRepository: MockMemberRepository = MockMemberRepository(),
         summaryStore: MockConversationSummaryStore = MockConversationSummaryStore(),
         conversationId: Int? = nil,
-        initialSentMessage: SentMessage? = nil
+        pendingFirstMessage: PendingFirstMessage? = nil
     ) -> ChatViewModel {
         ChatViewModel(
             sendMessageUseCase: SendMessageUseCase(conversationRepository: repository),
             getMessagesUseCase: GetMessagesUseCase(conversationRepository: repository),
             endConversationUseCase: EndConversationUseCase(conversationRepository: repository),
             createCardUseCase: CreateCardUseCase(cardRepository: cardRepository),
+            getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: memberRepository),
+            updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: repository),
             summaryStore: summaryStore,
             conversationId: conversationId,
-            initialSentMessage: initialSentMessage
+            pendingFirstMessage: pendingFirstMessage
         )
     }
 
-    func test_send_onSuccess_appendsSentMessageAndFirstCommentImmediately() async {
+    func test_send_onSuccess_queuesAllCommentsForSequentialReveal() async {
         let repository = MockConversationRepository()
         let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
         let comment1 = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
-        let comment2 = Message(id: 3, conversationId: 10, sender: .character(.joy), content: "오늘 어때?", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        let comment2 = Message(id: 3, conversationId: 10, sender: .character(.sadness), content: "오늘 어때?", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
         repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: [comment1, comment2]))
         let viewModel = makeViewModel(repository: repository)
         viewModel.input = "안녕"
 
         await viewModel.send()
 
-        XCTAssertEqual(viewModel.messages, [sentMessage, comment1])
-        XCTAssertEqual(viewModel.pendingComments, [comment2])
+        XCTAssertEqual(viewModel.messages, [sentMessage], "첫 댓글도 즉시 붙이지 않고 순차 노출 큐로 넘어가야 함")
+        XCTAssertEqual(viewModel.pendingComments, [comment1, comment2])
         XCTAssertEqual(viewModel.input, "")
+        XCTAssertEqual(viewModel.nextReplyCharacter, .joy, "첫 댓글(comment1)의 발신자를 가리켜야 함")
     }
 
     func test_send_onSuccess_addsContentToSummaryStoreAfterUpdatingMessages() async {
@@ -213,6 +238,7 @@ final class ChatViewModelTests: XCTestCase {
 
         XCTAssertEqual(repository.sendCallCount, 0, "최종 검증에 걸리면 네트워크 호출까지 가면 안 됨")
         XCTAssertEqual(viewModel.alertMessage, SendMessageValidationError.tooLong.errorDescription)
+        XCTAssertNil(viewModel.nextReplyCharacter, "검증 실패로 응답 자체를 못 받으면 다음 발신자도 없어야 함")
     }
 
     func test_send_beforeNetworkResponds_showsPendingUserMessageAndClearsInput() async {
@@ -427,18 +453,6 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(restored, [["사용자 발화"]], "재진입 복원은 사용자 발화만 summaryStore에 넘겨야 함")
     }
 
-    func test_start_withInitialSentMessage_seedsWithoutLoadingHistory() async {
-        let repository = MockConversationRepository()
-        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
-        let initialSentMessage = SentMessage(message: sentMessage, commentStatus: .done, comments: [])
-        let viewModel = makeViewModel(repository: repository, conversationId: 10, initialSentMessage: initialSentMessage)
-
-        await viewModel.start()
-
-        XCTAssertEqual(viewModel.messages, [sentMessage])
-        XCTAssertEqual(repository.getMessagesCallCount, 0, "initialSentMessage가 있으면 히스토리를 다시 조회하면 안 됨")
-    }
-
     func test_start_withConversationIdOnly_loadsHistory() async {
         let repository = MockConversationRepository()
         let userMessage = Message(id: 1, conversationId: 10, sender: .user, content: "사용자 발화", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
@@ -451,7 +465,7 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(repository.getMessagesCallCount, 1)
     }
 
-    func test_start_withNeitherConversationIdNorInitialSentMessage_doesNothing() async {
+    func test_start_withNeitherConversationIdNorPendingFirstMessage_doesNothing() async {
         let repository = MockConversationRepository()
         let viewModel = makeViewModel(repository: repository)
 
@@ -459,6 +473,48 @@ final class ChatViewModelTests: XCTestCase {
 
         XCTAssertTrue(viewModel.messages.isEmpty)
         XCTAssertEqual(repository.getMessagesCallCount, 0)
+        XCTAssertEqual(repository.sendCallCount, 0)
+    }
+
+    func test_start_withPendingFirstMessage_sendsAutomaticallyWithExcludedCharacters() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+        let pendingFirstMessage = PendingFirstMessage(content: "안녕", excludedCharacters: [.anger])
+        let viewModel = makeViewModel(repository: repository, pendingFirstMessage: pendingFirstMessage)
+
+        await viewModel.start()
+
+        XCTAssertEqual(repository.sendCallCount, 1)
+        XCTAssertEqual(repository.receivedExcludedCharacters, [.anger])
+        XCTAssertEqual(viewModel.messages, [sentMessage])
+    }
+
+    func test_seed_newConversation_updatesTitleWithMessageContentInBackground() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+        await viewModel.pendingTitleUpdateTask?.value
+
+        XCTAssertEqual(repository.updateTitleCallCount, 1)
+        XCTAssertEqual(repository.receivedTitleConversationId, 10)
+        XCTAssertEqual(repository.receivedTitle, "안녕")
+    }
+
+    func test_seed_existingConversation_doesNotUpdateTitle() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 2, conversationId: 10, sender: .user, content: "고마워", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+        let viewModel = makeViewModel(repository: repository, conversationId: 10)
+        viewModel.input = "고마워"
+
+        await viewModel.send()
+
+        XCTAssertEqual(repository.updateTitleCallCount, 0, "이미 대화가 있으면(재진입/두 번째 메시지) 제목을 다시 저장하면 안 됨")
     }
 
     func test_updateInput_trailingNewline_keepsNewlineAndDoesNotSignalKeyboardDismiss() {
@@ -541,6 +597,23 @@ final class ChatViewModelTests: XCTestCase {
         await viewModel.confirmEndConversation()
 
         XCTAssertEqual(cardRepository.receivedEmotion, .anger)
+    }
+
+    func test_confirmEndConversation_summaryStoreReturnsNil_usesJoinedUserMessagesAsSummary() async {
+        let repository = MockConversationRepository()
+        repository.stubbedMessages = [
+            Message(id: 1, conversationId: 10, sender: .user, content: "오늘 힘들었어", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+            Message(id: 2, conversationId: 10, sender: .character(.sadness), content: "무슨 일이야?", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+            Message(id: 3, conversationId: 10, sender: .user, content: "그냥 그랬어", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+        ]
+        let cardRepository = MockCardRepository()
+        cardRepository.stubbedResult = .success(Card(id: 1, conversationId: 10, emotion: .sadness, summary: "", message: "", date: Date(timeIntervalSince1970: 0)))
+        let viewModel = makeViewModel(repository: repository, cardRepository: cardRepository, conversationId: 10)
+        await viewModel.load(conversationId: 10)
+
+        await viewModel.confirmEndConversation()
+
+        XCTAssertEqual(cardRepository.receivedSummary, "오늘 힘들었어 그냥 그랬어", "압축본이 없으면(대화가 너무 짧은 경우 등) 사용자 원문을 이어붙여 대신 보내야 함")
     }
 
     func test_confirmEndConversation_endConversationFails_doesNotCreateCard() async {
@@ -668,5 +741,183 @@ final class ChatViewModelTests: XCTestCase {
 
         XCTAssertTrue(shouldScroll, "내 메시지는 최하단 여부와 무관하게 항상 스크롤 신호를 줘야 함")
         XCTAssertNil(viewModel.unseenIncomingMessage)
+    }
+
+    func test_send_beforeNetworkResponds_hasNoNextReplyCharacter() async {
+        let repository = MockConversationRepository()
+        let gate = SendGate()
+        repository.sendGate = gate
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        let sendTask = Task { await viewModel.send() }
+        while viewModel.pendingUserMessage == nil {
+            await Task.yield()
+        }
+
+        XCTAssertNil(viewModel.nextReplyCharacter, "서버 응답 자체가 아직 안 왔으면(pendingComments 없음) 다음 발신자를 알 수 없어야 함")
+
+        await gate.open()
+        await sendTask.value
+
+        XCTAssertNil(viewModel.nextReplyCharacter, "답장이 0개면 응답 도착 후에도 다음 발신자가 없어야 함")
+    }
+
+    func test_send_onSuccess_singleComment_queuesItForRevealThenClearsNextReplyCharacter() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        let comment = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: [comment]))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+
+        XCTAssertEqual(viewModel.messages, [sentMessage], "댓글이 1개뿐이어도 즉시 붙이지 않고 순차 노출 큐로 넘어가야 함")
+        XCTAssertEqual(viewModel.nextReplyCharacter, .joy, "노출 대기 중인 댓글의 발신자를 가리켜야 함")
+
+        await viewModel.revealTask?.value
+
+        XCTAssertEqual(viewModel.messages, [sentMessage, comment])
+        XCTAssertNil(viewModel.nextReplyCharacter, "노출이 끝나면 다음 발신자가 없어야 함")
+    }
+
+    func test_send_onSuccess_withRemainingComments_clearsNextReplyCharacterOnceRevealCompletes() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        let comment1 = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        let comment2 = Message(id: 3, conversationId: 10, sender: .character(.sadness), content: "오늘 어때?", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: [comment1, comment2]))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+        XCTAssertEqual(viewModel.nextReplyCharacter, .joy, "아직 아무 댓글도 노출 전이므로 첫 댓글(comment1)의 발신자를 가리켜야 함")
+
+        await viewModel.revealTask?.value
+
+        XCTAssertNil(viewModel.nextReplyCharacter, "마지막 답장까지 다 노출되면 다음 발신자가 없어야 함")
+        XCTAssertEqual(viewModel.messages, [sentMessage, comment1, comment2])
+    }
+
+    func test_send_onFailure_hasNoNextReplyCharacter() async {
+        let repository = MockConversationRepository()
+        repository.stubbedSendResult = .failure(SummaryError.inferenceFailed())
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "실패할 메시지"
+
+        await viewModel.send()
+
+        XCTAssertNil(viewModel.nextReplyCharacter)
+    }
+
+    func test_loadTokenUsage_onSuccess_setsTokenUsageAndExceededFlag() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 100000, dailyLimit: 100000, exceeded: true))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+
+        await viewModel.loadTokenUsage()
+
+        XCTAssertEqual(viewModel.tokenUsage?.percent, 100)
+        XCTAssertTrue(viewModel.isTokenExceeded)
+        XCTAssertTrue(viewModel.isSendDisabled)
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 1)
+    }
+
+    func test_loadTokenUsage_onSuccess_notExceeded_leavesComposerEnabled() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 12000, dailyLimit: 100000, exceeded: false))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+        viewModel.input = "안녕"
+
+        await viewModel.loadTokenUsage()
+
+        XCTAssertFalse(viewModel.isTokenExceeded)
+        XCTAssertFalse(viewModel.isSendDisabled)
+    }
+
+    func test_loadTokenUsage_onFailure_setsErrorMessage() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .failure(SummaryError.inferenceFailed())
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+
+        await viewModel.loadTokenUsage()
+
+        XCTAssertNotNil(viewModel.tokenUsageErrorMessage)
+        XCTAssertNil(viewModel.tokenUsage)
+    }
+
+    func test_send_commentStatusLimitExceeded_disablesComposerAndSetsPlaceholder() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .limitExceeded, comments: []))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+
+        XCTAssertTrue(viewModel.isTokenExceeded)
+        XCTAssertTrue(viewModel.isSendDisabled)
+        XCTAssertEqual(viewModel.composerDisabledPlaceholder, "오늘의 토큰을 모두 사용했어요")
+    }
+
+    func test_composerDisabledPlaceholder_conversationEnded_returnsEndedMessage() async {
+        let repository = MockConversationRepository()
+        let viewModel = makeViewModel(repository: repository, conversationId: 10)
+
+        await viewModel.confirmEndConversation()
+
+        XCTAssertEqual(viewModel.composerDisabledPlaceholder, "대화가 종료됐어요")
+    }
+
+    func test_start_fetchesTokenUsageAndSetsExceededFlagWithoutExplicitLoadCall() async {
+        let repository = MockConversationRepository()
+        let userMessage = Message(id: 1, conversationId: 10, sender: .user, content: "사용자 발화", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedMessages = [userMessage]
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 100000, dailyLimit: 100000, exceeded: true))
+        let viewModel = makeViewModel(repository: repository, memberRepository: memberRepository, conversationId: 10)
+
+        await viewModel.start()
+
+        XCTAssertTrue(viewModel.isTokenExceeded, "start() 하나만으로 토큰 초과 상태가 반영되어야 함")
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 1)
+        XCTAssertEqual(viewModel.messages, [userMessage], "토큰 조회와 무관하게 메시지 히스토리도 정상 로드되어야 함")
+    }
+
+    func test_loadTokenUsage_calledAgainAfterNewMessage_refetchesAndFlipsFlagBackToFalse() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 100000, dailyLimit: 100000, exceeded: true))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+
+        await viewModel.loadTokenUsage()
+        XCTAssertTrue(viewModel.isTokenExceeded)
+
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        viewModel.seed(with: SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 12000, dailyLimit: 100000, exceeded: false))
+        await viewModel.loadTokenUsage()
+
+        XCTAssertFalse(viewModel.isTokenExceeded, "새 메시지가 오간 뒤 재조회 결과가 더 이상 초과가 아니면 다시 false로 내려가야 함")
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 2, "새 메시지가 있었으면 캐시를 쓰지 않고 다시 API를 불러야 함")
+    }
+
+    func test_loadTokenUsage_calledAgainWithoutNewMessage_skipsRefetchAndKeepsCachedValue() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 12000, dailyLimit: 100000, exceeded: false))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+
+        await viewModel.loadTokenUsage()
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 1)
+
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 99000, dailyLimit: 100000, exceeded: true))
+        await viewModel.loadTokenUsage()
+
+        XCTAssertEqual(memberRepository.fetchTokenUsageCallCount, 1, "그 사이 새 메시지가 없었으면 API를 다시 부르면 안 됨")
+        XCTAssertEqual(viewModel.tokenUsage?.usedTokens, 12000, "마지막으로 받아온 값을 그대로 보여줘야 함")
+        XCTAssertFalse(viewModel.isTokenExceeded, "캐시된 값 기준 상태를 그대로 유지해야 함")
     }
 }

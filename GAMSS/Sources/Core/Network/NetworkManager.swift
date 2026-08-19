@@ -66,7 +66,7 @@ final class NetworkManager: NetworkRequesting {
                 from: data
             ).error
 
-            if apiError?.code == "EXPIRED_TOKEN", !isRetryAfterReissue {
+            if response.statusCode == 401, !isRetryAfterReissue {
                 do {
                     try await TokenStorage.shared.reissueToken()
                 } catch {

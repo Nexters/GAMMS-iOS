@@ -17,7 +17,7 @@ struct RootView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     
     var body: some View {
-        Group {
+        ZStack {
             switch loginSession.value {
             case .notLoggedIn:
                 LoginView(
@@ -30,6 +30,7 @@ struct RootView: View {
                         )
                     )
                 )
+                
             case .autoLoginPending, .loggedIn:
                 if hasCompletedOnboarding {
                     MainTabView()
@@ -40,6 +41,14 @@ struct RootView: View {
                 }
             }
         }
+        .animation(
+            .easeInOut(duration: 0.3),
+            value: loginSession.value
+        )
+        .animation(
+            .easeInOut(duration: 0.3),
+            value: hasCompletedOnboarding
+        )
         .environment(loginSession)
         .environment(UserManager.shared)
     }

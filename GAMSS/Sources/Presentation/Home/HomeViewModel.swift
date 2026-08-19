@@ -11,31 +11,19 @@ import Foundation
 @MainActor
 final class HomeViewModel: ObservableObject {
     @Published var input: String = ""
-    @Published private(set) var isSending = false
     @Published var alertMessage: String?
-    @Published var createdConversationId: Int?
-    @Published private(set) var createdSentMessage: SentMessage?
+    @Published var pendingFirstMessage: PendingFirstMessage?
     @Published private(set) var selectedEmotions: Set<EmotionCharacter> = Set(EmotionCharacter.allCases)
     @Published var isEmotionPickerOpen = false
 
-    private let sendMessageUseCase: SendMessageUseCase
     private let fetchMyProfileUseCase: FetchMyProfileUseCase
-    private let updateConversationTitleUseCase: UpdateConversationTitleUseCase
     private let userManager: UserManager
 
-    /// 테스트에서 백그라운드 title 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들
-    /// (ChatViewModel.pendingSummaryUpdateTask와 동일한 목적).
-    private(set) var pendingTitleUpdateTask: Task<Void, Never>?
-
     init(
-        sendMessageUseCase: SendMessageUseCase,
         fetchMyProfileUseCase: FetchMyProfileUseCase,
-        updateConversationTitleUseCase: UpdateConversationTitleUseCase,
         userManager: UserManager = .shared
     ) {
-        self.sendMessageUseCase = sendMessageUseCase
         self.fetchMyProfileUseCase = fetchMyProfileUseCase
-        self.updateConversationTitleUseCase = updateConversationTitleUseCase
         self.userManager = userManager
     }
 
@@ -58,7 +46,7 @@ final class HomeViewModel: ObservableObject {
     }
 
     var isSendDisabled: Bool {
-        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending || selectedEmotions.isEmpty
+        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || selectedEmotions.isEmpty
     }
 
     /// 감정 선택을 토글한다. 전체 해제(0개)도 허용한다 — 그 경우 `isSendDisabled`가 true가
@@ -71,41 +59,21 @@ final class HomeViewModel: ObservableObject {
         }
     }
 
-    func send() async {
+    /// 서버 응답을 기다리지 않고 채팅 화면으로 바로 넘어간다 — 실제 전송/제목 저장은
+    /// ChatViewModel이 화면 진입 직후 pendingFirstMessage로 자동 시작한다.
+    func send() {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, !isSending else { return }
-
-        isSending = true
-        defer { isSending = false }
-
-        do {
-            let sent = try await sendMessageUseCase.execute(
-                conversationId: nil,
-                content: trimmed,
-                repliesToMessageId: nil,
-                contextSummary: nil,
-                excludedCharacters: Set(EmotionCharacter.allCases).subtracting(selectedEmotions)
-            )
-            input = ""
-            createdSentMessage = sent
-            createdConversationId = sent.message.conversationId
-
-            // 채팅 화면 이동은 위에서 이미 트리거됐다 — title 저장 완료를 기다리지 않고
-            // 백그라운드에서 처리한다. self를 캡처하면 pendingTitleUpdateTask(self 소유)와
-            // 순환 참조가 생기므로 weak로 잡는다.
-            let conversationId = sent.message.conversationId
-            let updateConversationTitleUseCase = updateConversationTitleUseCase
-            pendingTitleUpdateTask = Task { [weak self] in
-                do {
-                    try await updateConversationTitleUseCase.execute(conversationId: conversationId, title: trimmed)
-                } catch {
-                    self?.alertMessage = "제목을 저장하지 못했어요"
-                }
-            }
-        } catch let error as SendMessageValidationError {
-            alertMessage = error.errorDescription
-        } catch {
-            alertMessage = "쪽지를 보내지 못했어요"
+        guard !trimmed.isEmpty else { return }
+        guard trimmed.count <= ConversationSummaryPolicy.maxMessageLength else {
+            alertMessage = SendMessageValidationError.tooLong.errorDescription
+            return
         }
+        guard !selectedEmotions.isEmpty else { return }
+
+        input = ""
+        pendingFirstMessage = PendingFirstMessage(
+            content: trimmed,
+            excludedCharacters: Set(EmotionCharacter.allCases).subtracting(selectedEmotions)
+        )
     }
 }

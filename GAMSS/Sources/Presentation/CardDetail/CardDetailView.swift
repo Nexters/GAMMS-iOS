@@ -11,10 +11,21 @@ struct CardDetailView: View {
     let onClose: () -> Void
 
     @StateObject private var viewModel: CardDetailViewModel
+    @StateObject private var conversationHistoryViewModel: ConversationHistoryViewModel
+    @State private var isShowingConversation = false
+
+    private let transitionDuration = 0.22
 
     init(viewModel: CardDetailViewModel, onClose: @escaping () -> Void) {
         self.onClose = onClose
         _viewModel = StateObject(wrappedValue: viewModel)
+        _conversationHistoryViewModel = StateObject(
+            wrappedValue: ConversationHistoryViewModel(
+                getMessagesUseCase: GetMessagesUseCase(
+                    conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
+                )
+            )
+        )
     }
 
     var body: some View {
@@ -23,13 +34,24 @@ struct CardDetailView: View {
                 .ignoresSafeArea()
 
             if let card = viewModel.card {
-                ZStack(alignment: .topTrailing) {
-                    CardView(card: card) {
-                        bottomActions
-                    }
+                if isShowingConversation {
+                    ConversationHistoryView(
+                        card: card,
+                        viewModel: conversationHistoryViewModel,
+                        onBack: { showCard() },
+                        onClose: onClose
+                    )
+                    .transition(.scale.combined(with: .opacity))
+                } else {
+                    ZStack(alignment: .topTrailing) {
+                        CardView(card: card) {
+                            bottomActions
+                        }
 
-                    closeButton
-                        .padding([.top, .trailing], Spacing.spacing300)
+                        closeButton
+                            .padding([.top, .trailing], Spacing.spacing300)
+                    }
+                    .transition(.scale.combined(with: .opacity))
                 }
             } else if viewModel.isLoading {
                 ProgressView()
@@ -71,13 +93,14 @@ struct CardDetailView: View {
                     Task { await discardCard() }
                 }
                 .frame(width: 97)
-                // 대화보기는 이번 스코프에서 UI만 존재 — 탭해도 동작 없음.
-                OutlineButton(title: "대화보기") {}
-                    .frame(width: 97)
+
+                OutlineButton(title: "대화보기") {
+                    showConversation()
+                }
+                .frame(width: 97)
             }
             .disabled(viewModel.isLoading)
 
-            // 공유하기도 이번 스코프에서 UI만 존재.
             HStack(spacing: Spacing.spacing025) {
                 Text("공유하기")
                     .typography(.caption2)
@@ -99,6 +122,18 @@ struct CardDetailView: View {
                 .frame(width: 20, height: 20)
         }
         .accessibilityLabel("닫기")
+    }
+
+    private func showConversation() {
+        withAnimation(.easeOut(duration: transitionDuration)) {
+            isShowingConversation = true
+        }
+    }
+
+    private func showCard() {
+        withAnimation(.easeOut(duration: transitionDuration)) {
+            isShowingConversation = false
+        }
     }
 
     private func discardCard() async {

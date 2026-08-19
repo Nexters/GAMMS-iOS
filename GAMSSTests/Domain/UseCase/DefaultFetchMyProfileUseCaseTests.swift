@@ -22,6 +22,10 @@ private final class MockMemberRepository: MemberRepository {
     func updateNickname(_ nickname: String) async throws -> User {
         fatalError("not used in this test")
     }
+
+    func fetchTokenUsage() async throws -> TokenUsage {
+        fatalError("not used in this test")
+    }
 }
 
 final class DefaultFetchMyProfileUseCaseTests: XCTestCase {

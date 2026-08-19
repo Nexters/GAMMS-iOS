@@ -27,7 +27,7 @@ struct ChatView: View {
     private let containerPadding = Spacing.spacing300
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .topTrailing) {
             chatContent
 
             if viewModel.isEndConfirmationPresented {
@@ -47,8 +47,40 @@ struct ChatView: View {
                     )
                 }
             }
+
+            if viewModel.isTokenUsagePopoverPresented {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        viewModel.isTokenUsagePopoverPresented = false
+                    }
+
+                TokenUsagePopoverView(
+                    tokenUsage: viewModel.tokenUsage,
+                    isLoading: viewModel.isLoadingTokenUsage,
+                    errorMessage: viewModel.tokenUsageErrorMessage,
+                    onRetry: { Task { await viewModel.loadTokenUsage() } }
+                )
+                .task {
+                    await viewModel.loadTokenUsage()
+                }
+                .padding(.top, tokenUsagePopoverTopOffset)
+                .padding(.trailing, Spacing.spacing400)
+            }
+
+            if viewModel.isEnding {
+                Color.colorBlack.opacity(0.7)
+                    .ignoresSafeArea()
+
+                ProgressView()
+                    .tint(Color.colorWhite)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
     }
+
+    private let tokenUsagePopoverTopOffset: CGFloat = Spacing.spacing400 + 24 + Spacing.spacing200
 
     private var chatContent: some View {
         VStack(spacing: 0) {
@@ -86,11 +118,18 @@ struct ChatView: View {
                                 .id(PendingUserMessage.scrollAnchorID)
                             }
 
+                            if let nextReplyCharacter = viewModel.nextReplyCharacter {
+                                TypingIndicatorView(emotion: nextReplyCharacter)
+                                    .id(TypingIndicatorView.scrollAnchorID)
+                                    .transition(.opacity)
+                            }
+
                             Color.clear
                                 .frame(height: 0)
                                 .onAppear { viewModel.markAtBottom(true) }
                                 .onDisappear { viewModel.markAtBottom(false) }
                         }
+                        .animation(.easeOut(duration: 0.2), value: viewModel.nextReplyCharacter)
                         .padding(containerPadding)
                     }
                     .simultaneousGesture(
@@ -103,6 +142,11 @@ struct ChatView: View {
                     }
                     .onChange(of: viewModel.pendingUserMessage) { _, _ in
                         scrollToBottom(proxy)
+                    }
+                    .onChange(of: viewModel.nextReplyCharacter) { _, _ in
+                        if viewModel.isAtBottom {
+                            scrollToBottom(proxy)
+                        }
                     }
                     .onReceive(keyboardWillChange) { notification in
                         guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
@@ -129,7 +173,8 @@ struct ChatView: View {
                                 replyTargetLabel: viewModel.replyTarget.flatMap { QuotedReplyHeader.label(forQuotedSender: $0.sender) },
                                 replyTargetContent: viewModel.replyTarget?.content,
                                 onCancelReply: { viewModel.cancelReply() },
-                                isDisabled: viewModel.isConversationEnded,
+                                isDisabled: viewModel.isConversationEnded || viewModel.isTokenExceeded,
+                                disabledPlaceholder: viewModel.composerDisabledPlaceholder,
                                 onSend: { Task { await viewModel.send() } },
                                 onTextChange: { viewModel.updateInput($0) },
                                 isFocused: $isInputFocused
@@ -180,7 +225,7 @@ struct ChatView: View {
         }
     }
 
-    /// 커스텀 상단 헤더: 뒤로가기 + 대화방 생성 날짜 + 우측 버튼 2개(종료, 자리만 미리 만든 placeholder).
+    /// 커스텀 상단 헤더: 뒤로가기 + 대화방 생성 날짜 + 우측 버튼 2개(종료, 토큰 사용량).
     /// 시스템 네비게이션 바는 `.toolbar(.hidden, for: .navigationBar)`로 숨기고 이 헤더가 대신한다.
     private var header: some View {
         ZStack {
@@ -196,20 +241,19 @@ struct ChatView: View {
 
                 Spacer()
 
-                HStack(spacing: Spacing.spacing300) {
+                HStack(spacing: Spacing.spacing400) {
                     Button(action: { viewModel.requestEndConversation() }) {
-                        Image(systemName: "checkmark.circle")
-                            .foregroundStyle(Color.colorGray950)
+                        Image("iconCardGenerate")
                     }
                     .disabled(!viewModel.canEndConversation)
                     .accessibilityLabel("대화 종료")
 
-                    // 다음 이터레이션에서 동작을 채울 자리만 미리 만든 버튼. 아이콘은 확정 전.
-                    Button(action: {}) {
-                        Image(systemName: "ellipsis")
-                            .foregroundStyle(Color.colorGray950)
+                    Button(action: {
+                        viewModel.isTokenUsagePopoverPresented.toggle()
+                    }) {
+                        Image("iconTokenUsage")
                     }
-                    .accessibilityLabel("더보기")
+                    .accessibilityLabel("토큰 사용량")
                 }
             }
         }
@@ -226,9 +270,6 @@ struct ChatView: View {
         return ConversationListDateHeaderFormatter.string(from: firstMessageDate)
     }
 
-    /// 확정된 메시지 목록의 마지막 항목, 없으면 전송 중인 낙관적 메시지를 기준으로 맨 아래로
-    /// 스크롤한다. pendingUserMessage가 항상 messages보다 나중에 화면에 그려지므로, 둘 다 있을
-    /// 때는 pendingUserMessage 쪽으로 스크롤해야 실제로 맨 아래가 된다.
     @ViewBuilder
     private func bottomIndicator(proxy: ScrollViewProxy) -> some View {
         if let unseen = viewModel.unseenIncomingMessage {
@@ -247,9 +288,14 @@ struct ChatView: View {
         }
     }
 
+    /// 화면에 그려지는 순서(메시지 → 낙관적 메시지 → 입력중 인디케이터) 중 가장 아래에 있는
+    /// 항목을 기준으로 맨 아래로 스크롤한다. 셋 중 실제로 보이는 것 중 가장 나중에 그려지는
+    /// 항목으로 스크롤해야 실제로 맨 아래가 된다.
     private func scrollToBottom(_ proxy: ScrollViewProxy, animation: Animation = .easeOut(duration: 0.2)) {
         withAnimation(animation) {
-            if viewModel.pendingUserMessage != nil {
+            if viewModel.nextReplyCharacter != nil {
+                proxy.scrollTo(TypingIndicatorView.scrollAnchorID, anchor: .bottom)
+            } else if viewModel.pendingUserMessage != nil {
                 proxy.scrollTo(PendingUserMessage.scrollAnchorID, anchor: .bottom)
             } else if let lastId = viewModel.messages.last?.id {
                 proxy.scrollTo(lastId, anchor: .bottom)

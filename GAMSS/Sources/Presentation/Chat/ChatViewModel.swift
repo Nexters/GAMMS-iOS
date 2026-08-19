@@ -23,44 +23,67 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var createdCard: Card?
     @Published private(set) var isAtBottom = true
     @Published private(set) var unseenIncomingMessage: Message?
+    @Published private(set) var tokenUsage: TokenUsage?
+    @Published private(set) var isLoadingTokenUsage = false
+    @Published var tokenUsageErrorMessage: String?
+    @Published var isTokenUsagePopoverPresented = false
+    @Published private(set) var isTokenExceeded = false
+    /// 답장 하나가 막 노출된 직후, 다음 캐릭터의 입력중 표시가 뜨기 전까지의 짧은 정적 구간.
+    /// 이 동안은 `nextReplyCharacter`가 nil을 돌려줘 인디케이터가 잠깐 사라진다.
+    @Published private(set) var isRevealPaused = false
 
     private var conversationId: Int?
-    private let initialSentMessage: SentMessage?
+    private let pendingFirstMessage: PendingFirstMessage?
     private let sendMessageUseCase: SendMessageUseCase
     private let getMessagesUseCase: GetMessagesUseCase
     private let endConversationUseCase: EndConversationUseCase
     private let createCardUseCase: CreateCardUseCase
+    private let getTokenUsageUseCase: GetTokenUsageUseCase
+    private let updateConversationTitleUseCase: UpdateConversationTitleUseCase
     private let summaryStore: ConversationSummaryStore
-    private var revealTask: Task<Void, Never>?
+    /// 테스트에서 순차 노출이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
+    private(set) var revealTask: Task<Void, Never>?
+    private var isTokenUsageStale = true
     /// 테스트에서 백그라운드 요약 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
     private(set) var pendingSummaryUpdateTask: Task<Void, Never>?
+    /// 테스트에서 백그라운드 제목 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
+    private(set) var pendingTitleUpdateTask: Task<Void, Never>?
 
     init(
         sendMessageUseCase: SendMessageUseCase,
         getMessagesUseCase: GetMessagesUseCase,
         endConversationUseCase: EndConversationUseCase,
         createCardUseCase: CreateCardUseCase,
+        getTokenUsageUseCase: GetTokenUsageUseCase,
+        updateConversationTitleUseCase: UpdateConversationTitleUseCase,
         summaryStore: ConversationSummaryStore,
         conversationId: Int? = nil,
-        initialSentMessage: SentMessage? = nil
+        pendingFirstMessage: PendingFirstMessage? = nil
     ) {
         self.sendMessageUseCase = sendMessageUseCase
         self.getMessagesUseCase = getMessagesUseCase
         self.endConversationUseCase = endConversationUseCase
         self.createCardUseCase = createCardUseCase
+        self.getTokenUsageUseCase = getTokenUsageUseCase
+        self.updateConversationTitleUseCase = updateConversationTitleUseCase
         self.summaryStore = summaryStore
         self.conversationId = conversationId
-        self.initialSentMessage = initialSentMessage
+        self.pendingFirstMessage = pendingFirstMessage
     }
 
-    /// 화면 진입 시 한 번 호출한다. 다른 화면에서 이미 받아온 응답이 있으면 그걸로 채우고,
-    /// 없으면 기존 대화의 히스토리를 불러온다.
+    /// 화면 진입 시 한 번 호출한다. 기존 대화면 히스토리를 불러오고, 홈에서 아직 안 보낸 첫
+    /// 메시지를 들고 왔으면(pendingFirstMessage) 그 내용으로 전송을 자동 시작한다.
     func start() async {
-        if let initialSentMessage {
-            seed(with: initialSentMessage)
-        } else if let conversationId {
+        async let tokenUsageFetch: Void = loadTokenUsage()
+
+        if let conversationId {
             await load(conversationId: conversationId)
+        } else if let pendingFirstMessage {
+            input = pendingFirstMessage.content
+            await send(excludedCharacters: pendingFirstMessage.excludedCharacters)
         }
+
+        await tokenUsageFetch
     }
 
     /// 재진입 시 히스토리를 불러온다. 순차 노출은 적용하지 않고 한 번에 표시한다.
@@ -104,7 +127,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     var isSendDisabled: Bool {
-        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending || isConversationEnded
+        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending || isConversationEnded || isTokenExceeded
     }
 
     /// 아직 대화방이 만들어지지 않았거나(첫 메시지 전) 이미 종료된 대화는 다시 종료할 수 없다.
@@ -116,7 +139,35 @@ final class ChatViewModel: ObservableObject {
         isConversationEnded && createdCard == nil && alertMessage != nil
     }
 
-    func send() async {
+    var composerDisabledPlaceholder: String {
+        isConversationEnded ? "대화가 종료됐어요" : "오늘의 토큰을 모두 사용했어요"
+    }
+
+    /// 다음으로 순차 노출될 답장의 발신자. 서버 응답(SentMessage.comments)이 이미 다 도착해
+    /// pendingComments에 담겨있는 상태라 다음 캐릭터가 누구인지 미리 알 수 있다 — 첫 응답이
+    /// 오기 전(네트워크 대기 중)에는 pendingComments가 비어있어 nil.
+    var nextReplyCharacter: EmotionCharacter? {
+        guard !isRevealPaused, case let .character(emotion) = pendingComments.first?.sender else { return nil }
+        return emotion
+    }
+
+    func loadTokenUsage() async {
+        guard isTokenUsageStale else { return }
+
+        isLoadingTokenUsage = true
+        tokenUsageErrorMessage = nil
+        defer { isLoadingTokenUsage = false }
+        do {
+            let usage = try await getTokenUsageUseCase.execute()
+            tokenUsage = usage
+            isTokenExceeded = usage.exceeded
+            isTokenUsageStale = false
+        } catch {
+            tokenUsageErrorMessage = "토큰 사용량을 불러오지 못했어요"
+        }
+    }
+
+    func send(excludedCharacters: Set<EmotionCharacter> = []) async {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !isSending else { return }
 
@@ -141,7 +192,7 @@ final class ChatViewModel: ObservableObject {
                 content: trimmed,
                 repliesToMessageId: replyTarget?.id,
                 contextSummary: contextSummary,
-                excludedCharacters: []
+                excludedCharacters: excludedCharacters
             )
             pendingUserMessage = nil
             if self.replyTarget == replyTarget {
@@ -167,18 +218,37 @@ final class ChatViewModel: ObservableObject {
     /// 다른 화면(홈)에서 이미 받아온 응답으로 화면을 채운다 — 방금 받은 응답을 다시
     /// getMessages로 조회하지 않기 위한 용도.
     func seed(with sent: SentMessage) {
+        let isNewConversation = conversationId == nil
         conversationId = sent.message.conversationId
+        isTokenUsageStale = true
 
-        // 첫 댓글은 즉시, 나머지는 순차 노출 큐로.
         messages.append(sent.message)
-        if let first = sent.comments.first {
-            messages.append(first)
-        }
-        pendingComments = Array(sent.comments.dropFirst())
+        // 첫 댓글을 포함해 전부 순차 노출 큐로 — 모든 답장 앞에 로티가 한 번씩 뜬다.
+        pendingComments = sent.comments
         revealRemainingComments()
 
         if sent.commentStatus != .done {
             alertMessage = sent.commentStatus.toUserMessage()
+        }
+        if sent.commentStatus == .limitExceeded {
+            isTokenExceeded = true
+        }
+
+        if isNewConversation {
+            updateTitleInBackground(conversationId: sent.message.conversationId, title: sent.message.content)
+        }
+    }
+
+    /// 새 대화의 첫 메시지 내용을 제목으로 저장한다. 실패해도 이미 진행 중인 대화 자체를
+    /// 막지 않고 알럿만 띄운다.
+    private func updateTitleInBackground(conversationId: Int, title: String) {
+        let updateConversationTitleUseCase = updateConversationTitleUseCase
+        pendingTitleUpdateTask = Task { [weak self] in
+            do {
+                try await updateConversationTitleUseCase.execute(conversationId: conversationId, title: title)
+            } catch {
+                self?.alertMessage = "제목을 저장하지 못했어요"
+            }
         }
     }
 
@@ -242,7 +312,7 @@ final class ChatViewModel: ObservableObject {
     /// summary는 채팅 압축본(ConversationSummaryStore)을 그대로 재사용한다 — 카드 전용 요약을
     /// 따로 만들지 않는다. emotion은 지금까지 등장한 캐릭터 답장의 최빈값.
     private func createCard(conversationId: Int) async {
-        let summary = await summaryStore.current() ?? ""
+        let summary = await summaryStore.current() ?? rawUserMessagesSummary()
         let emotion = EmotionCharacter.dominant(in: messages)
         do {
             createdCard = try await createCardUseCase.execute(conversationId: conversationId, emotion: emotion, summary: summary)
@@ -251,9 +321,20 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
+    /// summaryStore가 압축본을 못 내놓는 경우(대화가 너무 짧아 add()가 반영되기 전에
+    /// 종료된 경우 등)의 대비책 — 서버에 빈 summary를 보내면 카드 생성이 실패하므로,
+    /// 사용자가 실제로 보낸 원문을 그대로 이어붙여 대신 보낸다.
+    private func rawUserMessagesSummary() -> String {
+        messages
+            .filter { $0.sender == .user }
+            .map(\.content)
+            .joined(separator: " ")
+    }
+
     private func flushPendingComments() {
         revealTask?.cancel()
         revealTask = nil
+        isRevealPaused = false
         guard !pendingComments.isEmpty else { return }
         messages.append(contentsOf: pendingComments)
         pendingComments.removeAll()
@@ -270,10 +351,18 @@ final class ChatViewModel: ObservableObject {
                 guard hasNext else { break }
                 try? await Task.sleep(nanoseconds: UInt64(CommentRevealPolicy.nextGapSeconds() * 1_000_000_000))
                 guard !Task.isCancelled else { break }
-                await MainActor.run {
-                    guard !self.pendingComments.isEmpty else { return }
+                let hasMore: Bool = await MainActor.run {
+                    guard !self.pendingComments.isEmpty else { return false }
                     self.messages.append(self.pendingComments.removeFirst())
+                    let hasMore = !self.pendingComments.isEmpty
+                    self.isRevealPaused = hasMore
+                    return hasMore
                 }
+                // 다음 캐릭터가 남아있을 때만 정적 구간을 둔다 — 마지막 답장 뒤에는 쉴 필요 없음.
+                guard hasMore else { break }
+                try? await Task.sleep(nanoseconds: UInt64(CommentRevealPolicy.postRevealGapSeconds * 1_000_000_000))
+                guard !Task.isCancelled else { break }
+                await MainActor.run { self.isRevealPaused = false }
             }
         }
     }

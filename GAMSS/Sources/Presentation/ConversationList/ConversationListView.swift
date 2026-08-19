@@ -124,15 +124,17 @@ struct ConversationListView: View {
                         getMessagesUseCase: GetMessagesUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
                         endConversationUseCase: EndConversationUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
                         createCardUseCase: CreateCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)),
+                        getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)),
+                        updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
                         summaryStore: LazyConversationSummaryStore(),
                         conversationId: conversation.id
                     )
                 )
                 .toolbar(.hidden, for: .tabBar)
             }
-        }
-        .task {
-            await viewModel.load()
+            .onAppear {
+                Task { await viewModel.load() }
+            }
         }
         .alert(viewModel.alertMessage ?? "", isPresented: Binding(
             get: { viewModel.alertMessage != nil },

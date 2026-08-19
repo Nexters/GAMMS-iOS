@@ -60,7 +60,7 @@ struct HomeView: View {
                         isEmotionPickerOpen: $viewModel.isEmotionPickerOpen,
                         isSendDisabled: viewModel.isSendDisabled,
                         onToggleEmotion: { viewModel.toggleEmotion($0) },
-                        onCommit: { Task { await viewModel.send() } },
+                        onCommit: { viewModel.send() },
                         onInputChange: { viewModel.updateInput($0) },
                         isFocused: $isInputFocused
                     )
@@ -74,16 +74,20 @@ struct HomeView: View {
             // 줄어들면 같이 움직여 보인다 — 키보드에 반응해 레이아웃이 줄어들지 않게 한다.
             .ignoresSafeArea(.keyboard, edges: .bottom)
             .navigationBarHidden(true)
-            .navigationDestination(item: $viewModel.createdConversationId) { conversationId in
+            .onChange(of: viewModel.pendingFirstMessage) { _, newValue in
+                if newValue != nil { isInputFocused = false }
+            }
+            .navigationDestination(item: $viewModel.pendingFirstMessage) { pendingFirstMessage in
                 ChatView(
                     viewModel: ChatViewModel(
                         sendMessageUseCase: SendMessageUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
                         getMessagesUseCase: GetMessagesUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
                         endConversationUseCase: EndConversationUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
                         createCardUseCase: CreateCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)),
+                        getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)),
+                        updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
                         summaryStore: LazyConversationSummaryStore(),
-                        conversationId: conversationId,
-                        initialSentMessage: viewModel.createdSentMessage
+                        pendingFirstMessage: pendingFirstMessage
                     )
                 )
                 .toolbar(.hidden, for: .tabBar)
@@ -111,12 +115,14 @@ struct HomeView: View {
             Spacer()
 
             Button {
+                isInputFocused = false
                 isSettingPresented = true
             } label: {
-                Image("homeMenuIcon")
+                Image("gear")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 24, height: 24)
+                    .foregroundStyle(Color.colorGray900)
             }
         }
     }
@@ -180,14 +186,8 @@ struct HomeView: View {
 #Preview {
     HomeView(
         viewModel: HomeViewModel(
-            sendMessageUseCase: SendMessageUseCase(
-                conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
-            ),
             fetchMyProfileUseCase: DefaultFetchMyProfileUseCase(
                 memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
-            ),
-            updateConversationTitleUseCase: UpdateConversationTitleUseCase(
-                conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
             )
         )
     )
