@@ -48,8 +48,6 @@ final class ChatViewModel: ObservableObject {
     private(set) var pendingSummaryUpdateTask: Task<Void, Never>?
     /// 테스트에서 백그라운드 제목 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
     private(set) var pendingTitleUpdateTask: Task<Void, Never>?
-    /// 테스트에서 백그라운드 요약 히스토리 복원이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
-    private(set) var pendingSummaryRestoreTask: Task<Void, Never>?
 
     init(
         sendMessageUseCase: SendMessageUseCase,
@@ -98,25 +96,16 @@ final class ChatViewModel: ObservableObject {
                 guard message.sender == .user else { return nil }
                 return message.content
             }
-            // 요약 모델(온디바이스 추론) 로딩은 채팅방 진입 직후, 키보드/입력이 막 반응해야 하는
-            // 타이밍과 겹치면 리소스 경합으로 체감 렉을 만든다. 요약은 메시지를 보낼 때(current())가
-            // 되어서야 실제로 쓰이므로, 여기서 완료를 기다리지 않고 백그라운드로 흘려보낸다.
-            let summaryStore = summaryStore
-            pendingSummaryRestoreTask = Task { await summaryStore.restore(historicalUtterances: userUtterances) }
+            await summaryStore.restore(historicalUtterances: userUtterances)
         } catch {
             alertMessage = "대화를 불러오지 못했어요"
         }
     }
 
     /// 입력창의 원시 입력값을 받아 정책에 맞게 정규화하고, 키보드를 내려야 하는지 돌려준다.
-    /// `input`은 `text`와 바인딩되어 있어서, 값이 실제로 안 바뀌었는데도 재할당하면 그 onChange
-    /// 핸들러 안에서 자기 자신을 다시 바꾸는 재진입이 매 키 입력마다 발생한다 — 실제로 값이
-    /// 달라질 때만(140자 제한에 걸려 잘릴 때) 재할당한다.
     func updateInput(_ rawValue: String) -> Bool {
         let result = ConversationSummaryPolicy.normalizeInput(rawValue)
-        if input != result.value {
-            input = result.value
-        }
+        input = result.value
         return result.shouldDismissKeyboard
     }
 
