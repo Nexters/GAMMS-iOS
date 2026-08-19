@@ -6,12 +6,12 @@
 //
 
 enum Emotion: String, CaseIterable, Equatable, Identifiable {
-    case angry
-    case happy
-    case anxious
-    case embarrassed
-    case sad
-    case heartache
+    case angry = "ANGER"
+    case happy = "JOY"
+    case anxious = "ANXIETY"
+    case embarrassed = "QUIRKY"
+    case sad = "SADNESS"
+    case heartache = "GRUMPY"
     
     var id: Self { self }
 }
