@@ -52,6 +52,10 @@ private final class MockConversationRepository: ConversationRepository {
     private(set) var receivedExcludedCharacters: Set<EmotionCharacter>?
     private(set) var receivedRepliesToMessageId: Int?
     private(set) var receivedEndConversationId: Int?
+    var stubbedUpdateTitleResult: Result<Void, Error> = .success(())
+    private(set) var updateTitleCallCount = 0
+    private(set) var receivedTitleConversationId: Int?
+    private(set) var receivedTitle: String?
 
     func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
         sendCallCount += 1
@@ -72,7 +76,10 @@ private final class MockConversationRepository: ConversationRepository {
     }
 
     func updateTitle(conversationId: Int, title: String) async throws {
-        fatalError("not used in this test")
+        updateTitleCallCount += 1
+        receivedTitleConversationId = conversationId
+        receivedTitle = title
+        _ = try stubbedUpdateTitleResult.get()
     }
 
     func endConversation(conversationId: Int) async throws {
@@ -133,7 +140,7 @@ final class ChatViewModelTests: XCTestCase {
         memberRepository: MockMemberRepository = MockMemberRepository(),
         summaryStore: MockConversationSummaryStore = MockConversationSummaryStore(),
         conversationId: Int? = nil,
-        initialSentMessage: SentMessage? = nil
+        pendingFirstMessage: PendingFirstMessage? = nil
     ) -> ChatViewModel {
         ChatViewModel(
             sendMessageUseCase: SendMessageUseCase(conversationRepository: repository),
@@ -141,9 +148,10 @@ final class ChatViewModelTests: XCTestCase {
             endConversationUseCase: EndConversationUseCase(conversationRepository: repository),
             createCardUseCase: CreateCardUseCase(cardRepository: cardRepository),
             getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: memberRepository),
+            updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: repository),
             summaryStore: summaryStore,
             conversationId: conversationId,
-            initialSentMessage: initialSentMessage
+            pendingFirstMessage: pendingFirstMessage
         )
     }
 
@@ -445,18 +453,6 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(restored, [["사용자 발화"]], "재진입 복원은 사용자 발화만 summaryStore에 넘겨야 함")
     }
 
-    func test_start_withInitialSentMessage_seedsWithoutLoadingHistory() async {
-        let repository = MockConversationRepository()
-        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
-        let initialSentMessage = SentMessage(message: sentMessage, commentStatus: .done, comments: [])
-        let viewModel = makeViewModel(repository: repository, conversationId: 10, initialSentMessage: initialSentMessage)
-
-        await viewModel.start()
-
-        XCTAssertEqual(viewModel.messages, [sentMessage])
-        XCTAssertEqual(repository.getMessagesCallCount, 0, "initialSentMessage가 있으면 히스토리를 다시 조회하면 안 됨")
-    }
-
     func test_start_withConversationIdOnly_loadsHistory() async {
         let repository = MockConversationRepository()
         let userMessage = Message(id: 1, conversationId: 10, sender: .user, content: "사용자 발화", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
@@ -469,7 +465,7 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(repository.getMessagesCallCount, 1)
     }
 
-    func test_start_withNeitherConversationIdNorInitialSentMessage_doesNothing() async {
+    func test_start_withNeitherConversationIdNorPendingFirstMessage_doesNothing() async {
         let repository = MockConversationRepository()
         let viewModel = makeViewModel(repository: repository)
 
@@ -477,6 +473,48 @@ final class ChatViewModelTests: XCTestCase {
 
         XCTAssertTrue(viewModel.messages.isEmpty)
         XCTAssertEqual(repository.getMessagesCallCount, 0)
+        XCTAssertEqual(repository.sendCallCount, 0)
+    }
+
+    func test_start_withPendingFirstMessage_sendsAutomaticallyWithExcludedCharacters() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+        let pendingFirstMessage = PendingFirstMessage(content: "안녕", excludedCharacters: [.anger])
+        let viewModel = makeViewModel(repository: repository, pendingFirstMessage: pendingFirstMessage)
+
+        await viewModel.start()
+
+        XCTAssertEqual(repository.sendCallCount, 1)
+        XCTAssertEqual(repository.receivedExcludedCharacters, [.anger])
+        XCTAssertEqual(viewModel.messages, [sentMessage])
+    }
+
+    func test_seed_newConversation_updatesTitleWithMessageContentInBackground() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+        await viewModel.pendingTitleUpdateTask?.value
+
+        XCTAssertEqual(repository.updateTitleCallCount, 1)
+        XCTAssertEqual(repository.receivedTitleConversationId, 10)
+        XCTAssertEqual(repository.receivedTitle, "안녕")
+    }
+
+    func test_seed_existingConversation_doesNotUpdateTitle() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 2, conversationId: 10, sender: .user, content: "고마워", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
+        let viewModel = makeViewModel(repository: repository, conversationId: 10)
+        viewModel.input = "고마워"
+
+        await viewModel.send()
+
+        XCTAssertEqual(repository.updateTitleCallCount, 0, "이미 대화가 있으면(재진입/두 번째 메시지) 제목을 다시 저장하면 안 됨")
     }
 
     func test_updateInput_trailingNewline_stripsNewlineAndSignalsKeyboardDismiss() {
@@ -559,6 +597,23 @@ final class ChatViewModelTests: XCTestCase {
         await viewModel.confirmEndConversation()
 
         XCTAssertEqual(cardRepository.receivedEmotion, .anger)
+    }
+
+    func test_confirmEndConversation_summaryStoreReturnsNil_usesJoinedUserMessagesAsSummary() async {
+        let repository = MockConversationRepository()
+        repository.stubbedMessages = [
+            Message(id: 1, conversationId: 10, sender: .user, content: "오늘 힘들었어", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+            Message(id: 2, conversationId: 10, sender: .character(.sadness), content: "무슨 일이야?", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+            Message(id: 3, conversationId: 10, sender: .user, content: "그냥 그랬어", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)),
+        ]
+        let cardRepository = MockCardRepository()
+        cardRepository.stubbedResult = .success(Card(id: 1, conversationId: 10, emotion: .sadness, summary: "", message: "", date: Date(timeIntervalSince1970: 0)))
+        let viewModel = makeViewModel(repository: repository, cardRepository: cardRepository, conversationId: 10)
+        await viewModel.load(conversationId: 10)
+
+        await viewModel.confirmEndConversation()
+
+        XCTAssertEqual(cardRepository.receivedSummary, "오늘 힘들었어 그냥 그랬어", "압축본이 없으면(대화가 너무 짧은 경우 등) 사용자 원문을 이어붙여 대신 보내야 함")
     }
 
     func test_confirmEndConversation_endConversationFails_doesNotCreateCard() async {

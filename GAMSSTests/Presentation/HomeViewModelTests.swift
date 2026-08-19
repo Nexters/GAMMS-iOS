@@ -8,47 +8,6 @@
 import XCTest
 @testable import GAMSS
 
-private final class MockConversationRepository: ConversationRepository {
-    var stubbedSendResult: Result<SentMessage, Error> = .failure(SummaryError.inferenceFailed())
-    var stubbedUpdateTitleResult: Result<Void, Error> = .success(())
-    private(set) var sendCallCount = 0
-    private(set) var receivedExcludedCharacters: Set<EmotionCharacter>?
-    private(set) var receivedTitleConversationId: Int?
-    private(set) var receivedTitle: String?
-
-    func sendMessage(conversationId: Int?, content: String, repliesToMessageId: Int?, contextSummary: String?, excludedCharacters: Set<EmotionCharacter>) async throws -> SentMessage {
-        sendCallCount += 1
-        receivedExcludedCharacters = excludedCharacters
-        return try stubbedSendResult.get()
-    }
-
-    func getMessages(conversationId: Int) async throws -> [Message] {
-        []
-    }
-
-    func getIncompleteConversations() async throws -> [ConversationSummary] {
-        []
-    }
-
-    func updateTitle(conversationId: Int, title: String) async throws {
-        receivedTitleConversationId = conversationId
-        receivedTitle = title
-        _ = try stubbedUpdateTitleResult.get()
-    }
-
-    func endConversation(conversationId: Int) async throws {
-        fatalError("not used in this test")
-    }
-
-    func deleteConversations(_ ids: [Int]) async throws {
-        fatalError("not used in this test")
-    }
-
-    func searchConversations(_ text: String) async throws -> SearchChatResponseDTO {
-        fatalError("not used in this test")
-    }
-}
-
 private final class MockFetchMyProfileUseCase: FetchMyProfileUseCase {
     var stubbedResult: Result<User, Error> = .failure(SummaryError.inferenceFailed())
     private(set) var executeCallCount = 0
@@ -62,39 +21,32 @@ private final class MockFetchMyProfileUseCase: FetchMyProfileUseCase {
 @MainActor
 final class HomeViewModelTests: XCTestCase {
     private func makeViewModel(
-        repository: MockConversationRepository = MockConversationRepository(),
         fetchMyProfileUseCase: MockFetchMyProfileUseCase = MockFetchMyProfileUseCase(),
         userManager: UserManager = UserManager()
     ) -> HomeViewModel {
         HomeViewModel(
-            sendMessageUseCase: SendMessageUseCase(conversationRepository: repository),
             fetchMyProfileUseCase: fetchMyProfileUseCase,
-            updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: repository),
             userManager: userManager
         )
     }
 
-    func test_send_onSuccess_setsCreatedConversationIdAndClearsInput() async {
-        let repository = MockConversationRepository()
-        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
-        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
-        let viewModel = makeViewModel(repository: repository)
+    func test_send_onSuccess_setsPendingFirstMessageAndClearsInput() {
+        let viewModel = makeViewModel()
         viewModel.input = "안녕"
 
-        await viewModel.send()
+        viewModel.send()
 
-        XCTAssertEqual(viewModel.createdConversationId, 10)
+        XCTAssertEqual(viewModel.pendingFirstMessage?.content, "안녕")
         XCTAssertEqual(viewModel.input, "")
     }
 
-    func test_send_contentTooLong_setsValidationAlertAndDoesNotCallRepository() async {
-        let repository = MockConversationRepository()
-        let viewModel = makeViewModel(repository: repository)
+    func test_send_contentTooLong_setsValidationAlertAndDoesNotSetPendingFirstMessage() {
+        let viewModel = makeViewModel()
         viewModel.input = String(repeating: "가", count: ConversationSummaryPolicy.maxMessageLength + 1)
 
-        await viewModel.send()
+        viewModel.send()
 
-        XCTAssertEqual(repository.sendCallCount, 0, "최종 검증에 걸리면 네트워크 호출까지 가면 안 됨")
+        XCTAssertNil(viewModel.pendingFirstMessage, "최종 검증에 걸리면 채팅 화면으로 넘어가면 안 됨")
         XCTAssertEqual(viewModel.alertMessage, SendMessageValidationError.tooLong.errorDescription)
     }
 
@@ -210,48 +162,15 @@ final class HomeViewModelTests: XCTestCase {
         XCTAssertNil(userManager.user)
     }
 
-    func test_send_onSuccess_updatesTitleWithSentContentInBackground() async {
-        let repository = MockConversationRepository()
-        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
-        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
-        let viewModel = makeViewModel(repository: repository)
-        viewModel.input = "안녕"
-
-        await viewModel.send()
-        await viewModel.pendingTitleUpdateTask?.value
-
-        XCTAssertEqual(repository.receivedTitleConversationId, 10)
-        XCTAssertEqual(repository.receivedTitle, "안녕")
-        XCTAssertNil(viewModel.alertMessage, "title 저장 성공 시에는 알림이 뜨면 안 됨")
-    }
-
-    func test_send_onSuccess_titleUpdateFails_setsAlertMessageWithoutClearingCreatedConversationId() async {
-        let repository = MockConversationRepository()
-        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
-        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
-        repository.stubbedUpdateTitleResult = .failure(SummaryError.inferenceFailed())
-        let viewModel = makeViewModel(repository: repository)
-        viewModel.input = "안녕"
-
-        await viewModel.send()
-        await viewModel.pendingTitleUpdateTask?.value
-
-        XCTAssertEqual(viewModel.createdConversationId, 10, "title 저장이 실패해도 이미 트리거된 네비게이션은 유지돼야 함")
-        XCTAssertNotNil(viewModel.alertMessage)
-    }
-
-    func test_send_excludesDeselectedEmotionsOnly() async {
-        let repository = MockConversationRepository()
-        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
-        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: []))
-        let viewModel = makeViewModel(repository: repository)
+    func test_send_excludesDeselectedEmotionsOnly() {
+        let viewModel = makeViewModel()
         viewModel.input = "안녕"
         viewModel.toggleEmotion(.anger)
         viewModel.toggleEmotion(.quirky)
 
-        await viewModel.send()
+        viewModel.send()
 
-        XCTAssertEqual(repository.receivedExcludedCharacters, [.anger, .quirky])
+        XCTAssertEqual(viewModel.pendingFirstMessage?.excludedCharacters, [.anger, .quirky])
     }
 
     func test_isSendDisabled_trueWhenAllEmotionsDeselected_evenWithInput() {

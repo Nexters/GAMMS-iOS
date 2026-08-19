@@ -23,8 +23,12 @@ actor LazyConversationSummaryStore: ConversationSummaryStore {
         await resolve()?.add(utterance)
     }
 
+    /// `underlying`이 아직 없다는 건 `add`/`restore`가 한 번도 없었다는 뜻 — 즉 압축할
+    /// 발화 자체가 없다는 게 이미 확정이므로, 결과가 nil일 걸 알면서 모델을 로드할
+    /// 필요가 없다(첫 메시지 전송이 그 모델 로딩 때문에 지연되는 걸 막는다).
     func current() async -> String? {
-        await resolve()?.current()
+        guard let underlying else { return nil }
+        return await underlying.current()
     }
 
     func reset() async {
