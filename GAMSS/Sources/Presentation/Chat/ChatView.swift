@@ -135,10 +135,12 @@ struct ChatView: View {
                     .simultaneousGesture(
                         TapGesture().onEnded { isInputFocused = false }
                     )
-                    .onChange(of: viewModel.messages) { _, newValue in
-                        if let last = newValue.last, viewModel.handleNewLastMessage(last) {
-                            scrollToBottom(proxy)
-                        }
+                    .onChange(of: viewModel.messages) { oldValue, newValue in
+                        guard let last = newValue.last, viewModel.handleNewLastMessage(last) else { return }
+                        // 채팅방 진입 직후 대화 기록을 처음 불러올 때(oldValue가 비어있던 경우)는
+                        // 애니메이션 없이 바로 맨 아래에 위치시킨다 — 애니메이션을 걸면 화면에
+                        // 안 보이던 리스트가 위에서부터 순식간에 훑고 지나가는 것처럼 보인다.
+                        scrollToBottom(proxy, animation: oldValue.isEmpty ? nil : .easeOut(duration: 0.2))
                     }
                     .onChange(of: viewModel.pendingUserMessage) { _, _ in
                         scrollToBottom(proxy)
@@ -291,7 +293,7 @@ struct ChatView: View {
     /// 화면에 그려지는 순서(메시지 → 낙관적 메시지 → 입력중 인디케이터) 중 가장 아래에 있는
     /// 항목을 기준으로 맨 아래로 스크롤한다. 셋 중 실제로 보이는 것 중 가장 나중에 그려지는
     /// 항목으로 스크롤해야 실제로 맨 아래가 된다.
-    private func scrollToBottom(_ proxy: ScrollViewProxy, animation: Animation = .easeOut(duration: 0.2)) {
+    private func scrollToBottom(_ proxy: ScrollViewProxy, animation: Animation? = .easeOut(duration: 0.2)) {
         withAnimation(animation) {
             if viewModel.nextReplyCharacter != nil {
                 proxy.scrollTo(TypingIndicatorView.scrollAnchorID, anchor: .bottom)
