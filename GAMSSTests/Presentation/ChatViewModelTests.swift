@@ -447,6 +447,7 @@ final class ChatViewModelTests: XCTestCase {
         let viewModel = makeViewModel(repository: repository, summaryStore: summaryStore)
 
         await viewModel.load(conversationId: 10)
+        await viewModel.pendingSummaryRestoreTask?.value
 
         XCTAssertEqual(viewModel.messages, [userMessage, characterMessage])
         let restored = await summaryStore.restoredHistories
