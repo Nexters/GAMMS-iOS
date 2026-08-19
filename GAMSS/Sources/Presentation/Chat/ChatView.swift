@@ -168,7 +168,14 @@ struct ChatView: View {
                         }
                     }
                     .onChange(of: viewModel.replyTarget) { _, _ in
-                        if viewModel.isAtBottom {
+                        // 키보드가 아직 안 떠 있으면(막 답장을 시작해서 포커스가 잡히는 참) 곧
+                        // keyboardWillChange가 키보드 애니메이션에 정확히 맞춰 스크롤해줄 것이므로
+                        // 여기서 미리 스크롤하지 않는다 — 두 스크롤이 따로 발동하면 먼저 자리
+                        // 잡았다가 키보드가 실제로 뜨면서 다시 보정하는 이중 모션이 되어 "한 박자
+                        // 늦게 움직이는" 것처럼 부자연스러워진다. 이미 키보드가 떠 있는 상태(다른
+                        // 메시지로 답장 대상만 바뀌는 경우 등, 키보드 높이 변화가 없어
+                        // keyboardWillChange가 다시 안 옴)에서만 여기서 직접 스크롤한다.
+                        if keyboardHeight > 0, viewModel.isAtBottom {
                             scrollToBottom(proxy)
                         }
                     }
@@ -283,6 +290,10 @@ struct ChatView: View {
     private func bottomIndicator(proxy: ScrollViewProxy) -> some View {
         if let unseen = viewModel.unseenIncomingMessage {
             NewMessageToastView(message: unseen) {
+                // 토스트는 스크롤이 끝나 sentinel이 화면에 들어와야(markAtBottom(true)) 사라지는데,
+                // 그러면 스크롤 애니메이션이 끝날 때까지 토스트가 그대로 떠 있다가 뒤늦게 사라져서
+                // 부자연스럽다 — 탭하는 즉시 지운다.
+                viewModel.markAtBottom(true)
                 withAnimation(.easeOut(duration: 0.2)) {
                     proxy.scrollTo(unseen.id, anchor: .bottom)
                 }
