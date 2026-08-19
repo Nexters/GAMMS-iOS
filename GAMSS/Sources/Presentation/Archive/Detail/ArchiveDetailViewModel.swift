@@ -15,13 +15,13 @@ final class ArchiveDetailViewModel: ObservableObject {
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
 
-    private let fetchMonthlyCardsUseCase: FetchMonthlyCardsUseCase
+    private let fetchCardsByDateUseCase: FetchCardsByDateUseCase
 
     init(
-        fetchMonthlyCardsUseCase: FetchMonthlyCardsUseCase,
+        fetchCardsByDateUseCase: FetchCardsByDateUseCase,
         selectedMonth: Date = Date.now
     ) {
-        self.fetchMonthlyCardsUseCase = fetchMonthlyCardsUseCase
+        self.fetchCardsByDateUseCase = fetchCardsByDateUseCase
         self.selectedMonth = selectedMonth
     }
 
@@ -33,8 +33,8 @@ final class ArchiveDetailViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            notes = try await fetchMonthlyCardsUseCase.execute(yearMonth: selectedMonth).map { _ in
-                DropNote(id: 0, imageName: "cardFoldStepTwo")
+            notes = try await fetchCardsByDateUseCase.execute(yearMonth: selectedMonth).map { dailyEmotion in
+                DropNote(id: dailyEmotion.conversationId, imageName: "cardFoldStepTwo")
             }
         } catch {
             notes = []

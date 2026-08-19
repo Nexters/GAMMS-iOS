@@ -8,8 +8,8 @@
 import Foundation
 
 struct DailyEmotion: Identifiable, Equatable {
+    let id: Int
+    let conversationId: Int
     let date: Date
-    let emotions: [Emotion]
-
-    var id: Date { date }
+    let emotion: Emotion?
 }

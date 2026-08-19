@@ -42,11 +42,11 @@ final class DefaultCardRepository: CardRepository {
         )
     }
     
-    func fetchMonthlyCards(yearMonth: Date) async throws -> [DailyEmotion] {
+    func fetchCardsByDate(yearMonth: Date, emotion: Emotion) async throws -> [DailyEmotion] {
         let yearMonth = DateFormatterFactory.dateWithDot.string(from: yearMonth)
         let response = try await networkManager.request(
-            CardEndpoint.fetchMonthlyCards(yearMonth: yearMonth),
-            responseType: APIResponse<[FetchMonthlyCardsResponseDTO]>.self
+            CardEndpoint.fetchCardsByDate(yearMonth: yearMonth, emotion: emotion.rawValue),
+            responseType: APIResponse<[FetchCardsByDateResponseDTO]>.self
         )
         return response.data.compactMap { response in
             guard let date = DateFormatterFactory.dateWithDot.date(from: response.date) else {
@@ -54,8 +54,10 @@ final class DefaultCardRepository: CardRepository {
             }
             
             return DailyEmotion(
+                id: response.id,
+                conversationId: response.conversationId,
                 date: date,
-                emotions: []
+                emotion: Emotion(rawValue: response.emotion)
             )
         }
     }

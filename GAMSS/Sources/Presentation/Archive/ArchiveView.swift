@@ -71,7 +71,15 @@ private extension ArchiveView {
         ) {
             ForEach(viewModel.emotions) { emotion in
                 NavigationLink {
-                    ArchiveDetailView(title: emotion.name, viewModel: ArchiveDetailViewModel(fetchMonthlyCardsUseCase: DefaultFetchMonthlyCardsUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared))))
+                    ArchiveDetailView(
+                        title: emotion.name,
+                        viewModel: ArchiveDetailViewModel(
+                            fetchCardsByDateUseCase: DefaultFetchCardsByDateUseCase(
+                                cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared),
+                                emotion: emotion
+                            )
+                        )
+                    )
                 } label: {
                     TrashItemView(imageNamed: emotion.trashImageNamed)
                         .frame(width: 132, height: 172)
