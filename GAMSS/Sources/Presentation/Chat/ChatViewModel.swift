@@ -21,6 +21,8 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isEnding = false
     @Published private(set) var isConversationEnded = false
     @Published private(set) var createdCard: Card?
+    @Published private(set) var isAtBottom = true
+    @Published private(set) var unseenIncomingMessage: Message?
     @Published private(set) var tokenUsage: TokenUsage?
     @Published private(set) var isLoadingTokenUsage = false
     @Published var tokenUsageErrorMessage: String?
@@ -107,6 +109,23 @@ final class ChatViewModel: ObservableObject {
         return result.shouldDismissKeyboard
     }
 
+    func markAtBottom(_ atBottom: Bool) {
+        isAtBottom = atBottom
+        if atBottom {
+            unseenIncomingMessage = nil
+        }
+    }
+
+    @discardableResult
+    func handleNewLastMessage(_ message: Message) -> Bool {
+        guard case .character = message.sender else { return false }
+        if isAtBottom {
+            return true
+        }
+        unseenIncomingMessage = message
+        return false
+    }
+
     var isSendDisabled: Bool {
         input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending || isConversationEnded || isTokenExceeded
     }
@@ -130,6 +149,21 @@ final class ChatViewModel: ObservableObject {
     var nextReplyCharacter: EmotionCharacter? {
         guard !isRevealPaused, case let .character(emotion) = pendingComments.first?.sender else { return nil }
         return emotion
+    }
+
+    /// 화면에 그려지는 순서(입력중 인디케이터 → 낙관적 메시지 → 일반 메시지) 중 가장 아래에
+    /// 있는 항목이 뭔지 판단한다. 이 우선순위(무엇이 "마지막"인지)는 대화 상태에 대한 판단이라
+    /// View가 아니라 여기서 정한다 — View는 이 결과를 받아 실제 스크롤 앵커 id로 옮기기만 한다.
+    var scrollTarget: ScrollTarget? {
+        if nextReplyCharacter != nil {
+            .typingIndicator
+        } else if pendingUserMessage != nil {
+            .pendingUserMessage
+        } else if let lastId = messages.last?.id {
+            .message(lastId)
+        } else {
+            nil
+        }
     }
 
     func loadTokenUsage() async {

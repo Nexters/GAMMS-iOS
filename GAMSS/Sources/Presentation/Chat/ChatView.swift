@@ -11,6 +11,13 @@ struct ChatView: View {
     @StateObject private var viewModel: ChatViewModel
     @FocusState private var isInputFocused: Bool
     @SwiftUI.Environment(\.dismiss) private var dismiss
+    @State private var keyboardHeight: CGFloat = 0
+    @State private var isMessageListPositioned = false
+    private static var hasPositionedOnce = false
+
+    private let keyboardWillChange = NotificationCenter.default.publisher(
+        for: UIResponder.keyboardWillChangeFrameNotification
+    )
 
     init(viewModel: ChatViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -118,35 +125,70 @@ struct ChatView: View {
                                     .id(TypingIndicatorView.scrollAnchorID)
                                     .transition(.opacity)
                             }
+
+                            Color.clear
+                                .frame(height: 0)
+                                .onAppear { viewModel.markAtBottom(true) }
+                                .onDisappear { viewModel.markAtBottom(false) }
                         }
                         .animation(.easeOut(duration: 0.2), value: viewModel.nextReplyCharacter)
-                        .padding(containerPadding)
+                        .padding(.horizontal, containerPadding)
+                        .padding(.top, containerPadding)
                     }
-                    // ScrollView가 키보드에 의해 축소/복원될 때
-                    // SwiftUI가 키보드 dismiss를 자연스럽게 처리하도록 한다.
-                    .scrollDismissesKeyboard(.interactively)
-                    .onChange(of: viewModel.messages) { _, _ in
-                        scrollToBottom(proxy)
+                    .opacity(isMessageListPositioned ? 1 : 0)
+                    .simultaneousGesture(
+                        TapGesture().onEnded { isInputFocused = false }
+                    )
+                    .onChange(of: viewModel.messages) { oldValue, newValue in
+                        guard !oldValue.isEmpty else {
+                            positionMessageListForInitialLoad(proxy)
+                            return
+                        }
+                        if let last = newValue.last, viewModel.handleNewLastMessage(last) {
+                            scrollToBottom(proxy)
+                        }
                     }
                     .onChange(of: viewModel.pendingUserMessage) { _, _ in
+                        isMessageListPositioned = true
                         scrollToBottom(proxy)
                     }
                     .onChange(of: viewModel.nextReplyCharacter) { _, _ in
-                        scrollToBottom(proxy)
+                        if viewModel.isAtBottom {
+                            scrollToBottom(proxy)
+                        }
+                    }
+                    .onReceive(keyboardWillChange) { notification in
+                        guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+                        let newHeight = max(0, UIScreen.main.bounds.height - frame.origin.y)
+                        guard newHeight != keyboardHeight else { return }
+                        keyboardHeight = newHeight
+                        if viewModel.isAtBottom {
+                            let duration = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double) ?? 0.25
+                            scrollToBottom(proxy, animation: .easeInOut(duration: duration))
+                        }
+                    }
+                    .onChange(of: viewModel.replyTarget) { _, _ in
+                        if keyboardHeight > 0, viewModel.isAtBottom {
+                            scrollToBottom(proxy)
+                        }
                     }
                     .safeAreaInset(edge: .bottom, spacing: 0) {
-                        ChatComposerView(
-                            text: $viewModel.input,
-                            isSendDisabled: viewModel.isSendDisabled,
-                            replyTargetLabel: viewModel.replyTarget.flatMap { QuotedReplyHeader.label(forQuotedSender: $0.sender) },
-                            replyTargetContent: viewModel.replyTarget?.content,
-                            onCancelReply: { viewModel.cancelReply() },
-                            isDisabled: viewModel.isConversationEnded || viewModel.isTokenExceeded,
-                            disabledPlaceholder: viewModel.composerDisabledPlaceholder,
-                            onSend: { Task { await viewModel.send() } },
-                            onTextChange: { viewModel.updateInput($0) },
-                            isFocused: $isInputFocused
-                        )
+                        VStack(spacing: 0) {
+                            bottomIndicator(proxy: proxy)
+
+                            ChatComposerView(
+                                text: $viewModel.input,
+                                isSendDisabled: viewModel.isSendDisabled,
+                                replyTargetLabel: viewModel.replyTarget.flatMap { QuotedReplyHeader.label(forQuotedSender: $0.sender) },
+                                replyTargetContent: viewModel.replyTarget?.content,
+                                onCancelReply: { viewModel.cancelReply() },
+                                isDisabled: viewModel.isConversationEnded || viewModel.isTokenExceeded,
+                                disabledPlaceholder: viewModel.composerDisabledPlaceholder,
+                                onSend: { Task { await viewModel.send() } },
+                                onTextChange: { viewModel.updateInput($0) },
+                                isFocused: $isInputFocused
+                            )
+                        }
                     }
                 }
             }
@@ -237,17 +279,58 @@ struct ChatView: View {
         return ConversationListDateHeaderFormatter.string(from: firstMessageDate)
     }
 
+    @ViewBuilder
+    private func bottomIndicator(proxy: ScrollViewProxy) -> some View {
+        if let unseen = viewModel.unseenIncomingMessage {
+            NewMessageToastView(message: unseen) {
+                viewModel.markAtBottom(true)
+                withAnimation(.easeOut(duration: 0.2)) {
+                    proxy.scrollTo(unseen.id, anchor: .bottom)
+                }
+            }
+        } else if !viewModel.isAtBottom {
+            HStack {
+                Spacer()
+                ScrollDownButtonView { scrollToBottom(proxy) }
+                    .padding(.trailing, Spacing.spacing350)
+                    .padding(.bottom, Spacing.spacing100)
+            }
+        }
+    }
+
     /// 화면에 그려지는 순서(메시지 → 낙관적 메시지 → 입력중 인디케이터) 중 가장 아래에 있는
-    /// 항목을 기준으로 맨 아래로 스크롤한다. 셋 중 실제로 보이는 것 중 가장 나중에 그려지는
-    /// 항목으로 스크롤해야 실제로 맨 아래가 된다.
-    private func scrollToBottom(_ proxy: ScrollViewProxy) {
-        withAnimation(.easeOut(duration: 0.2)) {
-            if viewModel.nextReplyCharacter != nil {
+    /// 항목을 기준으로 맨 아래로 스크롤한다.
+    private func scrollToBottom(_ proxy: ScrollViewProxy, animation: Animation? = .easeOut(duration: 0.2)) {
+        guard let target = viewModel.scrollTarget else { return }
+        withAnimation(animation) {
+            switch target {
+            case .typingIndicator:
                 proxy.scrollTo(TypingIndicatorView.scrollAnchorID, anchor: .bottom)
-            } else if viewModel.pendingUserMessage != nil {
+            case .pendingUserMessage:
                 proxy.scrollTo(PendingUserMessage.scrollAnchorID, anchor: .bottom)
-            } else if let lastId = viewModel.messages.last?.id {
-                proxy.scrollTo(lastId, anchor: .bottom)
+            case let .message(id):
+                proxy.scrollTo(id, anchor: .bottom)
+            }
+        }
+    }
+
+    /// 채팅방 진입 직후 대화 기록을 처음 불러왔을 때만 쓰는 초기 위치 잡기.
+    private func positionMessageListForInitialLoad(_ proxy: ScrollViewProxy) {
+        guard !Self.hasPositionedOnce else {
+            DispatchQueue.main.async {
+                scrollToBottom(proxy, animation: nil)
+                isMessageListPositioned = true
+            }
+            return
+        }
+
+        DispatchQueue.main.async {
+            scrollToBottom(proxy, animation: nil)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                scrollToBottom(proxy, animation: nil)
+                isMessageListPositioned = true
+                Self.hasPositionedOnce = true
             }
         }
     }

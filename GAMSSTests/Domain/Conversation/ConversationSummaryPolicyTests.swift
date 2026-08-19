@@ -9,11 +9,11 @@ import XCTest
 @testable import GAMSS
 
 final class ConversationSummaryPolicyTests: XCTestCase {
-    func test_normalizeInput_trailingNewline_stripsAndSignalsKeyboardDismiss() {
+    func test_normalizeInput_trailingNewline_keepsNewlineAndDoesNotSignalKeyboardDismiss() {
         let result = ConversationSummaryPolicy.normalizeInput("안녕\n")
 
-        XCTAssertEqual(result.value, "안녕")
-        XCTAssertTrue(result.shouldDismissKeyboard)
+        XCTAssertEqual(result.value, "안녕\n")
+        XCTAssertFalse(result.shouldDismissKeyboard)
     }
 
     func test_normalizeInput_withinMaxLength_returnsUnchanged() {

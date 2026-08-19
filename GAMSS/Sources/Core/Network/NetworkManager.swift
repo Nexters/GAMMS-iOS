@@ -37,7 +37,7 @@ final class NetworkManager: NetworkRequesting {
 
     /// `isRetryAfterReissue`가 true면 이미 한 번 토큰을 재발급받고 재시도하는 중이라는 뜻 —
     /// 여기서 또 EXPIRED_TOKEN이 나도 다시 재발급을 시도하지 않는다(무한 루프 방지).
-    private func request<T: Decodable & Sendable>(
+    func request<T: Decodable & Sendable>(
         _ endpoint: Endpoint,
         responseType: T.Type,
         isRetryAfterReissue: Bool
