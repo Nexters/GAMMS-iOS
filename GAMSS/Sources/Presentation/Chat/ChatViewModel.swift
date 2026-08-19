@@ -118,7 +118,7 @@ final class ChatViewModel: ObservableObject {
 
     @discardableResult
     func handleNewLastMessage(_ message: Message) -> Bool {
-        guard case .character = message.sender else { return true }
+        guard case .character = message.sender else { return false }
         if isAtBottom {
             return true
         }

@@ -12,11 +12,7 @@ struct ScrollDownButtonView: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "chevron.down")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(Color.colorWhite)
-                .frame(width: 36, height: 36)
-                .background(Circle().fill(Color.colorGray900))
+            Image("scrollDownButton")
         }
         .accessibilityLabel("최하단으로 이동")
     }

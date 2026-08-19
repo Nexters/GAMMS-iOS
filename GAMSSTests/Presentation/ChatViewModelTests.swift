@@ -732,14 +732,14 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.unseenIncomingMessage, second, "누적 없이 항상 최신 1개만 유지해야 함")
     }
 
-    func test_handleNewLastMessage_whenNotAtBottom_userMessage_returnsTrueAndDoesNotSetUnseen() {
+    func test_handleNewLastMessage_whenNotAtBottom_userMessage_returnsFalseAndDoesNotSetUnseen() {
         let viewModel = makeViewModel()
         let userMessage = Message(id: 2, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
         viewModel.markAtBottom(false)
 
         let shouldScroll = viewModel.handleNewLastMessage(userMessage)
 
-        XCTAssertTrue(shouldScroll, "내 메시지는 최하단 여부와 무관하게 항상 스크롤 신호를 줘야 함")
+        XCTAssertFalse(shouldScroll, "내 메시지 echo는 스크롤 위치와 무관하게 무시해야 함(별도 스크롤/토스트 없음)")
         XCTAssertNil(viewModel.unseenIncomingMessage)
     }
 

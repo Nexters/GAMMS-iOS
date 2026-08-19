@@ -282,7 +282,7 @@ struct ChatView: View {
             HStack {
                 Spacer()
                 ScrollDownButtonView { scrollToBottom(proxy) }
-                    .padding(.trailing, Spacing.spacing300)
+                    .padding(.trailing, Spacing.spacing350)
                     .padding(.bottom, Spacing.spacing100)
             }
         }
