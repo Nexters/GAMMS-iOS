@@ -151,6 +151,21 @@ final class ChatViewModel: ObservableObject {
         return emotion
     }
 
+    /// 화면에 그려지는 순서(입력중 인디케이터 → 낙관적 메시지 → 일반 메시지) 중 가장 아래에
+    /// 있는 항목이 뭔지 판단한다. 이 우선순위(무엇이 "마지막"인지)는 대화 상태에 대한 판단이라
+    /// View가 아니라 여기서 정한다 — View는 이 결과를 받아 실제 스크롤 앵커 id로 옮기기만 한다.
+    var scrollTarget: ScrollTarget? {
+        if nextReplyCharacter != nil {
+            .typingIndicator
+        } else if pendingUserMessage != nil {
+            .pendingUserMessage
+        } else if let lastId = messages.last?.id {
+            .message(lastId)
+        } else {
+            nil
+        }
+    }
+
     func loadTokenUsage() async {
         guard isTokenUsageStale else { return }
 

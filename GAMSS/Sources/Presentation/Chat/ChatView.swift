@@ -301,13 +301,15 @@ struct ChatView: View {
     /// 화면에 그려지는 순서(메시지 → 낙관적 메시지 → 입력중 인디케이터) 중 가장 아래에 있는
     /// 항목을 기준으로 맨 아래로 스크롤한다.
     private func scrollToBottom(_ proxy: ScrollViewProxy, animation: Animation? = .easeOut(duration: 0.2)) {
+        guard let target = viewModel.scrollTarget else { return }
         withAnimation(animation) {
-            if viewModel.nextReplyCharacter != nil {
+            switch target {
+            case .typingIndicator:
                 proxy.scrollTo(TypingIndicatorView.scrollAnchorID, anchor: .bottom)
-            } else if viewModel.pendingUserMessage != nil {
+            case .pendingUserMessage:
                 proxy.scrollTo(PendingUserMessage.scrollAnchorID, anchor: .bottom)
-            } else if let lastId = viewModel.messages.last?.id {
-                proxy.scrollTo(lastId, anchor: .bottom)
+            case let .message(id):
+                proxy.scrollTo(id, anchor: .bottom)
             }
         }
     }
