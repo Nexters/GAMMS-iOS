@@ -10,12 +10,13 @@ import SwiftUI
 /// 캐릭터 프로필 아바타.
 struct EmotionAvatarView: View {
     let emotion: EmotionCharacter
+    var size: CGFloat = 24
 
     var body: some View {
         Image(emotion.avatarImageName)
             .resizable()
             .scaledToFill()
-            .frame(width: 24, height: 24)
+            .frame(width: size, height: size)
             .clipShape(Circle())
     }
 }
