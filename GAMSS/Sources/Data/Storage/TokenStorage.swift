@@ -18,7 +18,7 @@ final class TokenStorage {
             return
         }
         
-        let response = try await NetworkManager.shared.request(AuthEndpoint.reissueToken(.init(refreshToken: refreshToken)), responseType: APIResponse<ReissueTokenResponseDTO>.self).data
+        let response = try await NetworkManager.shared.request(AuthEndpoint.reissueToken(.init(refreshToken: refreshToken)), responseType: APIResponse<ReissueTokenResponseDTO>.self, isRetryAfterReissue: true).data
         try createTokens(accessToken: response.accessToken, refreshToken: response.refreshToken)
     }
     
