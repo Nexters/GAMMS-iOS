@@ -35,6 +35,7 @@
 		6247F063C637FED7F28DDE79 /* GetCardUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 706922C280295136993F80AC /* GetCardUseCaseTests.swift */; };
 		66BC114B170E43E9C900F517 /* QuotedReplyHeaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B68677BF01B5A8971B85AC4 /* QuotedReplyHeaderTests.swift */; };
 		6C623FF45784475E33185488 /* CardResponseDTOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD20B27264EF78F9AD4039D6 /* CardResponseDTOTests.swift */; };
+		6D62719004B2E6D1D53E3CB9 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 82735CEB5F372593FF6244CF /* FirebaseFirestore */; };
 		70248D85300794C800857369 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 70248D84300794C800857369 /* FirebaseCrashlytics */; };
 		70248DCD300D429100857369 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 70248DCC300D429100857369 /* FirebaseAuth */; };
 		7651811B18BCC6B77AD9FB7B /* ISO8601FlexibleParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8157B3B43D20FE0CB425BCC3 /* ISO8601FlexibleParserTests.swift */; };
@@ -186,6 +187,7 @@
 				26A84A0255BB5BB7139414C5 /* Tokenizers in Frameworks */,
 				A8948FBCA4DF4E43F2C582EA /* Pods_GAMSS.framework in Frameworks */,
 				B80C3F0EF4C82027FE1BA377 /* Lottie in Frameworks */,
+				6D62719004B2E6D1D53E3CB9 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,6 +475,7 @@
 				70248DCC300D429100857369 /* FirebaseAuth */,
 				4F92A4F86371ED0E8E85D78F /* Tokenizers */,
 				AC51C7CD8AAE4998794DF213 /* Lottie */,
+				82735CEB5F372593FF6244CF /* FirebaseFirestore */,
 			);
 			productName = GAMSS;
 			productReference = 708F57F33003C651008DF433 /* GAMSS.app */;
@@ -1046,6 +1049,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 70248D83300794C800857369 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		82735CEB5F372593FF6244CF /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 70248D83300794C800857369 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 		8E8487F478AF703D394C5EB6 /* Tokenizers */ = {
 			isa = XCSwiftPackageProductDependency;
