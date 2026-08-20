@@ -16,12 +16,15 @@ final class ArchiveDetailViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let fetchCardsByDateUseCase: FetchCardsByDateUseCase
+    private let deleteAllCardUseCase: DeleteAllCardUseCase
 
     init(
         fetchCardsByDateUseCase: FetchCardsByDateUseCase,
+        deleteAllCardUseCase: DeleteAllCardUseCase,
         selectedMonth: Date = Date.now
     ) {
         self.fetchCardsByDateUseCase = fetchCardsByDateUseCase
+        self.deleteAllCardUseCase = deleteAllCardUseCase
         self.selectedMonth = selectedMonth
     }
 
@@ -49,5 +52,14 @@ final class ArchiveDetailViewModel: ObservableObject {
 
     func clearNotes() {
         notes = []
+    }
+    
+    func deleteAll() async -> Bool {
+        do {
+            try await deleteAllCardUseCase.execute()
+            return true
+        } catch {
+            return false
+        }
     }
 }

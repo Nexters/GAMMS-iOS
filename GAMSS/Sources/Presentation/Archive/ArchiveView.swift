@@ -77,7 +77,7 @@ private extension ArchiveView {
                             fetchCardsByDateUseCase: DefaultFetchCardsByDateUseCase(
                                 cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared),
                                 emotion: emotion
-                            )
+                            ), deleteAllCardUseCase: DefaultDeleteAllCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared))
                         )
                     )
                 } label: {
