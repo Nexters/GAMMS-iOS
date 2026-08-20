@@ -14,6 +14,7 @@ struct ArchiveDetailView: View {
     @State private var scene = DropStackScene()
     @State private var isMonthPickerPresented = false
     @State private var isDeleteAllModalPresented = false
+    @State private var selectedNote: DropNote?
     
     private let title: String
     
@@ -39,16 +40,25 @@ struct ArchiveDetailView: View {
                 ZStack {
                     Color.colorWhite
                     
-                    GeometryReader { proxy in
-                        SpriteView(scene: scene, options: [.allowsTransparency])
-                            .onAppear {
-                                scene.scaleMode = .resizeFill
-                                scene.updateSize(proxy.size)
-                                scene.render(notes: viewModel.notes)
-                            }
-                            .onChange(of: proxy.size) { _, newSize in
-                                scene.updateSize(newSize)
-                            }
+                    if viewModel.notes.isEmpty, !viewModel.isLoading {
+                        Text("아직 남겨둔 이야기가 없어요.")
+                            .typography(.body3Regular)
+                            .foregroundStyle(Color.colorGray500)
+                    } else {
+                        GeometryReader { proxy in
+                            SpriteView(scene: scene, options: [.allowsTransparency])
+                                .onAppear {
+                                    scene.scaleMode = .resizeFill
+                                    scene.updateSize(proxy.size)
+                                    scene.onSelectNote = { note in
+                                        selectedNote = note
+                                    }
+                                    scene.render(notes: viewModel.notes)
+                                }
+                                .onChange(of: proxy.size) { _, newSize in
+                                    scene.updateSize(newSize)
+                                }
+                        }
                     }
                 }
             }
@@ -81,6 +91,20 @@ struct ArchiveDetailView: View {
                         await viewModel.selectMonth(month)
                     }
                 }
+            }
+            .fullScreenCover(item: $selectedNote) { note in
+                CardDetailView(
+                    viewModel: CardDetailViewModel(
+                        cardId: note.id,
+                        getCardUseCase: GetCardUseCase(
+                            cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
+                        )
+                    ),
+                    onClose: {
+                        selectedNote = nil
+                    }
+                )
+                .presentationBackground(.clear)
             }
             if isDeleteAllModalPresented {
                 ModalContainerView(

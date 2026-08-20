@@ -16,12 +16,10 @@ final class CardDetailViewModel: ObservableObject {
 
     private let cardId: Int
     private let getCardUseCase: GetCardUseCase
-    private let deleteCardUseCase: DeleteCardUseCase
 
-    init(cardId: Int, getCardUseCase: GetCardUseCase, deleteCardUseCase: DeleteCardUseCase) {
+    init(cardId: Int, getCardUseCase: GetCardUseCase) {
         self.cardId = cardId
         self.getCardUseCase = getCardUseCase
-        self.deleteCardUseCase = deleteCardUseCase
     }
 
     /// 카드가 아직 없고(로딩 실패로 보여줄 게 없음) 알럿이 떠 있으면, 알럿의 "닫기"가 화면 자체를
@@ -37,19 +35,6 @@ final class CardDetailViewModel: ObservableObject {
             card = try await getCardUseCase.execute(cardId: cardId)
         } catch {
             alertMessage = "카드를 불러오지 못했어요"
-        }
-    }
-
-    @discardableResult
-    func deleteCard() async -> Bool {
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            try await deleteCardUseCase.execute(cardId: cardId)
-            return true
-        } catch {
-            alertMessage = "카드를 삭제하지 못했어요"
-            return false
         }
     }
 }
