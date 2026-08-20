@@ -27,6 +27,7 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isLoadingTokenUsage = false
     @Published var tokenUsageErrorMessage: String?
     @Published var isTokenUsagePopoverPresented = false
+    @Published var riskDetection: RiskDetection?
     @Published private(set) var isTokenExceeded = false
     /// 답장 하나가 막 노출된 직후, 다음 캐릭터의 입력중 표시가 뜨기 전까지의 짧은 정적 구간.
     /// 이 동안은 `nextReplyCharacter`가 nil을 돌려줘 인디케이터가 잠깐 사라진다.
@@ -40,6 +41,7 @@ final class ChatViewModel: ObservableObject {
     private let createCardUseCase: CreateCardUseCase
     private let getTokenUsageUseCase: GetTokenUsageUseCase
     private let updateConversationTitleUseCase: UpdateConversationTitleUseCase
+    private let detectRiskInTextUseCase: DetectRiskInTextUseCase
     private let summaryStore: ConversationSummaryStore
     /// 테스트에서 순차 노출이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
     private(set) var revealTask: Task<Void, Never>?
@@ -56,6 +58,7 @@ final class ChatViewModel: ObservableObject {
         createCardUseCase: CreateCardUseCase,
         getTokenUsageUseCase: GetTokenUsageUseCase,
         updateConversationTitleUseCase: UpdateConversationTitleUseCase,
+        detectRiskInTextUseCase: DetectRiskInTextUseCase,
         summaryStore: ConversationSummaryStore,
         conversationId: Int? = nil,
         pendingFirstMessage: PendingFirstMessage? = nil
@@ -66,6 +69,7 @@ final class ChatViewModel: ObservableObject {
         self.createCardUseCase = createCardUseCase
         self.getTokenUsageUseCase = getTokenUsageUseCase
         self.updateConversationTitleUseCase = updateConversationTitleUseCase
+        self.detectRiskInTextUseCase = detectRiskInTextUseCase
         self.summaryStore = summaryStore
         self.conversationId = conversationId
         self.pendingFirstMessage = pendingFirstMessage
@@ -185,6 +189,14 @@ final class ChatViewModel: ObservableObject {
     func send(excludedCharacters: Set<EmotionCharacter> = []) async {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !isSending else { return }
+
+        let detection = await detectRiskInTextUseCase.execute(text: trimmed)
+        if detection.level != .none {
+            riskDetection = detection
+        }
+        if detection.shouldBlock {
+            return
+        }
 
         flushPendingComments()
         isSending = true

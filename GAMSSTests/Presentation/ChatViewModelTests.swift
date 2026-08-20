@@ -146,6 +146,7 @@ final class ChatViewModelTests: XCTestCase {
         repository: MockConversationRepository = MockConversationRepository(),
         cardRepository: MockCardRepository = MockCardRepository(),
         memberRepository: MockMemberRepository = MockMemberRepository(),
+        riskLexiconRepository: RiskLexiconRepository = StubEmptyRiskLexiconRepository(),
         summaryStore: MockConversationSummaryStore = MockConversationSummaryStore(),
         conversationId: Int? = nil,
         pendingFirstMessage: PendingFirstMessage? = nil
@@ -157,6 +158,7 @@ final class ChatViewModelTests: XCTestCase {
             createCardUseCase: CreateCardUseCase(cardRepository: cardRepository),
             getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: memberRepository),
             updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: repository),
+            detectRiskInTextUseCase: DetectRiskInTextUseCase(repository: riskLexiconRepository),
             summaryStore: summaryStore,
             conversationId: conversationId,
             pendingFirstMessage: pendingFirstMessage
@@ -928,4 +930,9 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.tokenUsage?.usedTokens, 12000, "마지막으로 받아온 값을 그대로 보여줘야 함")
         XCTAssertFalse(viewModel.isTokenExceeded, "캐시된 값 기준 상태를 그대로 유지해야 함")
     }
+}
+
+private final class StubEmptyRiskLexiconRepository: RiskLexiconRepository {
+    func currentLexicon() async -> RiskLexicon { .empty }
+    func refresh() async {}
 }
