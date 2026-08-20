@@ -13,7 +13,7 @@ enum CardEndpoint: Endpoint {
     case deleteAllCards
     case fetchCard(cardId: String)
     case deleteCard(cardId: String)
-    case fetchMonthlyCards(yearMonth: String)
+    case fetchCardsByDate(yearMonth: String, emotion: String)
     case deleteCardsByEmotion(emotion: String)
     
     var path: String {
@@ -28,8 +28,8 @@ enum CardEndpoint: Endpoint {
             return "/api/cards/\(cardId)"
         case let .deleteCard(cardId):
             return "/api/cards/\(cardId)"
-        case .fetchMonthlyCards:
-            return "/api/cards/monthly"
+        case let .fetchCardsByDate(_, emotion):
+            return "/api/cards/monthly/emotions/\(emotion)"
         case let .deleteCardsByEmotion(emotion):
             return "/api/cards/emotions/\(emotion)"
         }
@@ -47,7 +47,7 @@ enum CardEndpoint: Endpoint {
             return .get
         case .deleteCard:
             return .delete
-        case .fetchMonthlyCards:
+        case .fetchCardsByDate:
             return .get
         case .deleteCardsByEmotion:
             return .delete
@@ -66,7 +66,7 @@ enum CardEndpoint: Endpoint {
             return []
         case .deleteCard:
             return []
-        case let .fetchMonthlyCards(yearMonth):
+        case let .fetchCardsByDate(yearMonth, _):
             return [.query(["yearMonth": yearMonth])]
         case .deleteCardsByEmotion:
             return []

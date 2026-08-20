@@ -2,45 +2,93 @@
 //  ArchiveView.swift
 //  GAMSS
 //
-//  Created by cchanmi on 8/10/26.
+//  Created by 이건준 on 8/18/26.
 //
 
 import SwiftUI
 
 struct ArchiveView: View {
-    @State private var isShowingCardDetail = false
-
+    @StateObject private var viewModel: ArchiveViewModel
+    
+    init(viewModel: ArchiveViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
+    
     var body: some View {
-        VStack {
-            Spacer()
-
-            Text("준비 중입니다")
-                .typography(.body3Regular)
-                .foregroundStyle(Color.colorGray500)
-
-            // 카드 목록 화면이 아직 없어서 상세 화면을 확인해볼 임시 버튼.
-            // 목록 화면이 생기면 실제 카드를 탭해서 들어가는 걸로 대체하고 이 버튼은 지운다.
-            Button("카드 상세 보기 (임시)") {
-                isShowingCardDetail = true
+        NavigationStack {
+            VStack(spacing: 0) {
+                header
+                    .padding(.bottom, 32)
+                
+                ScrollView {
+                    VStack(alignment: .center, spacing: 34) {
+                        Text("다시 보고 싶은 쓰레기통을 열어보세요")
+                            .typography(.body4Medium)
+                            .foregroundStyle(Color.colorGray950)
+                            .padding(.bottom, 2)
+                        
+                        trashCanGrid
+                    }
+                    .padding(.bottom, 33)
+                }
             }
-            .padding(.top, Spacing.spacing300)
+            .background(Color.colorWhite)
+        }
+    }
+}
 
+private extension ArchiveView {
+    var header: some View {
+        HStack {
+            Image("logoGamss")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 24)
+            
             Spacer()
-        } // TODO: cardId 값 바인딩 필요
-        .fullScreenCover(isPresented: $isShowingCardDetail) {
-            CardDetailView(
-                viewModel: CardDetailViewModel(
-                    cardId: 28,
-                    getCardUseCase: GetCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)),
-                    deleteCardUseCase: DeleteCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared))
-                ),
-                onClose: { isShowingCardDetail = false }
-            )
-            .presentationBackground(.clear)
+            
+            Button {
+                
+            } label: {
+                Image("gear")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .foregroundStyle(Color.colorGray900)
+            }
+        }
+        .frame(height: 64)
+        .padding(.horizontal, 18)
+    }
+    
+    var trashCanGrid: some View {
+        LazyVGrid(
+            columns: [
+                GridItem(.fixed(132), spacing: 40),
+                GridItem(.fixed(132), spacing: 40)
+            ],
+            spacing: 11
+        ) {
+            ForEach(viewModel.emotions) { emotion in
+                NavigationLink {
+                    ArchiveDetailView(
+                        title: emotion.name,
+                        viewModel: ArchiveDetailViewModel(
+                            fetchCardsByDateUseCase: DefaultFetchCardsByDateUseCase(
+                                cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared),
+                                emotion: emotion
+                            ), deleteAllCardUseCase: DefaultDeleteAllCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared))
+                        )
+                    )
+                } label: {
+                    TrashItemView(imageNamed: emotion.trashImageNamed)
+                        .frame(width: 132, height: 172)
+                }
+            }
         }
     }
 }
 
 #Preview {
-    ArchiveView()
+    ArchiveView(viewModel: ArchiveViewModel())
 }
