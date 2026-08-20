@@ -42,6 +42,7 @@ final class DropStackScene: SKScene {
     }
 
     func render(notes: [DropNote]) {
+        clear()
         pendingNotes = notes
         flushPendingNotesIfNeeded()
     }

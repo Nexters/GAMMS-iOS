@@ -47,6 +47,7 @@ final class ArchiveDetailViewModel: ObservableObject {
 
     func selectMonth(_ month: Date) async {
         selectedMonth = month
+        notes = []
         await load()
     }
 
