@@ -13,4 +13,5 @@ protocol CardRepository {
     func getCard(cardId: Int) async throws -> Card
     func deleteCard(cardId: Int) async throws
     func fetchCardsByDate(yearMonth: Date, emotion: Emotion) async throws -> [DailyEmotion]
+    func deleteAllCard() async throws
 }

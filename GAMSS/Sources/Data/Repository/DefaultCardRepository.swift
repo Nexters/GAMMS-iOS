@@ -61,4 +61,11 @@ final class DefaultCardRepository: CardRepository {
             )
         }
     }
+    
+    func deleteAllCard() async throws {
+        _ = try await networkManager.request(
+            CardEndpoint.deleteAllCards,
+            responseType: APIResponse<DeleteAllCardResponseDTO>.self
+        )
+    }
 }
