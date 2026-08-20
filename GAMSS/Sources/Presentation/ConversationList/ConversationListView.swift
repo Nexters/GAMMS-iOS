@@ -14,13 +14,13 @@ enum ConversationMode {
 
 struct ConversationListView: View {
     @StateObject private var viewModel: ConversationListViewModel
-    
+    @State private var selectedConversation: ConversationSummary?
+
     init(viewModel: ConversationListViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-    
+
     var body: some View {
-        NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
                 ConversationListHeaderView(currentMode: viewModel.currentMode, onTappedBackButton: {
                     viewModel.updateMode(.normal)
@@ -58,7 +58,9 @@ struct ConversationListView: View {
                             ForEach(viewModel.displayedConversations) { conversation in
                                 switch viewModel.currentMode {
                                 case .normal:
-                                    NavigationLink(value: conversation) {
+                                    Button {
+                                        selectedConversation = conversation
+                                    } label: {
                                         ConversationRowView(
                                             currentMode: viewModel.currentMode,
                                             conversation: conversation,
@@ -117,7 +119,7 @@ struct ConversationListView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .padding(.horizontal, Spacing.spacing400)
             .toolbar(.hidden, for: .navigationBar)
-            .navigationDestination(for: ConversationSummary.self) { conversation in
+            .navigationDestination(item: $selectedConversation) { conversation in
                 ChatView(
                     viewModel: ChatViewModel(
                         sendMessageUseCase: SendMessageUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
@@ -135,7 +137,6 @@ struct ConversationListView: View {
             .onAppear {
                 Task { await viewModel.load() }
             }
-        }
         .alert(viewModel.alertMessage ?? "", isPresented: Binding(
             get: { viewModel.alertMessage != nil },
             set: { if !$0 { viewModel.alertMessage = nil } }

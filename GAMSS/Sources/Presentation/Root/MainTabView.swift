@@ -33,30 +33,32 @@ struct MainTabView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            ArchiveView(viewModel: ArchiveViewModel())
-                .tabItem { tabLabel(for: .archive) }
-                .tag(MainTab.archive)
+        NavigationStack {
+            TabView(selection: $selectedTab) {
+                ArchiveView(viewModel: ArchiveViewModel())
+                    .tabItem { tabLabel(for: .archive) }
+                    .tag(MainTab.archive)
 
-            HomeView(
-                viewModel: HomeViewModel(
-                    fetchMyProfileUseCase: DefaultFetchMyProfileUseCase(
-                        memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
+                HomeView(
+                    viewModel: HomeViewModel(
+                        fetchMyProfileUseCase: DefaultFetchMyProfileUseCase(
+                            memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
+                        )
                     )
                 )
-            )
-            .tabItem { tabLabel(for: .home) }
-            .tag(MainTab.home)
+                .tabItem { tabLabel(for: .home) }
+                .tag(MainTab.home)
 
-            ConversationListView(
-                viewModel: ConversationListViewModel(
-                    getIncompleteConversationsUseCase: GetIncompleteConversationsUseCase(
-                        conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
-                    ), deleteConversationsUseCase: DefaultDeleteConversationsUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)), searchConversationUseCase: DefaultSearchConversationUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared))
+                ConversationListView(
+                    viewModel: ConversationListViewModel(
+                        getIncompleteConversationsUseCase: GetIncompleteConversationsUseCase(
+                            conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
+                        ), deleteConversationsUseCase: DefaultDeleteConversationsUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)), searchConversationUseCase: DefaultSearchConversationUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared))
+                    )
                 )
-            )
-            .tabItem { tabLabel(for: .chat) }
-            .tag(MainTab.chat)
+                .tabItem { tabLabel(for: .chat) }
+                .tag(MainTab.chat)
+            }
         }
     }
 
