@@ -24,77 +24,75 @@ struct HomeView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                GeometryReader { geo in
-                    Image("homeBackgroundPaper")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: geo.size.width, height: geo.size.height)
-                        .clipped()
-                }
-                .ignoresSafeArea()
-
-                decorations
-
-                // 화면의 빈 영역(다른 인터랙티브 뷰가 가리지 않는 부분)을 탭하면 키보드와 감정
-                // 드롭다운을 내린다. TextEditor/버튼은 그 위에 그려져 자기 탭을 먼저 가져가므로
-                // 커서 이동 등은 방해받지 않는다.
-                Color.clear
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        isInputFocused = false
-                        viewModel.isEmotionPickerOpen = false
-                    }
-
-                VStack(alignment: .leading, spacing: 0) {
-                    header
-                        .padding(.bottom, 188) // Figma 지정값 — 로고와 인사말 사이 간격
-
-                    greeting
-                        .padding(.bottom, Spacing.spacing500)
-
-                    MessageComposerView(
-                        input: $viewModel.input,
-                        selectedEmotions: viewModel.selectedEmotions,
-                        isEmotionPickerOpen: $viewModel.isEmotionPickerOpen,
-                        isSendDisabled: viewModel.isSendDisabled,
-                        onToggleEmotion: { viewModel.toggleEmotion($0) },
-                        onCommit: { viewModel.send() },
-                        onInputChange: { viewModel.updateInput($0) },
-                        isFocused: $isInputFocused
-                    )
-
-                    Spacer()
-                }
-                .padding(Spacing.spacing400)
+        ZStack {
+            GeometryReader { geo in
+                Image("homeBackgroundPaper")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .clipped()
             }
-            // 키보드가 올라오면 SwiftUI가 기본적으로 사용 가능한 영역을 줄이는데, 장식
-            // 이미지가 GeometryReader의 상대 좌표(geo.size)로 위치를 잡고 있어서 그 영역이
-            // 줄어들면 같이 움직여 보인다 — 키보드에 반응해 레이아웃이 줄어들지 않게 한다.
-            .ignoresSafeArea(.keyboard, edges: .bottom)
-            .navigationBarHidden(true)
-            .onChange(of: viewModel.pendingFirstMessage) { _, newValue in
-                if newValue != nil { isInputFocused = false }
-            }
-            .navigationDestination(item: $viewModel.pendingFirstMessage) { pendingFirstMessage in
-                ChatView(
-                    viewModel: ChatViewModel(
-                        sendMessageUseCase: SendMessageUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
-                        getMessagesUseCase: GetMessagesUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
-                        endConversationUseCase: EndConversationUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
-                        createCardUseCase: CreateCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)),
-                        getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)),
-                        updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
-                        summaryStore: LazyConversationSummaryStore(),
-                        pendingFirstMessage: pendingFirstMessage
-                    )
+            .ignoresSafeArea()
+
+            decorations
+
+            // 화면의 빈 영역(다른 인터랙티브 뷰가 가리지 않는 부분)을 탭하면 키보드와 감정
+            // 드롭다운을 내린다. TextEditor/버튼은 그 위에 그려져 자기 탭을 먼저 가져가므로
+            // 커서 이동 등은 방해받지 않는다.
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    isInputFocused = false
+                    viewModel.isEmotionPickerOpen = false
+                }
+
+            VStack(alignment: .leading, spacing: 0) {
+                header
+                    .padding(.bottom, 188) // Figma 지정값 — 로고와 인사말 사이 간격
+
+                greeting
+                    .padding(.bottom, Spacing.spacing500)
+
+                MessageComposerView(
+                    input: $viewModel.input,
+                    selectedEmotions: viewModel.selectedEmotions,
+                    isEmotionPickerOpen: $viewModel.isEmotionPickerOpen,
+                    isSendDisabled: viewModel.isSendDisabled,
+                    onToggleEmotion: { viewModel.toggleEmotion($0) },
+                    onCommit: { viewModel.send() },
+                    onInputChange: { viewModel.updateInput($0) },
+                    isFocused: $isInputFocused
                 )
-                .toolbar(.hidden, for: .tabBar)
+
+                Spacer()
             }
-            .navigationDestination(isPresented: $isSettingPresented) {
-                SettingView().toolbar(.hidden, for: .tabBar)
-            }
+            .padding(Spacing.spacing400)
+        }
+        // 키보드가 올라오면 SwiftUI가 기본적으로 사용 가능한 영역을 줄이는데, 장식
+        // 이미지가 GeometryReader의 상대 좌표(geo.size)로 위치를 잡고 있어서 그 영역이
+        // 줄어들면 같이 움직여 보인다 — 키보드에 반응해 레이아웃이 줄어들지 않게 한다.
+        .ignoresSafeArea(.keyboard, edges: .bottom)
+        .navigationBarHidden(true)
+        .onChange(of: viewModel.pendingFirstMessage) { _, newValue in
+            if newValue != nil { isInputFocused = false }
+        }
+        .navigationDestination(item: $viewModel.pendingFirstMessage) { pendingFirstMessage in
+            ChatView(
+                viewModel: ChatViewModel(
+                    sendMessageUseCase: SendMessageUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
+                    getMessagesUseCase: GetMessagesUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
+                    endConversationUseCase: EndConversationUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
+                    createCardUseCase: CreateCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)),
+                    getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)),
+                    updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
+                    summaryStore: LazyConversationSummaryStore(),
+                    pendingFirstMessage: pendingFirstMessage
+                )
+            )
+            .toolbar(.hidden, for: .tabBar)
+        }
+        .navigationDestination(isPresented: $isSettingPresented) {
+            SettingView().toolbar(.hidden, for: .tabBar)
         }
         .task { await viewModel.loadProfileIfNeeded() }
         .alert(viewModel.alertMessage ?? "", isPresented: Binding(
@@ -184,12 +182,14 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView(
-        viewModel: HomeViewModel(
-            fetchMyProfileUseCase: DefaultFetchMyProfileUseCase(
-                memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
+    NavigationStack {
+        HomeView(
+            viewModel: HomeViewModel(
+                fetchMyProfileUseCase: DefaultFetchMyProfileUseCase(
+                    memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
+                )
             )
         )
-    )
+    }
     .environment(UserManager.shared)
 }
