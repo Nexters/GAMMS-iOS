@@ -13,6 +13,7 @@ struct HomeView: View {
     @State private var isSettingPresented = false
     @SwiftUI.Environment(UserManager.self) private var userManager
     @State private var loginSession = LoginSession()
+    @State private var isGreetingReady = false
 
     init(viewModel: HomeViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -52,6 +53,7 @@ struct HomeView: View {
 
                 greeting
                     .padding(.bottom, Spacing.spacing500)
+                    .opacity(isGreetingReady ? 1 : 0)
 
                 MessageComposerView(
                     input: $viewModel.input,
@@ -95,7 +97,16 @@ struct HomeView: View {
         .navigationDestination(isPresented: $isSettingPresented) {
             SettingView().toolbar(.hidden, for: .tabBar)
         }
-        .task { await viewModel.loadProfileIfNeeded() }
+        .task {
+            if userManager.user != nil { isGreetingReady = true }
+            await viewModel.loadProfileIfNeeded()
+        }
+        .onChange(of: userManager.user != nil) { _, isReady in
+            guard isReady, !isGreetingReady else { return }
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isGreetingReady = true
+            }
+        }
         .alert(viewModel.alertMessage ?? "", isPresented: Binding(
             get: { viewModel.alertMessage != nil },
             set: { if !$0 { viewModel.alertMessage = nil } }
