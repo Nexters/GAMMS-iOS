@@ -101,4 +101,17 @@ final class DefaultRiskLexiconRepositoryTests: XCTestCase {
 
         XCTAssertFalse(remoteCalled)
     }
+
+    func test_currentLexicon_cacheHasEmptyTermsOrAgencies_fallsBackToBundled() async {
+        cache.write(RiskLexiconDTO(version: 99, terms: [], safePhrases: [], agencies: []))
+        let repository = DefaultRiskLexiconRepository(
+            bundled: BundledRiskLexiconDataSource(),
+            cache: cache,
+            fetchRemote: { RiskLexiconDTO(version: 1, terms: [], safePhrases: [], agencies: []) }
+        )
+
+        let lexicon = await repository.currentLexicon()
+
+        XCTAssertGreaterThan(lexicon.terms.count, 0)
+    }
 }

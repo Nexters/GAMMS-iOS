@@ -21,7 +21,7 @@ final class DefaultRiskLexiconRepository: RiskLexiconRepository {
     }
 
     func currentLexicon() async -> RiskLexicon {
-        if let cached = cache.read() {
+        if let cached = cache.read(), !cached.terms.isEmpty, !cached.agencies.isEmpty {
             return cached.toDomain()
         }
         return (bundled.load() ?? RiskLexiconDTO(version: 0, terms: [], safePhrases: [], agencies: [])).toDomain()
