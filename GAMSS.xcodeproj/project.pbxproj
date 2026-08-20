@@ -70,6 +70,7 @@
 		F1D4E5A20F2B3C4D5E6F7A8B /* SpacingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D4E5A30F2B3C4D5E6F7A8C /* SpacingTests.swift */; };
 		F29C98F332A3EC127B809DD3 /* ChatViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE5C85E76690E41AE394895D /* ChatViewModelTests.swift */; };
 		F2D4E5A40F2B3C4D5E6F7A9D /* RadiusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5A50F2B3C4D5E6F7A9E /* RadiusTests.swift */; };
+		F5ECC31B10FC0D62E626B198 /* DetectRiskInTextUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232692580F47AA3D634D1C5B /* DetectRiskInTextUseCaseTests.swift */; };
 		FA90ADA39E7A145713881061 /* MainTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C15D652D0472A1EBD024674 /* MainTabTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -93,6 +94,7 @@
 		16F98692DAD0EFA3A362F10A /* CreateCardUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CreateCardUseCaseTests.swift; sourceTree = "<group>"; };
 		1A8F630A15A80F5FAB52F2C1 /* Pods-GAMSSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GAMSSTests.debug.xcconfig"; path = "Target Support Files/Pods-GAMSSTests/Pods-GAMSSTests.debug.xcconfig"; sourceTree = "<group>"; };
 		1B68677BF01B5A8971B85AC4 /* QuotedReplyHeaderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuotedReplyHeaderTests.swift; sourceTree = "<group>"; };
+		232692580F47AA3D634D1C5B /* DetectRiskInTextUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DetectRiskInTextUseCaseTests.swift; sourceTree = "<group>"; };
 		279ECD6F38C25ADFF48996F2 /* ConversationListDateHeaderFormatterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConversationListDateHeaderFormatterTests.swift; sourceTree = "<group>"; };
 		316EA002FAC5D3328796EF90 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		3A26CAC1BD5FA5DF19D14615 /* ConversationListViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConversationListViewModelTests.swift; sourceTree = "<group>"; };
@@ -329,6 +331,7 @@
 			children = (
 				90261BDEC2055EA4C470456E /* RiskDetectionTests.swift */,
 				6EDDC3C35E72B3C876A3079B /* RiskTermMatcherTests.swift */,
+				232692580F47AA3D634D1C5B /* DetectRiskInTextUseCaseTests.swift */,
 			);
 			name = Safety;
 			path = Safety;
@@ -729,6 +732,7 @@
 				4F5858CDEFD69E5C60230EB3 /* MessageComposerLayoutTests.swift in Sources */,
 				406BB4AAD1B77A703DD61BD3 /* RiskDetectionTests.swift in Sources */,
 				B94EC6110CF982D92F30E23E /* RiskTermMatcherTests.swift in Sources */,
+				F5ECC31B10FC0D62E626B198 /* DetectRiskInTextUseCaseTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
