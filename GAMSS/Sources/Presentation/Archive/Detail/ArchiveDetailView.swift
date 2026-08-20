@@ -40,19 +40,25 @@ struct ArchiveDetailView: View {
                 ZStack {
                     Color.colorWhite
                     
-                    GeometryReader { proxy in
-                        SpriteView(scene: scene, options: [.allowsTransparency])
-                            .onAppear {
-                                scene.scaleMode = .resizeFill
-                                scene.updateSize(proxy.size)
-                                scene.onSelectNote = { note in
-                                    selectedNote = note
+                    if viewModel.notes.isEmpty, !viewModel.isLoading {
+                        Text("아직 남겨둔 이야기가 없어요.")
+                            .typography(.body3Regular)
+                            .foregroundStyle(Color.colorGray500)
+                    } else {
+                        GeometryReader { proxy in
+                            SpriteView(scene: scene, options: [.allowsTransparency])
+                                .onAppear {
+                                    scene.scaleMode = .resizeFill
+                                    scene.updateSize(proxy.size)
+                                    scene.onSelectNote = { note in
+                                        selectedNote = note
+                                    }
+                                    scene.render(notes: viewModel.notes)
                                 }
-                                scene.render(notes: viewModel.notes)
-                            }
-                            .onChange(of: proxy.size) { _, newSize in
-                                scene.updateSize(newSize)
-                            }
+                                .onChange(of: proxy.size) { _, newSize in
+                                    scene.updateSize(newSize)
+                                }
+                        }
                     }
                 }
             }
