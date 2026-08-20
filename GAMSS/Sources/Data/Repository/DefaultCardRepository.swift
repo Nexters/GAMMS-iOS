@@ -43,7 +43,7 @@ final class DefaultCardRepository: CardRepository {
     }
     
     func fetchCardsByDate(yearMonth: Date, emotion: Emotion) async throws -> [DailyEmotion] {
-        let yearMonth = DateFormatterFactory.dateWithDot.string(from: yearMonth)
+        let yearMonth = DateFormatterFactory.dateWithHyphen.string(from: yearMonth)
         let response = try await networkManager.request(
             CardEndpoint.fetchCardsByDate(yearMonth: yearMonth, emotion: emotion.rawValue),
             responseType: APIResponse<[FetchCardsByDateResponseDTO]>.self
