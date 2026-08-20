@@ -28,6 +28,9 @@ struct MessageComposerView: View {
     /// 포커스 상태는 상위(HomeView)가 소유한다 — 빈 화면 탭으로 키보드를 내리는 처리가 상위에
     /// 있어, 이 뷰가 자체 `@FocusState`를 따로 가지면 상위에서 그 상태를 제어할 수 없다.
     var isFocused: FocusState<Bool>.Binding
+    /// 오늘의 토큰을 모두 썼으면 true — 입력 자체를 막고 감정/전송 컨트롤도 숨긴다.
+    let isDisabled: Bool
+    let disabledPlaceholder: String
 
     /// 박스 하단 컨트롤 행(감정 트리거/전송 버튼)이 차지하는 높이 — expanded일 때 TextEditor
     /// 텍스트가 그 밑에 깔리지 않도록 그만큼 하단 여백을 예약한다.
@@ -47,7 +50,14 @@ struct MessageComposerView: View {
                         .strokeBorder(Color.colorGray950, lineWidth: 1)
                 )
 
-            if input.isEmpty {
+            if isDisabled {
+                Text(disabledPlaceholder)
+                    .typography(.subtitle3)
+                    .foregroundStyle(Color.colorGray500)
+                    .lineLimit(1)
+                    .padding(.leading, Spacing.spacing300)
+                    .padding(.top, Spacing.spacing300)
+            } else if input.isEmpty {
                 Text("무슨 이야기를 버려볼까요?")
                     .typography(.subtitle3)
                     .foregroundStyle(Color.colorGray500)
@@ -67,6 +77,7 @@ struct MessageComposerView: View {
                 .padding(.top, 8)
                 .padding(.bottom, controlsRowHeight)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .disabled(isDisabled)
                 .focused(isFocused)
                 .onChange(of: isFocused.wrappedValue) { _, isFocusedNow in
                     if isFocusedNow { isEmotionPickerOpen = false }
@@ -88,9 +99,9 @@ struct MessageComposerView: View {
 
     private var controlsRow: some View {
         HStack {
-            if isEmotionSelectionEnabled { emotionTrigger }
+            if !isDisabled, isEmotionSelectionEnabled { emotionTrigger }
             Spacer()
-            submitButton
+            if !isDisabled { submitButton }
         }
         .padding(.horizontal, Spacing.spacing300)
         .padding(.bottom, Spacing.spacing300)
@@ -175,6 +186,7 @@ private struct MessageComposerPreviewContainer: View {
     @State var input: String
     @State var selectedEmotions: Set<EmotionCharacter>
     @State var isEmotionPickerOpen: Bool
+    var isDisabled: Bool = false
     @FocusState private var isFocused: Bool
 
     var body: some View {
@@ -195,7 +207,9 @@ private struct MessageComposerPreviewContainer: View {
                 input = newValue
                 return false
             },
-            isFocused: $isFocused
+            isFocused: $isFocused,
+            isDisabled: isDisabled,
+            disabledPlaceholder: "오늘의 토큰을 모두 사용했어요"
         )
         .padding(Spacing.spacing400)
     }
@@ -222,5 +236,14 @@ private struct MessageComposerPreviewContainer: View {
         input: "",
         selectedEmotions: [.joy, .sadness],
         isEmotionPickerOpen: true
+    )
+}
+
+#Preview("token exceeded") {
+    MessageComposerPreviewContainer(
+        input: "",
+        selectedEmotions: Set(EmotionCharacter.allCases),
+        isEmotionPickerOpen: false,
+        isDisabled: true
     )
 }

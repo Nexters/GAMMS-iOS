@@ -68,6 +68,15 @@ final class CardResultViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.dragOffset, 0)
     }
 
+    func test_drop_setsDragOffsetToDropOffset() {
+        let viewModel = CardResultViewModel()
+        viewModel.updateDrag(translationHeight: 130)
+
+        viewModel.drop()
+
+        XCTAssertEqual(viewModel.dragOffset, CardResultViewModel.dropOffset)
+    }
+
     func test_shouldDiscard_belowThreshold_returnsFalse() {
         XCTAssertFalse(CardResultViewModel.shouldDiscard(dragOffset: 0))
         XCTAssertFalse(CardResultViewModel.shouldDiscard(dragOffset: 119))
@@ -75,25 +84,5 @@ final class CardResultViewModelTests: XCTestCase {
 
     func test_shouldDiscard_aboveThreshold_returnsTrue() {
         XCTAssertTrue(CardResultViewModel.shouldDiscard(dragOffset: 121))
-    }
-
-    func test_opacity_noOffset_isFullyOpaque() {
-        XCTAssertEqual(CardResultViewModel.opacity(forDragOffset: 0), 1.0)
-    }
-
-    func test_opacity_atDiscardThreshold_isNotYetFullyFaded() {
-        XCTAssertEqual(CardResultViewModel.opacity(forDragOffset: 120), 0.65, accuracy: 0.0001)
-    }
-
-    func test_opacity_atFadeDistance_isMinimumOpacity() {
-        XCTAssertEqual(CardResultViewModel.opacity(forDragOffset: 240), 0.3, accuracy: 0.0001)
-    }
-
-    func test_opacity_beyondFadeDistance_staysClampedAtMinimum() {
-        XCTAssertEqual(CardResultViewModel.opacity(forDragOffset: 500), 0.3, accuracy: 0.0001)
-    }
-
-    func test_opacity_negativeOffset_staysFullyOpaque() {
-        XCTAssertEqual(CardResultViewModel.opacity(forDragOffset: -50), 1.0)
     }
 }

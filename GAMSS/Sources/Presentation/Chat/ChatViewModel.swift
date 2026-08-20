@@ -203,6 +203,7 @@ final class ChatViewModel: ObservableObject {
         flushPendingComments()
 
         let replyTarget = replyTarget
+        self.replyTarget = nil
         pendingUserMessage = PendingUserMessage(
             content: trimmed,
             sentAt: Date(),
@@ -222,9 +223,6 @@ final class ChatViewModel: ObservableObject {
                 excludedCharacters: excludedCharacters
             )
             pendingUserMessage = nil
-            if self.replyTarget == replyTarget {
-                self.replyTarget = nil
-            }
             seed(with: sent)
 
             // 요약기(온디바이스 추론)가 끝날 때까지 다음 입력을 막지 않도록 백그라운드로 돌린다.
@@ -233,10 +231,12 @@ final class ChatViewModel: ObservableObject {
             pendingSummaryUpdateTask = Task { await summaryStore.add(trimmed) }
         } catch let error as SendMessageValidationError {
             pendingUserMessage = nil
+            if self.replyTarget == nil { self.replyTarget = replyTarget }
             if input.isEmpty { input = trimmed }
             alertMessage = error.errorDescription
         } catch {
             pendingUserMessage = nil
+            if self.replyTarget == nil { self.replyTarget = replyTarget }
             if input.isEmpty { input = trimmed }
             alertMessage = "메시지를 보내지 못했어요"
         }

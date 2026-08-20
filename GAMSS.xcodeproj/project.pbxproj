@@ -49,6 +49,7 @@
 		94A526BCCCD9DF730A39BF97 /* sample_sentences.json in Resources */ = {isa = PBXBuildFile; fileRef = D4BE9D664889F13369325DC9 /* sample_sentences.json */; };
 		96AB63E38D6D2755BA3BC839 /* ConversationPreviewTextFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA0CD379D5E578049585DD1 /* ConversationPreviewTextFormatterTests.swift */; };
 		9EA6F6B8DF51021E18342083 /* HomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EDC07CB1FA5BA970388DB6A /* HomeViewModelTests.swift */; };
+		85725D9CB0A442D0A3F763B7 /* CardResultViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A3B1AD8D344DFAB396C504 /* CardResultViewModelTests.swift */; };
 		A2EE79F9D91A740A8F752761 /* ConversationSummaryDTOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACAF83D4A9CCBB62EFD5C84 /* ConversationSummaryDTOTests.swift */; };
 		A8948FBCA4DF4E43F2C582EA /* Pods_GAMSS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB14F9D00BB8B80EFE9A40A4 /* Pods_GAMSS.framework */; };
 		A8FEE0AD9A4A60908DC5F5F1 /* CreateMessageRequestDTOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAA522A6DCECC0B3666523C /* CreateMessageRequestDTOTests.swift */; };
@@ -107,6 +108,7 @@
 		3C15D652D0472A1EBD024674 /* MainTabTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MainTabTests.swift; sourceTree = "<group>"; };
 		3C5DF3BD54F67AE200949A44 /* ChatComposerViewTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChatComposerViewTests.swift; sourceTree = "<group>"; };
 		3EDC07CB1FA5BA970388DB6A /* HomeViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeViewModelTests.swift; sourceTree = "<group>"; };
+		E3A3B1AD8D344DFAB396C504 /* CardResultViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardResultViewModelTests.swift; sourceTree = "<group>"; };
 		411F8C36A4F71C3D2F78D616 /* CreateCardRequestDTOTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CreateCardRequestDTOTests.swift; sourceTree = "<group>"; };
 		41CCBD8A019CAA37319E7984 /* ConversationSummaryPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConversationSummaryPolicyTests.swift; sourceTree = "<group>"; };
 		4DDF78D0118869F3D9E1E269 /* SendMessageUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SendMessageUseCaseTests.swift; sourceTree = "<group>"; };
@@ -404,6 +406,7 @@
 				02C393632C8A4F12516549D4 /* ConversationHistoryViewModelTests.swift */,
 				B130F9698EB71973DB961378 /* MessageComposerLayoutTests.swift */,
 				AB13C8E422F2136CAAAF20DF /* ChatViewModelRiskDetectionTests.swift */,
+				E3A3B1AD8D344DFAB396C504 /* CardResultViewModelTests.swift */,
 			);
 			path = Presentation;
 			sourceTree = "<group>";
@@ -711,6 +714,7 @@
 				F29C98F332A3EC127B809DD3 /* ChatViewModelTests.swift in Sources */,
 				FA90ADA39E7A145713881061 /* MainTabTests.swift in Sources */,
 				9EA6F6B8DF51021E18342083 /* HomeViewModelTests.swift in Sources */,
+				85725D9CB0A442D0A3F763B7 /* CardResultViewModelTests.swift in Sources */,
 				C63AB33F1424E4237FF76F6B /* SummaryErrorTests.swift in Sources */,
 				1D8DF6DFC7E7383B9B8C5850 /* DefaultSummaryRepositoryTests.swift in Sources */,
 				F1D4E5A20F2B3C4D5E6F7A8B /* SpacingTests.swift in Sources */,

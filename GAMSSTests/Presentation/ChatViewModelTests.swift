@@ -425,6 +425,52 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.replyTarget, newTarget, "전송 성공 처리가 그 사이에 새로 고른 답장 대상을 지우면 안 됨")
     }
 
+    func test_send_withReplyTarget_clearsReplyTargetImmediatelyBeforeNetworkResponds() async {
+        let repository = MockConversationRepository()
+        let gate = SendGate()
+        repository.sendGate = gate
+        repository.stubbedSendResult = .success(SentMessage(
+            message: Message(id: 2, conversationId: 10, sender: .user, content: "고마워", repliesToMessageId: 5, createdAt: Date(timeIntervalSince1970: 0)),
+            commentStatus: .done, comments: []
+        ))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.startReply(to: Message(id: 5, conversationId: 10, sender: .character(.anxiety), content: "안녕하세용", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)))
+        viewModel.input = "고마워"
+
+        let sendTask = Task { await viewModel.send() }
+        while viewModel.pendingUserMessage == nil {
+            await Task.yield()
+        }
+
+        XCTAssertNil(viewModel.replyTarget, "감정 캐릭터의 응답을 기다리지 않고 답장 모드가 바로 꺼져야 함")
+
+        await gate.open()
+        await sendTask.value
+    }
+
+    func test_send_onFailure_doesNotRestoreReplyTargetIfUserStartedNewReplyMidFlight() async {
+        let repository = MockConversationRepository()
+        let gate = SendGate()
+        repository.sendGate = gate
+        repository.stubbedSendResult = .failure(SummaryError.inferenceFailed())
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.startReply(to: Message(id: 5, conversationId: 10, sender: .character(.anxiety), content: "안녕하세용", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0)))
+        viewModel.input = "고마워"
+
+        let sendTask = Task { await viewModel.send() }
+        while viewModel.pendingUserMessage == nil {
+            await Task.yield()
+        }
+
+        let newTarget = Message(id: 6, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        viewModel.startReply(to: newTarget)
+
+        await gate.open()
+        await sendTask.value
+
+        XCTAssertEqual(viewModel.replyTarget, newTarget, "전송 실패 복원이 그 사이에 새로 고른 답장 대상을 덮어쓰면 안 됨")
+    }
+
     func test_send_withoutReplyTarget_pendingUserMessageHasNoQuote() async {
         let repository = MockConversationRepository()
         let gate = SendGate()

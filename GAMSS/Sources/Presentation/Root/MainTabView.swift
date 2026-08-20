@@ -43,6 +43,9 @@ struct MainTabView: View {
                     viewModel: HomeViewModel(
                         fetchMyProfileUseCase: DefaultFetchMyProfileUseCase(
                             memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
+                        ),
+                        getTokenUsageUseCase: GetTokenUsageUseCase(
+                            memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
                         )
                     )
                 )

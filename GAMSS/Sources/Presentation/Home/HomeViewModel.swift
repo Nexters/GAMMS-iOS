@@ -15,15 +15,21 @@ final class HomeViewModel: ObservableObject {
     @Published var pendingFirstMessage: PendingFirstMessage?
     @Published private(set) var selectedEmotions: Set<EmotionCharacter> = Set(EmotionCharacter.allCases)
     @Published var isEmotionPickerOpen = false
+    @Published private(set) var isTokenExceeded = false
+
+    let composerDisabledPlaceholder = "오늘의 토큰을 모두 사용했어요"
 
     private let fetchMyProfileUseCase: FetchMyProfileUseCase
+    private let getTokenUsageUseCase: GetTokenUsageUseCase
     private let userManager: UserManager
 
     init(
         fetchMyProfileUseCase: FetchMyProfileUseCase,
+        getTokenUsageUseCase: GetTokenUsageUseCase,
         userManager: UserManager = .shared
     ) {
         self.fetchMyProfileUseCase = fetchMyProfileUseCase
+        self.getTokenUsageUseCase = getTokenUsageUseCase
         self.userManager = userManager
     }
 
@@ -46,7 +52,19 @@ final class HomeViewModel: ObservableObject {
     }
 
     var isSendDisabled: Bool {
-        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || selectedEmotions.isEmpty
+        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || selectedEmotions.isEmpty || isTokenExceeded
+    }
+
+    /// 화면 진입/재진입마다 호출한다. 채팅에서 토큰을 다 쓰고 돌아왔을 수 있어, 프로필과
+    /// 달리 캐싱하지 않고 매번 최신 상태를 확인한다.
+    func loadTokenUsage() async {
+        do {
+            let usage = try await getTokenUsageUseCase.execute()
+            isTokenExceeded = usage.exceeded
+        } catch {
+            // 실패해도 조용히 무시한다 — 입력을 막을지 여부만 결정하는 부가 정보라, 홈 진입
+            // 자체를 방해하는 얼럿까지는 띄우지 않는다.
+        }
     }
 
     /// 감정 선택을 토글한다. 전체 해제(0개)도 허용한다 — 그 경우 `isSendDisabled`가 true가
@@ -63,7 +81,7 @@ final class HomeViewModel: ObservableObject {
     /// ChatViewModel이 화면 진입 직후 pendingFirstMessage로 자동 시작한다.
     func send() {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        guard !trimmed.isEmpty, !isTokenExceeded else { return }
         guard trimmed.count <= ConversationSummaryPolicy.maxMessageLength else {
             alertMessage = SendMessageValidationError.tooLong.errorDescription
             return
