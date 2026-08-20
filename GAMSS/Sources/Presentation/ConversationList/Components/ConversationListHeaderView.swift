@@ -11,6 +11,7 @@ struct ConversationListHeaderView: View {
     var currentMode: ConversationMode
     var onTappedBackButton: (() -> Void)?
     var onTappedSearchButton: (() -> Void)?
+    var onTappedSettingButton: (() -> Void)?
     
     var body: some View {
         HStack(spacing: Spacing.spacing200) {
@@ -38,8 +39,12 @@ struct ConversationListHeaderView: View {
                     .foregroundStyle(Color.colorGray900)
             }
             
-            Image(.gear)
-                .foregroundStyle(Color.colorGray900)
+            Button {
+                onTappedSettingButton?()
+            } label: {
+                Image(.gear)
+                    .foregroundStyle(Color.colorGray900)
+            }
         }
         .padding(.vertical, Spacing.spacing400)
     }

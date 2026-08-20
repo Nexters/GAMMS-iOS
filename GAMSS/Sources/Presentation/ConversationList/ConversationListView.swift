@@ -15,6 +15,7 @@ enum ConversationMode {
 struct ConversationListView: View {
     @StateObject private var viewModel: ConversationListViewModel
     @State private var selectedConversation: ConversationSummary?
+    @State private var isSettingPresented = false
 
     init(viewModel: ConversationListViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -28,6 +29,8 @@ struct ConversationListView: View {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         viewModel.startSearching()
                     }
+                }, onTappedSettingButton: {
+                    isSettingPresented = true
                 })
                 .frame(height: 64)
                 
@@ -134,6 +137,9 @@ struct ConversationListView: View {
                     )
                 )
                 .toolbar(.hidden, for: .tabBar)
+            }
+            .navigationDestination(isPresented: $isSettingPresented) {
+                SettingView().toolbar(.hidden, for: .tabBar)
             }
             .onAppear {
                 Task { await viewModel.load() }
