@@ -24,6 +24,7 @@ struct SupportAgencyDTO: Codable {
     let phoneNumber: String?
     let url: String?
     let priority: Int
+    let isEmergency: Bool
 }
 
 extension RiskLexiconDTO {
@@ -52,6 +53,6 @@ extension RiskTermDTO {
 
 extension SupportAgencyDTO {
     func toDomain() -> SupportAgency {
-        SupportAgency(id: id, name: name, description: description, phoneNumber: phoneNumber, url: url, priority: priority)
+        SupportAgency(id: id, name: name, description: description, phoneNumber: phoneNumber, url: url, priority: priority, isEmergency: isEmergency)
     }
 }

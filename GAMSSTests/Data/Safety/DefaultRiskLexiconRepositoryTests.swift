@@ -32,12 +32,12 @@ final class DefaultRiskLexiconRepositoryTests: XCTestCase {
     }
 
     func test_refresh_staleCache_adoptsHigherVersionRemote() async {
-        cache.write(RiskLexiconDTO(version: 1, terms: [RiskTermDTO(term: "old", level: "WARNING")], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1)]))
+        cache.write(RiskLexiconDTO(version: 1, terms: [RiskTermDTO(term: "old", level: "WARNING")], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1, isEmergency: false)]))
         let staleCache = RiskLexiconCache(userDefaults: userDefaults, ttl: -1)
         let repository = DefaultRiskLexiconRepository(
             bundled: BundledRiskLexiconDataSource(),
             cache: staleCache,
-            fetchRemote: { RiskLexiconDTO(version: 5, terms: [RiskTermDTO(term: "new", level: "CRITICAL")], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1)]) }
+            fetchRemote: { RiskLexiconDTO(version: 5, terms: [RiskTermDTO(term: "new", level: "CRITICAL")], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1, isEmergency: false)]) }
         )
 
         await repository.refresh()
@@ -46,12 +46,12 @@ final class DefaultRiskLexiconRepositoryTests: XCTestCase {
     }
 
     func test_refresh_remoteVersionNotHigher_keepsCache() async {
-        cache.write(RiskLexiconDTO(version: 10, terms: [RiskTermDTO(term: "old", level: "WARNING")], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1)]))
+        cache.write(RiskLexiconDTO(version: 10, terms: [RiskTermDTO(term: "old", level: "WARNING")], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1, isEmergency: false)]))
         let staleCache = RiskLexiconCache(userDefaults: userDefaults, ttl: -1)
         let repository = DefaultRiskLexiconRepository(
             bundled: BundledRiskLexiconDataSource(),
             cache: staleCache,
-            fetchRemote: { RiskLexiconDTO(version: 2, terms: [], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1)]) }
+            fetchRemote: { RiskLexiconDTO(version: 2, terms: [], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1, isEmergency: false)]) }
         )
 
         await repository.refresh()
@@ -116,14 +116,14 @@ final class DefaultRiskLexiconRepositoryTests: XCTestCase {
     }
 
     func test_refresh_remoteVersionNotHigher_stampsFetchedAtAnyway() async {
-        let seedDTO = RiskLexiconDTO(version: 10, terms: [RiskTermDTO(term: "old", level: "WARNING")], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1)])
+        let seedDTO = RiskLexiconDTO(version: 10, terms: [RiskTermDTO(term: "old", level: "WARNING")], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1, isEmergency: false)])
         userDefaults.set(try! JSONEncoder().encode(seedDTO), forKey: "risk_lexicon_cache_json")
         userDefaults.set(0.0, forKey: "risk_lexicon_cache_fetched_at")
         let staleCache = RiskLexiconCache(userDefaults: userDefaults, ttl: -1)
         let repository = DefaultRiskLexiconRepository(
             bundled: BundledRiskLexiconDataSource(),
             cache: staleCache,
-            fetchRemote: { RiskLexiconDTO(version: 2, terms: [RiskTermDTO(term: "new", level: "WARNING")], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1)]) }
+            fetchRemote: { RiskLexiconDTO(version: 2, terms: [RiskTermDTO(term: "new", level: "WARNING")], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1, isEmergency: false)]) }
         )
 
         await repository.refresh()
@@ -133,7 +133,7 @@ final class DefaultRiskLexiconRepositoryTests: XCTestCase {
     }
 
     func test_currentLexicon_bundledVersionHigherThanCache_prefersBundled() async {
-        cache.write(RiskLexiconDTO(version: 0, terms: [RiskTermDTO(term: "old", level: "WARNING")], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1)]))
+        cache.write(RiskLexiconDTO(version: 0, terms: [RiskTermDTO(term: "old", level: "WARNING")], safePhrases: [], agencies: [SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "1", url: nil, priority: 1, isEmergency: false)]))
         let repository = DefaultRiskLexiconRepository(
             bundled: BundledRiskLexiconDataSource(),
             cache: cache,

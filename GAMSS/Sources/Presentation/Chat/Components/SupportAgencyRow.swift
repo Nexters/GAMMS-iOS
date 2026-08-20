@@ -10,7 +10,7 @@ import SwiftUI
 struct SupportAgencyRow: View {
     let agency: SupportAgency
 
-    private var isEmergency: Bool { agency.url != nil }
+    private var isEmergency: Bool { agency.isEmergency }
 
     var body: some View {
         Button(action: open) {
@@ -50,8 +50,8 @@ struct SupportAgencyRow: View {
 
 #Preview {
     VStack(spacing: 8) {
-        SupportAgencyRow(agency: SupportAgency(id: "a", name: "자살예방 상담", description: "", phoneNumber: "109", url: nil, priority: 1))
-        SupportAgencyRow(agency: SupportAgency(id: "b", name: "긴급 도움이 필요해요", description: "", phoneNumber: nil, url: "https://pf.kakao.com/PLACEHOLDER/chat", priority: 5))
+        SupportAgencyRow(agency: SupportAgency(id: "a", name: "자살예방 상담", description: "", phoneNumber: "109", url: nil, priority: 1, isEmergency: false))
+        SupportAgencyRow(agency: SupportAgency(id: "b", name: "긴급 도움이 필요해요", description: "", phoneNumber: "119", url: nil, priority: 5, isEmergency: true))
     }
     .padding()
 }

@@ -21,8 +21,8 @@ final class RiskTermMatcherTests: XCTestCase {
         ],
         safePhrases: ["배고파죽", "죽고싶지않", "자살예방"],
         agencies: [
-            SupportAgency(id: "a", name: "자살예방 상담전화", description: "24시간 무료 전문 상담", phoneNumber: "109", url: nil, priority: 1),
-            SupportAgency(id: "b", name: "청소년 상담전화", description: "청소년 전문 상담", phoneNumber: "1388", url: nil, priority: 3),
+            SupportAgency(id: "a", name: "자살예방 상담전화", description: "24시간 무료 전문 상담", phoneNumber: "109", url: nil, priority: 1, isEmergency: false),
+            SupportAgency(id: "b", name: "청소년 상담전화", description: "청소년 전문 상담", phoneNumber: "1388", url: nil, priority: 3, isEmergency: false),
         ]
     )
 

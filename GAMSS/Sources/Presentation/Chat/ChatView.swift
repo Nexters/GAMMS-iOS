@@ -92,6 +92,9 @@ struct ChatView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .onChange(of: viewModel.riskDetection) { _, newValue in
+            if newValue != nil { isInputFocused = false }
+        }
     }
 
     private let tokenUsagePopoverTopOffset: CGFloat = Spacing.spacing400 + 24 + Spacing.spacing200

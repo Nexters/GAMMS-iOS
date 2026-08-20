@@ -30,6 +30,9 @@ struct SupportAgencyDialogContentView: View {
                         .foregroundStyle(Color.colorGray500)
                 }
             }
+            .padding(Spacing.spacing200)
+            .background(Color.colorGray075)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.radius200))
             .padding(.top, Spacing.spacing200)
             .padding(.bottom, Spacing.spacing200)
         }
@@ -41,9 +44,9 @@ struct SupportAgencyDialogContentView: View {
         detection: RiskDetection(
             level: .critical,
             agencies: [
-                SupportAgency(id: "a", name: "종합 상담센터", description: "", phoneNumber: "129", url: nil, priority: 1),
-                SupportAgency(id: "b", name: "자살예방 상담", description: "", phoneNumber: "109", url: nil, priority: 2),
-                SupportAgency(id: "c", name: "긴급 도움이 필요해요", description: "", phoneNumber: nil, url: "https://pf.kakao.com/PLACEHOLDER/chat", priority: 5),
+                SupportAgency(id: "a", name: "종합 상담센터", description: "", phoneNumber: "129", url: nil, priority: 1, isEmergency: false),
+                SupportAgency(id: "b", name: "자살예방 상담", description: "", phoneNumber: "109", url: nil, priority: 2, isEmergency: false),
+                SupportAgency(id: "c", name: "긴급 도움이 필요해요", description: "", phoneNumber: "119", url: nil, priority: 5, isEmergency: true),
             ]
         ),
         onDismiss: {}

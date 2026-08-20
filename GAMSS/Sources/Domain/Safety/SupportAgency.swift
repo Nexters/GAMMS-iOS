@@ -12,4 +12,5 @@ struct SupportAgency: Equatable, Identifiable {
     let phoneNumber: String?
     let url: String?
     let priority: Int
+    let isEmergency: Bool
 }

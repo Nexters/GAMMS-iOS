@@ -24,7 +24,7 @@ final class DetectRiskInTextUseCaseTests: XCTestCase {
             version: 1,
             terms: [RiskTerm(term: "자살", level: .critical)],
             safePhrases: [],
-            agencies: [SupportAgency(id: "a", name: "자살예방", description: "", phoneNumber: "109", url: nil, priority: 1)]
+            agencies: [SupportAgency(id: "a", name: "자살예방", description: "", phoneNumber: "109", url: nil, priority: 1, isEmergency: false)]
         )
         let useCase = DetectRiskInTextUseCase(repository: repository, matcher: RiskTermMatcher())
 

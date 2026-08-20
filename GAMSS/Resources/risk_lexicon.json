@@ -50,10 +50,10 @@
     "힘들어죽", "심심해죽", "죽을맛", "죽을만큼", "죽도록", "죽여주는", "자해공갈"
   ],
   "agencies": [
-    { "id": "kr-129", "name": "종합 상담센터", "description": "24시간 통합 상담", "phoneNumber": "129", "url": null, "priority": 1 },
-    { "id": "kr-109", "name": "자살예방 상담", "description": "24시간 무료 전문 상담", "phoneNumber": "109", "url": null, "priority": 2 },
-    { "id": "kr-mental-health", "name": "정신건강 상담", "description": "정신건강 위기 상담", "phoneNumber": "1577-0199", "url": null, "priority": 3 },
-    { "id": "kr-youth", "name": "청소년 상담", "description": "청소년 전문 상담", "phoneNumber": "1388", "url": null, "priority": 4 },
-    { "id": "kr-emergency-kakao", "name": "긴급 도움이 필요해요", "description": "24시간 상담이 가능해요, 누르면 바로 연결돼요.", "phoneNumber": null, "url": "https://pf.kakao.com/PLACEHOLDER/chat", "priority": 5 }
+    { "id": "kr-129", "name": "종합 상담센터", "description": "24시간 통합 상담", "phoneNumber": "129", "url": null, "priority": 1, "isEmergency": false },
+    { "id": "kr-109", "name": "자살예방 상담", "description": "24시간 무료 전문 상담", "phoneNumber": "109", "url": null, "priority": 2, "isEmergency": false },
+    { "id": "kr-mental-health", "name": "정신건강 상담", "description": "정신건강 위기 상담", "phoneNumber": "1577-0199", "url": null, "priority": 3, "isEmergency": false },
+    { "id": "kr-youth", "name": "청소년 상담", "description": "청소년 전문 상담", "phoneNumber": "1388", "url": null, "priority": 4, "isEmergency": false },
+    { "id": "kr-emergency", "name": "긴급 도움이 필요해요", "description": "24시간 상담이 가능해요, 누르면 바로 연결돼요.", "phoneNumber": "119", "url": null, "priority": 5, "isEmergency": true }
   ]
 }

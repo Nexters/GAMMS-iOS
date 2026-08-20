@@ -15,8 +15,8 @@ final class RiskLexiconDTOTests: XCTestCase {
             terms: [RiskTermDTO(term: "자살", level: "CRITICAL")],
             safePhrases: ["자살예방"],
             agencies: [
-                SupportAgencyDTO(id: "b", name: "B", description: "", phoneNumber: "222", url: nil, priority: 2),
-                SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "111", url: nil, priority: 1),
+                SupportAgencyDTO(id: "b", name: "B", description: "", phoneNumber: "222", url: nil, priority: 2, isEmergency: false),
+                SupportAgencyDTO(id: "a", name: "A", description: "", phoneNumber: "111", url: nil, priority: 1, isEmergency: false),
             ]
         )
 

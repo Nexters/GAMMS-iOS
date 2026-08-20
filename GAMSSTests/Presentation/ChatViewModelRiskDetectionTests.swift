@@ -64,14 +64,14 @@ final class ChatViewModelRiskDetectionTests: XCTestCase {
         version: 1,
         terms: [RiskTerm(term: "자살", level: .critical)],
         safePhrases: [],
-        agencies: [SupportAgency(id: "a", name: "자살예방", description: "", phoneNumber: "109", url: nil, priority: 1)]
+        agencies: [SupportAgency(id: "a", name: "자살예방", description: "", phoneNumber: "109", url: nil, priority: 1, isEmergency: false)]
     )
 
     private let warningLexicon = RiskLexicon(
         version: 1,
         terms: [RiskTerm(term: "살기싫", level: .warning)],
         safePhrases: [],
-        agencies: [SupportAgency(id: "a", name: "자살예방", description: "", phoneNumber: "109", url: nil, priority: 1)]
+        agencies: [SupportAgency(id: "a", name: "자살예방", description: "", phoneNumber: "109", url: nil, priority: 1, isEmergency: false)]
     )
 
     func test_send_criticalText_blocksSendAndKeepsInput() async {
