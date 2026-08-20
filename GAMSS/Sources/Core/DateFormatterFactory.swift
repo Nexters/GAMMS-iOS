@@ -20,4 +20,11 @@ enum DateFormatterFactory {
         formatter.dateFormat = "yyyy.MM"
         return formatter
     }
+    
+    /// `yyyy-MM`
+    static var dateWithHyphen: DateFormatter {
+        let formatter = dateFormatter()
+        formatter.dateFormat = "yyyy-MM"
+        return formatter
+    }
 }
