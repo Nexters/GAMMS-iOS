@@ -24,6 +24,14 @@ private final class MockCardRepository: CardRepository {
     func deleteCard(cardId: Int) async throws {
         fatalError("사용 안 함")
     }
+
+    func fetchCardsByDate(yearMonth: Date, emotion: Emotion) async throws -> [DailyEmotion] {
+        fatalError("사용 안 함")
+    }
+
+    func deleteAllCard() async throws {
+        fatalError("사용 안 함")
+    }
 }
 
 final class GetCardUseCaseTests: XCTestCase {

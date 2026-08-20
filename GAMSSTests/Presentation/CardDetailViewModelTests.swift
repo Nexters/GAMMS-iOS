@@ -27,6 +27,14 @@ private final class MockCardRepository: CardRepository {
         receivedDeleteCardId = cardId
         _ = try stubbedDeleteCardResult.get()
     }
+
+    func fetchCardsByDate(yearMonth: Date, emotion: Emotion) async throws -> [DailyEmotion] {
+        fatalError("사용 안 함")
+    }
+
+    func deleteAllCard() async throws {
+        fatalError("사용 안 함")
+    }
 }
 
 @MainActor
