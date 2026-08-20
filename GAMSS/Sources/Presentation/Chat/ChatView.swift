@@ -71,6 +71,18 @@ struct ChatView: View {
                 .padding(.trailing, Spacing.spacing400)
             }
 
+            if viewModel.riskDetection != nil {
+                ModalContainerView(isPresented: Binding(
+                    get: { viewModel.riskDetection != nil },
+                    set: { if !$0 { viewModel.riskDetection = nil } }
+                )) {
+                    SupportAgencyDialogContentView(
+                        detection: viewModel.riskDetection ?? .none,
+                        onDismiss: { viewModel.riskDetection = nil }
+                    )
+                }
+            }
+
             if viewModel.isEnding {
                 Color.colorBlack.opacity(0.7)
                     .ignoresSafeArea()

@@ -41,6 +41,9 @@ struct RootView: View {
                 }
             }
         }
+        .task {
+            await RefreshRiskLexiconUseCase(repository: DefaultRiskLexiconRepository()).execute()
+        }
         .animation(
             .easeInOut(duration: 0.3),
             value: loginSession.value
