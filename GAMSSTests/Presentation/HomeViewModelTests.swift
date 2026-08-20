@@ -18,14 +18,30 @@ private final class MockFetchMyProfileUseCase: FetchMyProfileUseCase {
     }
 }
 
+private final class MockMemberRepository: MemberRepository {
+    var stubbedTokenUsageResult: Result<TokenUsage, Error> = .failure(SummaryError.inferenceFailed())
+    private(set) var fetchTokenUsageCallCount = 0
+
+    func deleteMember() async throws { fatalError("not used in this test") }
+    func fetchMyProfile() async throws -> User { fatalError("not used in this test") }
+    func updateNickname(_ nickname: String) async throws -> User { fatalError("not used in this test") }
+
+    func fetchTokenUsage() async throws -> TokenUsage {
+        fetchTokenUsageCallCount += 1
+        return try stubbedTokenUsageResult.get()
+    }
+}
+
 @MainActor
 final class HomeViewModelTests: XCTestCase {
     private func makeViewModel(
         fetchMyProfileUseCase: MockFetchMyProfileUseCase = MockFetchMyProfileUseCase(),
+        memberRepository: MockMemberRepository = MockMemberRepository(),
         userManager: UserManager = UserManager()
     ) -> HomeViewModel {
         HomeViewModel(
             fetchMyProfileUseCase: fetchMyProfileUseCase,
+            getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: memberRepository),
             userManager: userManager
         )
     }
@@ -182,5 +198,51 @@ final class HomeViewModelTests: XCTestCase {
 
         XCTAssertTrue(viewModel.selectedEmotions.isEmpty, "사전 조건: 전체 해제 상태여야 함")
         XCTAssertTrue(viewModel.isSendDisabled, "감정을 전체 제외하면 입력이 있어도 전송은 막혀야 함")
+    }
+
+    func test_loadTokenUsage_whenNotExceeded_doesNotDisableSend() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 10, dailyLimit: 100, exceeded: false))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+        viewModel.input = "안녕"
+
+        await viewModel.loadTokenUsage()
+
+        XCTAssertFalse(viewModel.isTokenExceeded)
+        XCTAssertFalse(viewModel.isSendDisabled)
+    }
+
+    func test_loadTokenUsage_whenExceeded_disablesSend() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 100, dailyLimit: 100, exceeded: true))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+        viewModel.input = "안녕"
+
+        await viewModel.loadTokenUsage()
+
+        XCTAssertTrue(viewModel.isTokenExceeded)
+        XCTAssertTrue(viewModel.isSendDisabled, "토큰을 다 쓰면 입력이 있어도 전송이 막혀야 함")
+    }
+
+    func test_loadTokenUsage_onFailure_leavesExceededStateUnchanged() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .failure(SummaryError.inferenceFailed())
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+
+        await viewModel.loadTokenUsage()
+
+        XCTAssertFalse(viewModel.isTokenExceeded, "조회 실패 시 조용히 무시하고 입력을 막지 않아야 함")
+    }
+
+    func test_send_whenTokenExceeded_doesNotSetPendingFirstMessage() async {
+        let memberRepository = MockMemberRepository()
+        memberRepository.stubbedTokenUsageResult = .success(TokenUsage(usedTokens: 100, dailyLimit: 100, exceeded: true))
+        let viewModel = makeViewModel(memberRepository: memberRepository)
+        await viewModel.loadTokenUsage()
+        viewModel.input = "안녕"
+
+        viewModel.send()
+
+        XCTAssertNil(viewModel.pendingFirstMessage, "토큰을 다 쓰면 전송 자체가 막혀야 함")
     }
 }

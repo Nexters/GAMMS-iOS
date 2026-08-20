@@ -63,7 +63,9 @@ struct HomeView: View {
                     onToggleEmotion: { viewModel.toggleEmotion($0) },
                     onCommit: { viewModel.send() },
                     onInputChange: { viewModel.updateInput($0) },
-                    isFocused: $isInputFocused
+                    isFocused: $isInputFocused,
+                    isDisabled: viewModel.isTokenExceeded,
+                    disabledPlaceholder: viewModel.composerDisabledPlaceholder
                 )
 
                 Spacer()
@@ -99,7 +101,9 @@ struct HomeView: View {
         }
         .task {
             if userManager.user != nil { isGreetingReady = true }
-            await viewModel.loadProfileIfNeeded()
+            async let profile: Void = viewModel.loadProfileIfNeeded()
+            async let tokenUsage: Void = viewModel.loadTokenUsage()
+            _ = await (profile, tokenUsage)
         }
         .onChange(of: userManager.user != nil) { _, isReady in
             guard isReady, !isGreetingReady else { return }
@@ -198,6 +202,9 @@ struct HomeView: View {
         HomeView(
             viewModel: HomeViewModel(
                 fetchMyProfileUseCase: DefaultFetchMyProfileUseCase(
+                    memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
+                ),
+                getTokenUsageUseCase: GetTokenUsageUseCase(
                     memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)
                 )
             )
