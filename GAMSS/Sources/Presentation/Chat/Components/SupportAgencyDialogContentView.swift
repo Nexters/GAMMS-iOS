@@ -17,10 +17,13 @@ struct SupportAgencyDialogContentView: View {
             subtitle: "대화에서 도움이 필요하다는 신호가 확인됐어요.\n전문가와 이야기해 보는 걸 추천드려요.",
             actions: [.init(title: "닫기", style: .primary, action: onDismiss)]
         ) {
-            VStack(alignment: .leading, spacing: Spacing.spacing200) {
+            VStack(alignment: .leading, spacing: Spacing.spacing075) {
                 ForEach(detection.agencies) { agency in
                     SupportAgencyRow(agency: agency)
                 }
+                
+                Spacer()
+                    .frame(height: 8)
 
                 HStack(spacing: Spacing.spacing050) {
                     Image(systemName: "info.circle")
@@ -31,7 +34,7 @@ struct SupportAgencyDialogContentView: View {
                 }
             }
             .padding(Spacing.spacing200)
-            .background(Color.colorGray075)
+            .background(Color.colorGray050)
             .clipShape(RoundedRectangle(cornerRadius: Radius.radius200))
             .padding(.top, Spacing.spacing200)
             .padding(.bottom, Spacing.spacing200)

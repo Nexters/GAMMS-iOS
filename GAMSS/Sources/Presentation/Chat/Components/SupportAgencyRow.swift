@@ -15,9 +15,15 @@ struct SupportAgencyRow: View {
     var body: some View {
         Button(action: open) {
             HStack {
-                Text(agency.name)
-                    .typography(.subtitle4)
-                    .foregroundStyle(isEmergency ? Color.colorWhite : Color.colorGray950)
+                HStack(spacing: Spacing.spacing050) {
+                    Text(agency.name)
+                        .typography(.body5Medium)
+                        .foregroundStyle(isEmergency ? Color.colorWhite : Color.colorGray900)
+                    
+                    Text("(\(agency.phoneNumber ?? ""))")
+                        .typography(.body5Regular)
+                        .foregroundStyle(isEmergency ? Color.clear : Color.colorGray400)
+                }
 
                 Spacer()
 
@@ -26,7 +32,7 @@ struct SupportAgencyRow: View {
             }
             .padding(.horizontal, Spacing.spacing300)
             .frame(height: 48)
-            .background(isEmergency ? Color.colorRed : Color.colorGray025)
+            .background(isEmergency ? Color.colorApricot : Color.colorGray025)
             .overlay(
                 RoundedRectangle(cornerRadius: Radius.radius100)
                     .strokeBorder(isEmergency ? Color.clear : Color.colorGray200, lineWidth: 1)

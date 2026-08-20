@@ -28,6 +28,9 @@ struct ModalContentView<ExtraContent: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             titleSection
+            
+            Spacer()
+                .frame(height: 8)
 
             extraContent
 
