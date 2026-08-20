@@ -13,6 +13,7 @@ struct CardDetailView: View {
     @StateObject private var viewModel: CardDetailViewModel
     @StateObject private var conversationHistoryViewModel: ConversationHistoryViewModel
     @State private var isShowingConversation = false
+    @State private var isShredPresented = false
 
     private let transitionDuration = 0.22
 
@@ -73,8 +74,6 @@ struct CardDetailView: View {
                 Task {
                     if isLoadFailure {
                         await viewModel.loadCard()
-                    } else {
-                        
                     }
                 }
             }
@@ -84,13 +83,33 @@ struct CardDetailView: View {
                 Button("확인", role: .cancel) {}
             }
         }
+        .fullScreenCover(isPresented: $isShredPresented) {
+            if let card = viewModel.card {
+                CardShredView(
+                    viewModel: CardShredViewModel(
+                        cardId: card.id,
+                        deleteCardUseCase: DeleteCardUseCase(
+                            cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
+                        )
+                    ),
+                    stripImageName: "noteStrip",
+                    onBack: {
+                        isShredPresented = false
+                    },
+                    onComplete: {
+                        isShredPresented = false
+                        onClose()
+                    }
+                )
+            }
+        }
     }
 
     private var bottomActions: some View {
         VStack(spacing: Spacing.spacing200) {
             HStack(spacing: Spacing.spacing050) {
                 OutlineButton(title: "기록 버리기") {
-
+                    isShredPresented = true
                 }
                 .frame(width: 97)
 
