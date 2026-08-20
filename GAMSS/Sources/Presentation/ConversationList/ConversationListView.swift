@@ -128,6 +128,7 @@ struct ConversationListView: View {
                         createCardUseCase: CreateCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)),
                         getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)),
                         updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
+                        detectRiskInTextUseCase: DetectRiskInTextUseCase(repository: DefaultRiskLexiconRepository()),
                         summaryStore: LazyConversationSummaryStore(),
                         conversationId: conversation.id
                     )

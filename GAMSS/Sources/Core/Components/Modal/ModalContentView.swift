@@ -7,24 +7,32 @@
 
 import SwiftUI
 
-struct ModalContentView: View {
+struct ModalContentView<ExtraContent: View>: View {
     let title: String
     let subtitle: String?
     let actions: [ModalAction]
+    let extraContent: ExtraContent
 
     init(
         title: String,
         subtitle: String? = nil,
-        actions: [ModalAction]
+        actions: [ModalAction],
+        @ViewBuilder extraContent: () -> ExtraContent = { EmptyView() }
     ) {
         self.title = title
         self.subtitle = subtitle
         self.actions = actions
+        self.extraContent = extraContent()
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             titleSection
+            
+            Spacer()
+                .frame(height: 8)
+
+            extraContent
 
             Spacer()
                 .frame(height: 20)
