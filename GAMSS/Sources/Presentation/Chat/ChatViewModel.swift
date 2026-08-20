@@ -189,6 +189,8 @@ final class ChatViewModel: ObservableObject {
     func send(excludedCharacters: Set<EmotionCharacter> = []) async {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !isSending else { return }
+        isSending = true
+        defer { isSending = false }
 
         let detection = await detectRiskInTextUseCase.execute(text: trimmed)
         if detection.level != .none {
@@ -199,8 +201,6 @@ final class ChatViewModel: ObservableObject {
         }
 
         flushPendingComments()
-        isSending = true
-        defer { isSending = false }
 
         let replyTarget = replyTarget
         pendingUserMessage = PendingUserMessage(

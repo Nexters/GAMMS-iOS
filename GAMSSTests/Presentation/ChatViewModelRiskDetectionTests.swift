@@ -16,6 +16,31 @@ private final class StubRiskLexiconRepository: RiskLexiconRepository {
     func refresh() async {}
 }
 
+private actor GatedRiskLexiconRepository: RiskLexiconRepository {
+    private var isOpen = false
+    private var continuation: CheckedContinuation<Void, Never>?
+    private let lexicon: RiskLexicon
+
+    init(lexicon: RiskLexicon) {
+        self.lexicon = lexicon
+    }
+
+    func currentLexicon() async -> RiskLexicon {
+        if !isOpen {
+            await withCheckedContinuation { continuation = $0 }
+        }
+        return lexicon
+    }
+
+    func refresh() async {}
+
+    func open() {
+        isOpen = true
+        continuation?.resume()
+        continuation = nil
+    }
+}
+
 @MainActor
 final class ChatViewModelRiskDetectionTests: XCTestCase {
     private func makeViewModel(lexicon: RiskLexicon) -> (ChatViewModel, MockConversationRepositoryForRisk) {
@@ -88,6 +113,31 @@ final class ChatViewModelRiskDetectionTests: XCTestCase {
 
         XCTAssertNil(viewModel.riskDetection)
         XCTAssertEqual(repository.sendCallCount, 1)
+    }
+
+    func test_send_setsIsSendingSynchronouslyBeforeRiskCheckAwaits() async {
+        let repository = MockConversationRepositoryForRisk()
+        let gatedRiskRepository = GatedRiskLexiconRepository(lexicon: .empty)
+        let viewModel = ChatViewModel(
+            sendMessageUseCase: SendMessageUseCase(conversationRepository: repository),
+            getMessagesUseCase: GetMessagesUseCase(conversationRepository: repository),
+            endConversationUseCase: EndConversationUseCase(conversationRepository: repository),
+            createCardUseCase: CreateCardUseCase(cardRepository: MockCardRepositoryForRisk()),
+            getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: MockMemberRepositoryForRisk()),
+            updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: repository),
+            detectRiskInTextUseCase: DetectRiskInTextUseCase(repository: gatedRiskRepository),
+            summaryStore: MockConversationSummaryStoreForRisk()
+        )
+        viewModel.input = "안녕"
+
+        let sendTask = Task { await viewModel.send() }
+        while !viewModel.isSending {
+            await Task.yield()
+        }
+        XCTAssertTrue(viewModel.isSending)
+
+        await gatedRiskRepository.open()
+        await sendTask.value
     }
 }
 

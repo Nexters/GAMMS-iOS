@@ -40,4 +40,11 @@ final class RiskLexiconCacheTests: XCTestCase {
 
         XCTAssertFalse(cache.isStale)
     }
+
+    func test_markFetched_setsIsStaleToFalseWithoutWritingContent() {
+        cache.markFetched()
+
+        XCTAssertFalse(cache.isStale)
+        XCTAssertNil(cache.read())
+    }
 }

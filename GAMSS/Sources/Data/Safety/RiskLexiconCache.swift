@@ -27,6 +27,10 @@ struct RiskLexiconCache {
         userDefaults.set(Date().timeIntervalSince1970, forKey: Keys.fetchedAt)
     }
 
+    func markFetched() {
+        userDefaults.set(Date().timeIntervalSince1970, forKey: Keys.fetchedAt)
+    }
+
     var isStale: Bool {
         let fetchedAt = userDefaults.double(forKey: Keys.fetchedAt)
         guard fetchedAt > 0 else { return true }
