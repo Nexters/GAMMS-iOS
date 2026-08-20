@@ -30,7 +30,7 @@ final class CardResultViewModel: ObservableObject {
     @Published private(set) var dragOffset: CGFloat = 0
 
     static let discardThreshold: CGFloat = 120
-    static let fadeDistance: CGFloat = 240
+    static let dropOffset: CGFloat = 900
 
     func advanceStage() {
         guard let next = stage.next else { return }
@@ -45,12 +45,11 @@ final class CardResultViewModel: ObservableObject {
         dragOffset = 0
     }
 
-    static func shouldDiscard(dragOffset: CGFloat) -> Bool {
-        dragOffset > discardThreshold
+    func drop() {
+        dragOffset = Self.dropOffset
     }
 
-    static func opacity(forDragOffset dragOffset: CGFloat) -> Double {
-        let progress = min(max(dragOffset / fadeDistance, 0), 1)
-        return 1.0 - progress * 0.7
+    static func shouldDiscard(dragOffset: CGFloat) -> Bool {
+        dragOffset > discardThreshold
     }
 }

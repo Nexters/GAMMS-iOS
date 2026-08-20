@@ -84,6 +84,8 @@ struct CardResultView: View {
 
     private var discardableCard: some View {
         ZStack {
+            draggablePaper
+
             trashBin
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                 .ignoresSafeArea(edges: .bottom)
@@ -97,20 +99,21 @@ struct CardResultView: View {
                         .fixedSize()
                         .alignmentGuide(.top) { $0[.bottom] + 29 }
                 }
-
-            Image("cardFoldStepTwo")
-                .resizable()
-                .frame(width: foldStepTwoSize.width, height: foldStepTwoSize.height)
-                .overlay(alignment: .top) {
-                    Image("cardDiscardArrow")
-                        .resizable()
-                        .frame(width: discardArrowSize.width, height: discardArrowSize.height)
-                        .offset(y: 104)
-                }
-                .offset(y: viewModel.dragOffset)
-                .opacity(CardResultViewModel.opacity(forDragOffset: viewModel.dragOffset))
-                .gesture(discardDragGesture)
         }
+    }
+
+    private var draggablePaper: some View {
+        Image("cardFoldStepTwo")
+            .resizable()
+            .frame(width: foldStepTwoSize.width, height: foldStepTwoSize.height)
+            .overlay(alignment: .top) {
+                Image("cardDiscardArrow")
+                    .resizable()
+                    .frame(width: discardArrowSize.width, height: discardArrowSize.height)
+                    .offset(y: 104)
+            }
+            .offset(y: viewModel.dragOffset)
+            .gesture(discardDragGesture)
     }
 
     private var trashBin: some View {
@@ -128,7 +131,11 @@ struct CardResultView: View {
             }
             .onEnded { value in
                 if CardResultViewModel.shouldDiscard(dragOffset: max(0, value.translation.height)) {
-                    onComplete()
+                    withAnimation(.easeIn(duration: 0.3)) {
+                        viewModel.drop()
+                    } completion: {
+                        onComplete()
+                    }
                 } else {
                     withAnimation(.spring()) {
                         viewModel.resetDrag()
