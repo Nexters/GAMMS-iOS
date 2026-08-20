@@ -8,12 +8,15 @@
 import SpriteKit
 
 final class DropStackScene: SKScene {
+    var onSelectNote: ((DropNote) -> Void)?
+
     private let floorNodeName = "drop-floor"
     private let boxNodeName = "drop-note"
     private let dropSize = CGSize(width: 80, height: 80)
     private let floorHeight: CGFloat = 12
 
     private var pendingNotes: [DropNote] = []
+    private var renderedNotes: [DropNote] = []
     private var isAttachedToView = false
 
     override func didMove(to view: SKView) {
@@ -46,9 +49,19 @@ final class DropStackScene: SKScene {
     func clear() {
         removeAllActions()
         pendingNotes = []
+        renderedNotes = []
         children
             .filter { $0.name == boxNodeName }
             .forEach { $0.removeFromParent() }
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let location = touches.first?.location(in: self),
+              let id = nodes(at: location).first(where: { $0.name == boxNodeName })?.userData?["id"] as? Int,
+              let note = renderedNotes.first(where: { $0.id == id })
+        else { return }
+
+        onSelectNote?(note)
     }
 
     private func flushPendingNotesIfNeeded() {
@@ -58,6 +71,7 @@ final class DropStackScene: SKScene {
 
         let notes = pendingNotes
         pendingNotes = []
+        renderedNotes = notes
 
         removeAllActions()
         children
@@ -67,7 +81,7 @@ final class DropStackScene: SKScene {
         for (index, note) in notes.enumerated() {
             let wait = SKAction.wait(forDuration: 0.07 * Double(index))
             let spawn = SKAction.run { [weak self] in
-                self?.spawnOne(imageName: note.imageName)
+                self?.spawnOne(note: note)
             }
             run(.sequence([wait, spawn]))
         }
@@ -93,9 +107,10 @@ final class DropStackScene: SKScene {
         addChild(floor)
     }
 
-    private func spawnOne(imageName: String) {
-        let node = SKSpriteNode(imageNamed: imageName)
+    private func spawnOne(note: DropNote) {
+        let node = SKSpriteNode(imageNamed: note.imageName)
         node.name = boxNodeName
+        node.userData = ["id": note.id]
         node.size = dropSize
 
         let minX = dropSize.width * 0.5

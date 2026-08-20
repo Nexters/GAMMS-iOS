@@ -74,7 +74,7 @@ struct CardDetailView: View {
                     if isLoadFailure {
                         await viewModel.loadCard()
                     } else {
-                        await discardCard()
+                        
                     }
                 }
             }
@@ -90,7 +90,7 @@ struct CardDetailView: View {
         VStack(spacing: Spacing.spacing200) {
             HStack(spacing: Spacing.spacing050) {
                 OutlineButton(title: "기록 버리기") {
-                    Task { await discardCard() }
+
                 }
                 .frame(width: 97)
 
@@ -135,21 +135,15 @@ struct CardDetailView: View {
             isShowingConversation = false
         }
     }
-
-    private func discardCard() async {
-        let succeeded = await viewModel.deleteCard()
-        if succeeded {
-            onClose()
-        }
-    }
 }
 
 #Preview {
     CardDetailView(
         viewModel: CardDetailViewModel(
             cardId: 1,
-            getCardUseCase: GetCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)),
-            deleteCardUseCase: DeleteCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared))
+            getCardUseCase: GetCardUseCase(
+                cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
+            )
         ),
         onClose: {}
     )

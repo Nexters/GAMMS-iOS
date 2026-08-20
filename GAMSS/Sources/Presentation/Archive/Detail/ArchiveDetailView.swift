@@ -14,6 +14,7 @@ struct ArchiveDetailView: View {
     @State private var scene = DropStackScene()
     @State private var isMonthPickerPresented = false
     @State private var isDeleteAllModalPresented = false
+    @State private var selectedNote: DropNote?
     
     private let title: String
     
@@ -44,6 +45,9 @@ struct ArchiveDetailView: View {
                             .onAppear {
                                 scene.scaleMode = .resizeFill
                                 scene.updateSize(proxy.size)
+                                scene.onSelectNote = { note in
+                                    selectedNote = note
+                                }
                                 scene.render(notes: viewModel.notes)
                             }
                             .onChange(of: proxy.size) { _, newSize in
@@ -81,6 +85,20 @@ struct ArchiveDetailView: View {
                         await viewModel.selectMonth(month)
                     }
                 }
+            }
+            .fullScreenCover(item: $selectedNote) { note in
+                CardDetailView(
+                    viewModel: CardDetailViewModel(
+                        cardId: note.id,
+                        getCardUseCase: GetCardUseCase(
+                            cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
+                        )
+                    ),
+                    onClose: {
+                        selectedNote = nil
+                    }
+                )
+                .presentationBackground(.clear)
             }
             if isDeleteAllModalPresented {
                 ModalContainerView(
