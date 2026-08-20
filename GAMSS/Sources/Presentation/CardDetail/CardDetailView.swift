@@ -106,31 +106,18 @@ struct CardDetailView: View {
     }
 
     private var bottomActions: some View {
-        VStack(spacing: Spacing.spacing200) {
-            HStack(spacing: Spacing.spacing050) {
-                OutlineButton(title: "기록 버리기") {
-                    isShredPresented = true
-                }
-                .frame(width: 97)
-
-                OutlineButton(title: "대화보기") {
-                    showConversation()
-                }
-                .frame(width: 97)
+        HStack(spacing: Spacing.spacing050) {
+            OutlineButton(title: "기록 버리기") {
+                isShredPresented = true
             }
-            .disabled(viewModel.isLoading)
+            .frame(width: 97)
 
-            HStack(spacing: Spacing.spacing025) {
-                Text("공유하기")
-                    .typography(.caption2)
-                    .foregroundStyle(Color.colorGray600)
-
-                Image("cardShareChevron")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 12, height: 12)
+            OutlineButton(title: "대화보기") {
+                showConversation()
             }
+            .frame(width: 97)
         }
+        .disabled(viewModel.isLoading)
     }
 
     private var closeButton: some View {
