@@ -13,7 +13,7 @@ struct ArchiveDetailView: View {
     @StateObject private var viewModel: ArchiveDetailViewModel
     @State private var scene = DropStackScene()
     @State private var isMonthPickerPresented = false
-    @State private var isDeleteAllModalPresented = false
+    @State private var isShredPresented = false
     @State private var selectedNote: DropNote?
     
     private let title: String
@@ -102,44 +102,29 @@ struct ArchiveDetailView: View {
                     ),
                     onClose: {
                         selectedNote = nil
+                        Task { await viewModel.load() }
                     }
                 )
                 .presentationBackground(.clear)
             }
-            if isDeleteAllModalPresented {
-                ModalContainerView(
-                    isPresented: $isDeleteAllModalPresented
-                ) {
-                    ModalContentView(
-                        title: "대화 전체 비우기",
-                        subtitle: "모든 대화 기록이 삭제돼요.\n삭제한 내용은 다시 복구할 수 없어요.",
-                        actions: [
-                            .init(
-                                title: "취소",
-                                style: .secondary,
-                                action: {
-                                    isDeleteAllModalPresented = false
-                                }
-                            ),
-                            .init(
-                                title: "비우기",
-                                style: .destructive,
-                                action: {
-                                    isDeleteAllModalPresented = false
-                                    
-                                    Task {
-                                        let success = await viewModel.deleteAll()
-                                        
-                                        if success {
-                                            viewModel.clearNotes()
-                                            scene.clear()
-                                        }
-                                    }
-                                }
-                            )
-                        ]
-                    )
-                }
+            .fullScreenCover(isPresented: $isShredPresented) {
+                CardShredView(
+                    viewModel: CardShredViewModel(
+                        deleteAllCardUseCase: DefaultDeleteAllCardUseCase(
+                            cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
+                        )
+                    ),
+                    stripImageName: "noteStrip",
+                    onBack: {
+                        isShredPresented = false
+                    },
+                    onComplete: {
+                        isShredPresented = false
+                        viewModel.clearNotes()
+                        scene.clear()
+                        Task { await viewModel.load() }
+                    }
+                )
             }
         }
     }
@@ -160,7 +145,7 @@ struct ArchiveDetailView: View {
             Spacer()
             
             Button {
-                isDeleteAllModalPresented = true
+                isShredPresented = true
             } label: {
                 Text("비우기")
                     .typography(.body5Medium)

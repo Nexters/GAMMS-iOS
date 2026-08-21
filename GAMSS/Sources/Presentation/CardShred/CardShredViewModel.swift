@@ -8,19 +8,32 @@
 import Combine
 import Foundation
 
+enum CardShredMode {
+    case single(cardId: Int)
+    case all
+}
+
 @MainActor
 final class CardShredViewModel: ObservableObject {
     @Published private(set) var step = 0
     @Published private(set) var isSubmitting = false
     @Published var alertMessage: String?
 
-    private let cardId: Int
-    private let deleteCardUseCase: DeleteCardUseCase
+    private let mode: CardShredMode
+    private let deleteCardUseCase: DeleteCardUseCase?
+    private let deleteAllCardUseCase: DeleteAllCardUseCase?
     private let requiredSteps = 4
 
     init(cardId: Int, deleteCardUseCase: DeleteCardUseCase) {
-        self.cardId = cardId
+        self.mode = .single(cardId: cardId)
         self.deleteCardUseCase = deleteCardUseCase
+        self.deleteAllCardUseCase = nil
+    }
+
+    init(deleteAllCardUseCase: DeleteAllCardUseCase) {
+        self.mode = .all
+        self.deleteCardUseCase = nil
+        self.deleteAllCardUseCase = deleteAllCardUseCase
     }
 
     var isPowerOn: Bool {
@@ -48,7 +61,14 @@ final class CardShredViewModel: ObservableObject {
         defer { isSubmitting = false }
 
         do {
-            try await deleteCardUseCase.execute(cardId: cardId)
+            switch mode {
+            case .single(let cardId):
+                guard let deleteCardUseCase else { return false }
+                try await deleteCardUseCase.execute(cardId: cardId)
+            case .all:
+                guard let deleteAllCardUseCase else { return false }
+                try await deleteAllCardUseCase.execute()
+            }
             return true
         } catch {
             alertMessage = "기록을 파쇄하지 못했어요"
