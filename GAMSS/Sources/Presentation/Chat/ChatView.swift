@@ -194,6 +194,7 @@ struct ChatView: View {
                             ChatComposerView(
                                 text: $viewModel.input,
                                 isSendDisabled: viewModel.isSendDisabled,
+                                isSending: viewModel.isSending,
                                 replyTargetLabel: viewModel.replyTarget.flatMap { QuotedReplyHeader.label(forQuotedSender: $0.sender) },
                                 replyTargetContent: viewModel.replyTarget?.content,
                                 onCancelReply: { viewModel.cancelReply() },

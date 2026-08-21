@@ -45,6 +45,7 @@ final class ChatViewModel: ObservableObject {
     private let summaryStore: ConversationSummaryStore
     /// 테스트에서 순차 노출이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
     private(set) var revealTask: Task<Void, Never>?
+    @Published private var isSendQueued = false
     private var isTokenUsageStale = true
     /// 테스트에서 백그라운드 요약 저장이 끝나는 시점을 결정적으로 기다리기 위한 핸들.
     private(set) var pendingSummaryUpdateTask: Task<Void, Never>?
@@ -131,7 +132,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     var isSendDisabled: Bool {
-        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending || isConversationEnded || isTokenExceeded
+        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending || isSendQueued || isConversationEnded || isTokenExceeded
     }
 
     /// 아직 대화방이 만들어지지 않았거나(첫 메시지 전) 이미 종료된 대화는 다시 종료할 수 없다.
@@ -189,6 +190,10 @@ final class ChatViewModel: ObservableObject {
     func send(excludedCharacters: Set<EmotionCharacter> = []) async {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !isSending else { return }
+        guard pendingComments.isEmpty else {
+            isSendQueued = true
+            return
+        }
         isSending = true
         defer { isSending = false }
 
@@ -200,7 +205,6 @@ final class ChatViewModel: ObservableObject {
             return
         }
 
-        flushPendingComments()
 
         let replyTarget = replyTarget
         self.replyTarget = nil
@@ -358,22 +362,11 @@ final class ChatViewModel: ObservableObject {
             .joined(separator: " ")
     }
 
-    private func flushPendingComments() {
-        revealTask?.cancel()
-        revealTask = nil
-        isRevealPaused = false
-        guard !pendingComments.isEmpty else { return }
-        messages.append(contentsOf: pendingComments)
-        pendingComments.removeAll()
-    }
-
     private func revealRemainingComments() {
         guard !pendingComments.isEmpty else { return }
         revealTask = Task { [weak self] in
             guard let self else { return }
             while true {
-                // 취소 시 flushPendingComments()가 그대로 쓸어담을 수 있도록, 자는 동안은
-                // pendingComments에서 빼지 않고 들여다보기만 한다(제거는 취소 검사 통과 후에만).
                 let hasNext: Bool = await MainActor.run { !self.pendingComments.isEmpty }
                 guard hasNext else { break }
                 try? await Task.sleep(nanoseconds: UInt64(CommentRevealPolicy.nextGapSeconds() * 1_000_000_000))
@@ -391,7 +384,16 @@ final class ChatViewModel: ObservableObject {
                 guard !Task.isCancelled else { break }
                 await MainActor.run { self.isRevealPaused = false }
             }
+            guard !Task.isCancelled else { return }
+            await self.autoSendPendingInputIfPossible()
         }
+    }
+
+    private func autoSendPendingInputIfPossible() async {
+        guard isSendQueued else { return }
+        isSendQueued = false
+        guard !isSendDisabled else { return }
+        await send()
     }
 }
 

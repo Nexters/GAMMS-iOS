@@ -858,6 +858,138 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.messages, [sentMessage, comment1, comment2])
     }
 
+    func test_isSendDisabled_whileCommentsStillRevealingButNotYetTapped_isFalse() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        let comment1 = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        let comment2 = Message(id: 3, conversationId: 10, sender: .character(.sadness), content: "오늘 어때?", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: [comment1, comment2]))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+        viewModel.input = "다음 메시지"
+
+        XCTAssertFalse(viewModel.isSendDisabled, "감정 답장이 노출 중이어도 아직 탭하지 않았으면 버튼은 활성 상태로 보여야 함")
+    }
+
+    func test_isSendDisabled_afterTappingSendWhileRevealing_isTrue() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        let comment1 = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        let comment2 = Message(id: 3, conversationId: 10, sender: .character(.sadness), content: "오늘 어때?", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: [comment1, comment2]))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+        viewModel.input = "다음 메시지"
+        await viewModel.send() // 노출 중 전송 버튼을 탭함
+
+        XCTAssertTrue(viewModel.isSendDisabled, "탭해서 전송이 대기열에 담기면 버튼이 비활성 상태로 보여야 함")
+    }
+
+    func test_isSendDisabled_afterRevealCompletesWithNoLeftoverInput_isTrueBecauseInputIsEmpty() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        let comment = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: [comment]))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+        await viewModel.revealTask?.value
+
+        XCTAssertTrue(viewModel.pendingComments.isEmpty)
+        XCTAssertFalse(viewModel.isSending)
+        XCTAssertTrue(viewModel.isSendDisabled, "노출은 끝났지만 입력이 비어있으니 전송 버튼은 계속 비활성 상태여야 함")
+    }
+
+    func test_send_whileCommentsStillRevealing_doesNothingAndDoesNotFlushReveal() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        let comment1 = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        let comment2 = Message(id: 3, conversationId: 10, sender: .character(.sadness), content: "오늘 어때?", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: [comment1, comment2]))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+        viewModel.input = "다음 메시지"
+
+        await viewModel.send()
+
+        XCTAssertEqual(repository.sendCallCount, 1, "감정 답장이 노출 중일 때는 새 전송이 서버까지 가면 안 됨")
+        XCTAssertEqual(viewModel.messages, [sentMessage], "노출 중이던 답장을 한 번에 쏟아내면 안 됨")
+        XCTAssertEqual(viewModel.pendingComments, [comment1, comment2], "순차 노출 큐가 그대로 유지되어야 함")
+        XCTAssertEqual(viewModel.input, "다음 메시지", "막힌 전송은 입력값을 비우면 안 됨")
+
+        // 노출 완료 시 남은 입력이 자동 전송되는 동작은 별도 테스트에서 검증한다 — 여기서는
+        // 차단된 전송이 노출 자체를 망가뜨리지 않는지만 본다.
+        viewModel.input = ""
+        await viewModel.revealTask?.value
+
+        XCTAssertEqual(viewModel.messages, [sentMessage, comment1, comment2], "차단된 뒤에도 원래 노출은 정상적으로 이어져야 함")
+    }
+
+    func test_whenRevealCompletes_ifUserTappedSendWhileBlocked_autoSendsIt() async {
+        let repository = MockConversationRepository()
+        let sentMessage1 = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        let comment = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage1, commentStatus: .done, comments: [comment]))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+        viewModel.input = "다음 메시지"
+        await viewModel.send() // 노출 중에 사용자가 전송 버튼을 누른 상황
+
+        let sentMessage2 = Message(id: 3, conversationId: 10, sender: .user, content: "다음 메시지", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage2, commentStatus: .done, comments: []))
+
+        let firstRevealTask = viewModel.revealTask
+        await firstRevealTask?.value
+
+        XCTAssertEqual(repository.sendCallCount, 2, "노출 중에 눌러둔 전송은 노출이 끝나면 재탭 없이 이어서 전송되어야 함")
+        XCTAssertEqual(viewModel.messages, [sentMessage1, comment, sentMessage2])
+        XCTAssertEqual(viewModel.input, "", "자동 전송 후 입력창은 비워져야 함")
+    }
+
+    func test_whenRevealCompletes_ifSendWasNeverTappedWhileBlocked_doesNotAutoSend() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        let comment = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: [comment]))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+        viewModel.input = "다음 메시지" // 타이핑만 하고 전송 버튼은 누르지 않음
+
+        await viewModel.revealTask?.value
+
+        XCTAssertEqual(repository.sendCallCount, 1, "전송 버튼을 누르지 않았다면 노출이 끝나도 자동 전송되면 안 됨")
+        XCTAssertEqual(viewModel.input, "다음 메시지", "입력값은 그대로 남아있어야 함")
+    }
+
+    func test_whenRevealCompletes_ifQueuedButInputWasClearedMeanwhile_doesNotAutoSend() async {
+        let repository = MockConversationRepository()
+        let sentMessage = Message(id: 1, conversationId: 10, sender: .user, content: "안녕", repliesToMessageId: nil, createdAt: Date(timeIntervalSince1970: 0))
+        let comment = Message(id: 2, conversationId: 10, sender: .character(.joy), content: "반가워", repliesToMessageId: 1, createdAt: Date(timeIntervalSince1970: 0))
+        repository.stubbedSendResult = .success(SentMessage(message: sentMessage, commentStatus: .done, comments: [comment]))
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.input = "안녕"
+
+        await viewModel.send()
+        viewModel.input = "다음 메시지"
+        await viewModel.send() // 눌러서 대기열에 담아둔 뒤
+        viewModel.input = "" // 마음이 바뀌어 지움
+
+        await viewModel.revealTask?.value
+
+        XCTAssertEqual(repository.sendCallCount, 1, "대기열에 담겼어도 그 사이 입력이 비었으면 자동 전송하면 안 됨")
+    }
+
     func test_send_onFailure_hasNoNextReplyCharacter() async {
         let repository = MockConversationRepository()
         repository.stubbedSendResult = .failure(SummaryError.inferenceFailed())

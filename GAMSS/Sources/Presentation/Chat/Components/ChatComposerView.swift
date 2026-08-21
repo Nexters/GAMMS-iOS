@@ -13,6 +13,7 @@ import SwiftUI
 struct ChatComposerView: View {
     @Binding var text: String
     let isSendDisabled: Bool
+    let isSending: Bool
     let replyTargetLabel: String?
     let replyTargetContent: String?
     let onCancelReply: () -> Void
@@ -137,15 +138,13 @@ struct ChatComposerView: View {
         .accessibilityLabel("답장 취소")
     }
 
-    // 비활성화 상태는 화면에 노출되지 않는다(hasText(text)가 false면 버튼 자체가 안 뜬다) —
-    // 그래서 홈 화면과 달리 sendButtonDisabled 에셋은 쓰지 않는다.
     private var sendButton: some View {
         Button(action: onSend) {
-            Image("sendButtonEnabled")
+            Image(isSendDisabled ? "sendButtonDisabled" : "sendButtonEnabled")
                 .resizable()
                 .frame(width: 32, height: 32)
         }
-        .disabled(isSendDisabled)
+        .disabled(isSending)
         .accessibilityLabel("전송")
     }
 }
@@ -157,6 +156,7 @@ struct ChatComposerView: View {
     return ChatComposerView(
         text: $text,
         isSendDisabled: text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+        isSending: false,
         replyTargetLabel: nil,
         replyTargetContent: nil,
         onCancelReply: {},
@@ -175,6 +175,7 @@ struct ChatComposerView: View {
     return ChatComposerView(
         text: $text,
         isSendDisabled: text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+        isSending: false,
         replyTargetLabel: "불안에게 답장",
         replyTargetContent: "안녕하세용",
         onCancelReply: {},
