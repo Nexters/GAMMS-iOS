@@ -190,11 +190,24 @@ private struct ShredStrip: Identifiable {
     let height: CGFloat
 }
 
-#Preview {
+#Preview("단일 삭제") {
     CardShredView(
         viewModel: CardShredViewModel(
             cardId: 1,
             deleteCardUseCase: DeleteCardUseCase(
+                cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
+            )
+        ),
+        stripImageName: "noteStrip",
+        onBack: {},
+        onComplete: {}
+    )
+}
+
+#Preview("전체 삭제") {
+    CardShredView(
+        viewModel: CardShredViewModel(
+            deleteAllCardUseCase: DefaultDeleteAllCardUseCase(
                 cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
             )
         ),
