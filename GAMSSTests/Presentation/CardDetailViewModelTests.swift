@@ -10,9 +10,7 @@ import XCTest
 
 private final class MockCardRepository: CardRepository {
     var stubbedGetCardResult: Result<Card, Error> = .failure(SummaryError.inferenceFailed())
-    var stubbedDeleteCardResult: Result<Void, Error> = .success(())
     private(set) var receivedGetCardId: Int?
-    private(set) var receivedDeleteCardId: Int?
 
     func createCard(conversationId: Int, emotion: EmotionCharacter?, summary: String) async throws -> Card {
         fatalError("사용 안 함")
@@ -24,8 +22,7 @@ private final class MockCardRepository: CardRepository {
     }
 
     func deleteCard(cardId: Int) async throws {
-        receivedDeleteCardId = cardId
-        _ = try stubbedDeleteCardResult.get()
+        fatalError("사용 안 함")
     }
 
     func fetchCardsByDate(yearMonth: Date, emotion: Emotion) async throws -> [DailyEmotion] {
@@ -42,8 +39,7 @@ final class CardDetailViewModelTests: XCTestCase {
     private func makeViewModel(cardId: Int = 1, repository: MockCardRepository) -> CardDetailViewModel {
         CardDetailViewModel(
             cardId: cardId,
-            getCardUseCase: GetCardUseCase(cardRepository: repository),
-            deleteCardUseCase: DeleteCardUseCase(cardRepository: repository)
+            getCardUseCase: GetCardUseCase(cardRepository: repository)
         )
     }
 
@@ -80,43 +76,5 @@ final class CardDetailViewModelTests: XCTestCase {
         await viewModel.loadCard()
 
         XCTAssertTrue(viewModel.isLoadFailureAlert)
-    }
-
-    func test_deleteCard_onSuccess_returnsTrueAndClearsLoading() async {
-        let repository = MockCardRepository()
-        let card = Card(id: 1, conversationId: 10, emotion: .anger, summary: "요약", message: "메시지", date: Date(timeIntervalSince1970: 0))
-        repository.stubbedGetCardResult = .success(card)
-        let viewModel = makeViewModel(repository: repository)
-        await viewModel.loadCard()
-
-        let succeeded = await viewModel.deleteCard()
-
-        XCTAssertTrue(succeeded)
-        XCTAssertFalse(viewModel.isLoading)
-        XCTAssertEqual(repository.receivedDeleteCardId, 1)
-    }
-
-    func test_deleteCard_onFailure_returnsFalseAndSetsAlertMessage() async {
-        let repository = MockCardRepository()
-        repository.stubbedDeleteCardResult = .failure(SummaryError.inferenceFailed())
-        let viewModel = makeViewModel(repository: repository)
-
-        let succeeded = await viewModel.deleteCard()
-
-        XCTAssertFalse(succeeded)
-        XCTAssertEqual(viewModel.alertMessage, "카드를 삭제하지 못했어요")
-    }
-
-    func test_isLoadFailureAlert_afterDeleteFailureWithCardLoaded_isFalse() async {
-        let repository = MockCardRepository()
-        let card = Card(id: 1, conversationId: 10, emotion: .anger, summary: "요약", message: "메시지", date: Date(timeIntervalSince1970: 0))
-        repository.stubbedGetCardResult = .success(card)
-        repository.stubbedDeleteCardResult = .failure(SummaryError.inferenceFailed())
-        let viewModel = makeViewModel(repository: repository)
-        await viewModel.loadCard()
-
-        _ = await viewModel.deleteCard()
-
-        XCTAssertFalse(viewModel.isLoadFailureAlert)
     }
 }
