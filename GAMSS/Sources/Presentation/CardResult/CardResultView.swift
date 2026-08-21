@@ -12,6 +12,7 @@ struct CardResultView: View {
     let onComplete: () -> Void
 
     @StateObject private var viewModel: CardResultViewModel
+    @GestureState private var isDraggingPaper = false
 
     init(card: Card, viewModel: CardResultViewModel, onComplete: @escaping () -> Void) {
         self.card = card
@@ -111,6 +112,7 @@ struct CardResultView: View {
                     .resizable()
                     .frame(width: discardArrowSize.width, height: discardArrowSize.height)
                     .offset(y: 104)
+                    .opacity(isDraggingPaper ? 0 : 1)
             }
             .offset(y: viewModel.dragOffset)
             .gesture(discardDragGesture)
@@ -126,6 +128,9 @@ struct CardResultView: View {
 
     private var discardDragGesture: some Gesture {
         DragGesture()
+            .updating($isDraggingPaper) { _, isDraggingPaper, _ in
+                isDraggingPaper = true
+            }
             .onChanged { value in
                 viewModel.updateDrag(translationHeight: value.translation.height)
             }
