@@ -149,7 +149,8 @@ final class ChatViewModelTests: XCTestCase {
         riskLexiconRepository: RiskLexiconRepository = StubEmptyRiskLexiconRepository(),
         summaryStore: MockConversationSummaryStore = MockConversationSummaryStore(),
         conversationId: Int? = nil,
-        pendingFirstMessage: PendingFirstMessage? = nil
+        pendingFirstMessage: PendingFirstMessage? = nil,
+        initialDate: Date = Date()
     ) -> ChatViewModel {
         ChatViewModel(
             sendMessageUseCase: SendMessageUseCase(conversationRepository: repository),
@@ -161,8 +162,16 @@ final class ChatViewModelTests: XCTestCase {
             detectRiskInTextUseCase: DetectRiskInTextUseCase(repository: riskLexiconRepository),
             summaryStore: summaryStore,
             conversationId: conversationId,
-            pendingFirstMessage: pendingFirstMessage
+            pendingFirstMessage: pendingFirstMessage,
+            initialDate: initialDate
         )
+    }
+
+    func test_conversationDate_whenInitialDateProvided_usesItInsteadOfWaitingForMessages() {
+        let expectedDate = Date(timeIntervalSince1970: 1_000_000)
+        let viewModel = makeViewModel(initialDate: expectedDate)
+
+        XCTAssertEqual(viewModel.conversationDate, expectedDate)
     }
 
     func test_send_onSuccess_queuesAllCommentsForSequentialReveal() async {

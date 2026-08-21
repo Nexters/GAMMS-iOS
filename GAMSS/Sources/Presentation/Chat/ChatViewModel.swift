@@ -35,6 +35,7 @@ final class ChatViewModel: ObservableObject {
 
     private var conversationId: Int?
     private let pendingFirstMessage: PendingFirstMessage?
+    let conversationDate: Date
     private let sendMessageUseCase: SendMessageUseCase
     private let getMessagesUseCase: GetMessagesUseCase
     private let endConversationUseCase: EndConversationUseCase
@@ -62,7 +63,8 @@ final class ChatViewModel: ObservableObject {
         detectRiskInTextUseCase: DetectRiskInTextUseCase,
         summaryStore: ConversationSummaryStore,
         conversationId: Int? = nil,
-        pendingFirstMessage: PendingFirstMessage? = nil
+        pendingFirstMessage: PendingFirstMessage? = nil,
+        initialDate: Date = Date()
     ) {
         self.sendMessageUseCase = sendMessageUseCase
         self.getMessagesUseCase = getMessagesUseCase
@@ -74,6 +76,7 @@ final class ChatViewModel: ObservableObject {
         self.summaryStore = summaryStore
         self.conversationId = conversationId
         self.pendingFirstMessage = pendingFirstMessage
+        self.conversationDate = initialDate
     }
 
     /// 화면 진입 시 한 번 호출한다. 기존 대화면 히스토리를 불러오고, 홈에서 아직 안 보낸 첫

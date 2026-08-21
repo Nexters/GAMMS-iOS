@@ -133,7 +133,8 @@ struct ConversationListView: View {
                         updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
                         detectRiskInTextUseCase: DetectRiskInTextUseCase(repository: DefaultRiskLexiconRepository()),
                         summaryStore: LazyConversationSummaryStore(),
-                        conversationId: conversation.id
+                        conversationId: conversation.id,
+                        initialDate: conversation.createdAt
                     )
                 )
                 .toolbar(.hidden, for: .tabBar)

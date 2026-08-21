@@ -287,12 +287,8 @@ struct ChatView: View {
         .background(Color.colorWhite)
     }
 
-    /// 대화방이 생성된 날짜(yy.MM.dd). 첫 메시지의 시각을 기준으로 삼는다 — 대화방 생성 시점과
-    /// 사실상 같고, 별도로 conversationId를 다시 조회하지 않아도 이미 로드된 messages에서 구할 수
-    /// 있다. 메시지가 아직 로드되기 전(화면 진입 직후 아주 짧은 순간)에는 빈 문자열을 보여준다.
     private var headerDateText: String {
-        guard let firstMessageDate = viewModel.messages.first?.createdAt else { return "" }
-        return ConversationListDateHeaderFormatter.string(from: firstMessageDate)
+        ConversationListDateHeaderFormatter.string(from: viewModel.conversationDate)
     }
 
     @ViewBuilder
