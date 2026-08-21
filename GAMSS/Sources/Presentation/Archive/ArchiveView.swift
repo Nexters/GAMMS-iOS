@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ArchiveView: View {
     @StateObject private var viewModel: ArchiveViewModel
+    @State private var isSettingPresented = false
     
     init(viewModel: ArchiveViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -33,6 +34,8 @@ struct ArchiveView: View {
                 }
             }
             .background(Color.colorWhite)
+        }.navigationDestination(isPresented: $isSettingPresented) {
+            SettingView().toolbar(.hidden, for: .tabBar)
         }
     }
 }
@@ -48,7 +51,7 @@ private extension ArchiveView {
             Spacer()
             
             Button {
-                
+                isSettingPresented = true
             } label: {
                 Image("gear")
                     .resizable()
