@@ -11,6 +11,7 @@ struct ChatView: View {
     @StateObject private var viewModel: ChatViewModel
     @FocusState private var isInputFocused: Bool
     @SwiftUI.Environment(\.dismiss) private var dismiss
+    @SwiftUI.Environment(PendingCardResult.self) private var pendingCardResult
     @State private var keyboardHeight: CGFloat = 0
     @State private var isMessageListPositioned = false
     private static var hasPositionedOnce = false
@@ -231,22 +232,12 @@ struct ChatView: View {
             }
             Button("확인", role: .cancel) {}
         }
-        .fullScreenCover(item: Binding(
-            get: { viewModel.createdCard },
-            set: { if $0 == nil { viewModel.dismissCard() } }
-        )) { card in
-            CardResultView(
-                card: card,
-                viewModel: CardResultViewModel(),
-                onComplete: {
-                    viewModel.dismissCard()
-
-                    DispatchQueue.main.async {
-                        dismiss()
-                    }
-                }
-            )
-            .presentationBackground(.clear)
+        .onAppear {
+            pendingCardResult.dismissPresenter = { dismiss() }
+        }
+        .onChange(of: viewModel.createdCard) { _, newValue in
+            guard let newValue else { return }
+            pendingCardResult.card = newValue
         }
     }
 

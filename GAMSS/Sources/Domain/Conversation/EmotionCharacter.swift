@@ -62,6 +62,17 @@ enum EmotionCharacter: CaseIterable, Equatable {
         }
     }
 
+    var asEmotion: Emotion {
+        switch self {
+        case .joy: .happy
+        case .sadness: .sad
+        case .anger: .angry
+        case .anxiety: .anxious
+        case .prickly: .heartache
+        case .quirky: .embarrassed
+        }
+    }
+
     /// 채팅 메시지 헤더/입력중 인디케이터에 쓰이는 캐릭터 프로필 아바타 이미지 에셋 이름.
     var avatarImageName: String {
         switch self {

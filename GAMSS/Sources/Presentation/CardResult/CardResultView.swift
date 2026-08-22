@@ -10,13 +10,21 @@ import SwiftUI
 struct CardResultView: View {
     let card: Card
     let onComplete: () -> Void
+    let onDiscarded: (Emotion) -> Void
 
     @StateObject private var viewModel: CardResultViewModel
     @GestureState private var isDraggingPaper = false
+    @State private var isShowingArchiveDetail = false
 
-    init(card: Card, viewModel: CardResultViewModel, onComplete: @escaping () -> Void) {
+    init(
+        card: Card,
+        viewModel: CardResultViewModel,
+        onComplete: @escaping () -> Void,
+        onDiscarded: @escaping (Emotion) -> Void
+    ) {
         self.card = card
         self.onComplete = onComplete
+        self.onDiscarded = onDiscarded
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
@@ -28,18 +36,34 @@ struct CardResultView: View {
 
     var body: some View {
         ZStack {
-            Color.colorBlack.opacity(0.7)
-                .ignoresSafeArea()
+            if isShowingArchiveDetail, let emotion = card.emotion?.asEmotion {
+                ArchiveDetailView(
+                    title: emotion.name,
+                    viewModel: ArchiveDetailViewModel(
+                        fetchCardsByDateUseCase: DefaultFetchCardsByDateUseCase(
+                            cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared),
+                            emotion: emotion
+                        ),
+                        deleteAllCardUseCase: DefaultDeleteAllCardUseCase(
+                            cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
+                        )
+                    )
+                )
+                .transition(.opacity)
+            } else {
+                Color.colorBlack.opacity(0.7)
+                    .ignoresSafeArea()
 
-            switch viewModel.stage {
-            case .unfolded:
-                cardContent
-            case .foldedOnce:
-                foldStepImage("cardFoldStepOne", size: foldStepOneSize)
-            case .foldedTwice:
-                foldStepImage("cardFoldStepTwo", size: foldStepTwoSize)
-            case .readyToDiscard:
-                discardableCard
+                switch viewModel.stage {
+                case .unfolded:
+                    cardContent
+                case .foldedOnce:
+                    foldStepImage("cardFoldStepOne", size: foldStepOneSize)
+                case .foldedTwice:
+                    foldStepImage("cardFoldStepTwo", size: foldStepTwoSize)
+                case .readyToDiscard:
+                    discardableCard
+                }
             }
         }
     }
@@ -139,7 +163,14 @@ struct CardResultView: View {
                     withAnimation(.easeIn(duration: 0.3)) {
                         viewModel.drop()
                     } completion: {
-                        onComplete()
+                        guard let emotion = card.emotion?.asEmotion else {
+                            onComplete()
+                            return
+                        }
+                        onDiscarded(emotion)
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            isShowingArchiveDetail = true
+                        }
                     }
                 } else {
                     withAnimation(.spring()) {
@@ -154,6 +185,7 @@ struct CardResultView: View {
     CardResultView(
         card: Card(id: 1, conversationId: 1, emotion: .anger, summary: "오늘 비가 와서 짜증나고 찝찝하다", message: "얘 오늘 건들면 안 됨.", date: Date()),
         viewModel: CardResultViewModel(),
-        onComplete: {}
+        onComplete: {},
+        onDiscarded: { _ in }
     )
 }
