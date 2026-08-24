@@ -51,7 +51,9 @@ struct ArchiveDetailView: View {
                                     scene.scaleMode = .resizeFill
                                     scene.updateSize(proxy.size)
                                     scene.onSelectNote = { note in
-                                        selectedNote = note
+                                        withAnimation(.easeOut(duration: 0.12)) {
+                                            selectedNote = note
+                                        }
                                     }
                                     scene.render(notes: viewModel.notes)
                                 }
@@ -92,21 +94,6 @@ struct ArchiveDetailView: View {
                     }
                 }
             }
-            .fullScreenCover(item: $selectedNote) { note in
-                CardDetailView(
-                    viewModel: CardDetailViewModel(
-                        cardId: note.id,
-                        getCardUseCase: GetCardUseCase(
-                            cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
-                        )
-                    ),
-                    onClose: {
-                        selectedNote = nil
-                        Task { await viewModel.load() }
-                    }
-                )
-                .presentationBackground(.clear)
-            }
             .navigationDestination(isPresented: $isShredPresented) {
                 CardShredView(
                     viewModel: CardShredViewModel(
@@ -126,7 +113,28 @@ struct ArchiveDetailView: View {
                     }
                 )
             }
+
+            if let note = selectedNote {
+                CardDetailView(
+                    viewModel: CardDetailViewModel(
+                        cardId: note.id,
+                        getCardUseCase: GetCardUseCase(
+                            cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
+                        )
+                    ),
+                    onClose: {
+                        withAnimation(.easeOut(duration: 0.12)) {
+                            selectedNote = nil
+                        }
+                        Task { await viewModel.load() }
+                    }
+                )
+                .id(note.id)
+                .transition(.opacity)
+                .zIndex(1)
+            }
         }
+        .animation(.easeOut(duration: 0.12), value: selectedNote?.id)
     }
     
     private var header: some View {

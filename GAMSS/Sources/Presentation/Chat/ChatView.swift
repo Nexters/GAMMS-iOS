@@ -91,7 +91,26 @@ struct ChatView: View {
                     .tint(Color.colorWhite)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+
+            if let card = viewModel.createdCard {
+                CardResultView(
+                    card: card,
+                    viewModel: CardResultViewModel(),
+                    onComplete: {
+                        withAnimation(.easeOut(duration: 0.12)) {
+                            viewModel.dismissCard()
+                        }
+                        DispatchQueue.main.async {
+                            dismiss()
+                        }
+                    }
+                )
+                .id(card.id)
+                .transition(.opacity)
+                .zIndex(2)
+            }
         }
+        .animation(.easeOut(duration: 0.12), value: viewModel.createdCard?.id)
         .onChange(of: viewModel.riskDetection) { _, newValue in
             if newValue != nil { isInputFocused = false }
         }
@@ -230,23 +249,6 @@ struct ChatView: View {
                 Button("다시 시도") { Task { await viewModel.retryCreateCard() } }
             }
             Button("확인", role: .cancel) {}
-        }
-        .fullScreenCover(item: Binding(
-            get: { viewModel.createdCard },
-            set: { if $0 == nil { viewModel.dismissCard() } }
-        )) { card in
-            CardResultView(
-                card: card,
-                viewModel: CardResultViewModel(),
-                onComplete: {
-                    viewModel.dismissCard()
-
-                    DispatchQueue.main.async {
-                        dismiss()
-                    }
-                }
-            )
-            .presentationBackground(.clear)
         }
     }
 
