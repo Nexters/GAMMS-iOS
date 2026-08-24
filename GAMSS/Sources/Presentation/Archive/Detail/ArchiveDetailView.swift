@@ -106,7 +106,6 @@ struct ArchiveDetailView: View {
                     onComplete: {
                         shredMode = nil
                         selectedNote = nil
-                        viewModel.clearNotes()
                         scene.clear()
                         Task { await viewModel.load() }
                     }
