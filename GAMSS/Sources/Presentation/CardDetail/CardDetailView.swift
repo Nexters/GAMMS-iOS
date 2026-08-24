@@ -62,6 +62,7 @@ struct CardDetailView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .task {
+                guard viewModel.card == nil else { return }
                 await viewModel.loadCard()
             }
             .alert(
@@ -99,7 +100,6 @@ struct CardDetailView: View {
                             isShredPresented = false
                         },
                         onComplete: {
-                            isShredPresented = false
                             onClose()
                         }
                     )
