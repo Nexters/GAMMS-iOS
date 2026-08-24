@@ -228,7 +228,6 @@ struct ChatView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
         .task {
             await viewModel.start()
         }
@@ -253,7 +252,7 @@ struct ChatView: View {
     }
 
     /// 커스텀 상단 헤더: 뒤로가기 + 대화방 생성 날짜 + 우측 버튼 2개(종료, 토큰 사용량).
-    /// 시스템 네비게이션 바는 `.toolbar(.hidden, for: .navigationBar)`로 숨기고 이 헤더가 대신한다.
+    /// 시스템 네비게이션 바는 MainTabView의 NavigationStack에서 숨긴다.
     private var header: some View {
         ZStack {
             Text(headerDateText)

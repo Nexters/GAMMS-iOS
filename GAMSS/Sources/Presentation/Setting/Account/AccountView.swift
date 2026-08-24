@@ -38,7 +38,6 @@ struct AccountView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(Color.colorWhite)
-            .toolbar(.hidden, for: .navigationBar)
             .alert(
                 viewModel.errorMessage ?? "",
                 isPresented: Binding(
@@ -117,7 +116,6 @@ struct AccountView: View {
         case .changeNickname:
             NavigationLink {
                 NicknameEditView(viewModel: NicknameEditViewModel(updateNicknameUseCase: DefaultUpdateNicknameUseCase(memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: TokenStorage.shared), userManager: UserManager.shared)))
-                    .toolbar(.hidden, for: .navigationBar)
             } label: {
                 row
             }

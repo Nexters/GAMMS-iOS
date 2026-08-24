@@ -32,7 +32,6 @@ struct SettingView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.colorWhite)
-        .toolbar(.hidden, for: .navigationBar)
         .sheet(item: $presentedWebPage) { page in
             SafariView(url: page.url)
                 .ignoresSafeArea()

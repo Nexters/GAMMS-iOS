@@ -56,7 +56,6 @@ struct CardShredView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.colorWhite)
-        .toolbar(.hidden, for: .navigationBar)
         .alert(
             viewModel.alertMessage ?? "",
             isPresented: Binding(

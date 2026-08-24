@@ -76,7 +76,6 @@ struct HomeView: View {
         // 이미지가 GeometryReader의 상대 좌표(geo.size)로 위치를 잡고 있어서 그 영역이
         // 줄어들면 같이 움직여 보인다 — 키보드에 반응해 레이아웃이 줄어들지 않게 한다.
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        .navigationBarHidden(true)
         .onChange(of: viewModel.pendingFirstMessage) { _, newValue in
             if newValue != nil { isInputFocused = false }
         }
@@ -94,10 +93,9 @@ struct HomeView: View {
                     pendingFirstMessage: pendingFirstMessage
                 )
             )
-            .toolbar(.hidden, for: .tabBar)
         }
         .navigationDestination(isPresented: $isSettingPresented) {
-            SettingView().toolbar(.hidden, for: .tabBar)
+            SettingView()
         }
         .task {
             if userManager.user != nil { isGreetingReady = true }

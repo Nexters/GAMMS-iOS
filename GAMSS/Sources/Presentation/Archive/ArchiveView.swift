@@ -16,26 +16,25 @@ struct ArchiveView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                header
-                    .padding(.bottom, 32)
-                
-                ScrollView {
-                    VStack(alignment: .center, spacing: 34) {
-                        Text("다시 보고 싶은 쓰레기통을 열어보세요")
-                            .typography(.body4Medium)
-                            .foregroundStyle(Color.colorGray950)
-                            .padding(.bottom, 2)
-                        
-                        trashCanGrid
-                    }
-                    .padding(.bottom, 33)
+        VStack(spacing: 0) {
+            header
+                .padding(.bottom, 32)
+            
+            ScrollView {
+                VStack(alignment: .center, spacing: 34) {
+                    Text("다시 보고 싶은 쓰레기통을 열어보세요")
+                        .typography(.body4Medium)
+                        .foregroundStyle(Color.colorGray950)
+                        .padding(.bottom, 2)
+                    
+                    trashCanGrid
                 }
+                .padding(.bottom, 33)
             }
-            .background(Color.colorWhite)
-        }.navigationDestination(isPresented: $isSettingPresented) {
-            SettingView().toolbar(.hidden, for: .tabBar)
+        }
+        .background(Color.colorWhite)
+        .navigationDestination(isPresented: $isSettingPresented) {
+            SettingView()
         }
     }
 }

@@ -9,16 +9,21 @@ import SwiftUI
 
 struct CardDetailView: View {
     let onClose: () -> Void
+    let onDiscard: () -> Void
 
     @StateObject private var viewModel: CardDetailViewModel
     @StateObject private var conversationHistoryViewModel: ConversationHistoryViewModel
     @State private var isShowingConversation = false
-    @State private var isShredPresented = false
 
     private let transitionDuration = 0.22
 
-    init(viewModel: CardDetailViewModel, onClose: @escaping () -> Void) {
+    init(
+        viewModel: CardDetailViewModel,
+        onClose: @escaping () -> Void,
+        onDiscard: @escaping () -> Void
+    ) {
         self.onClose = onClose
+        self.onDiscard = onDiscard
         _viewModel = StateObject(wrappedValue: viewModel)
         _conversationHistoryViewModel = StateObject(
             wrappedValue: ConversationHistoryViewModel(
@@ -30,80 +35,58 @@ struct CardDetailView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.colorBlack.opacity(0.7)
-                    .ignoresSafeArea()
+        ZStack {
+            Color.colorBlack.opacity(0.7)
+                .ignoresSafeArea()
 
-                if let card = viewModel.card {
-                    if isShowingConversation {
-                        ConversationHistoryView(
-                            card: card,
-                            viewModel: conversationHistoryViewModel,
-                            onBack: { showCard() },
-                            onClose: onClose
-                        )
-                        .transition(.scale.combined(with: .opacity))
-                    } else {
-                        ZStack(alignment: .topTrailing) {
-                            CardView(card: card) {
-                                bottomActions
-                            }
-
-                            closeButton
-                                .padding([.top, .trailing], Spacing.spacing300)
-                        }
-                        .transition(.scale.combined(with: .opacity))
-                    }
-                } else if viewModel.isLoading {
-                    ProgressView()
-                        .tint(Color.colorWhite)
-                }
-            }
-            .toolbar(.hidden, for: .navigationBar)
-            .task {
-                guard viewModel.card == nil else { return }
-                await viewModel.loadCard()
-            }
-            .alert(
-                viewModel.alertMessage ?? "",
-                isPresented: Binding(
-                    get: { viewModel.alertMessage != nil },
-                    set: { if !$0 { viewModel.alertMessage = nil } }
-                )
-            ) {
-                Button("다시 시도") {
-                    let isLoadFailure = viewModel.isLoadFailureAlert
-                    Task {
-                        if isLoadFailure {
-                            await viewModel.loadCard()
-                        }
-                    }
-                }
-                if viewModel.isLoadFailureAlert {
-                    Button("닫기", role: .cancel) { onClose() }
-                } else {
-                    Button("확인", role: .cancel) {}
-                }
-            }
-            .navigationDestination(isPresented: $isShredPresented) {
-                if let card = viewModel.card {
-                    CardShredView(
-                        viewModel: CardShredViewModel(
-                            cardId: card.id,
-                            deleteCardUseCase: DeleteCardUseCase(
-                                cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
-                            )
-                        ),
-                        stripImageName: "noteStrip",
-                        onBack: {
-                            isShredPresented = false
-                        },
-                        onComplete: {
-                            onClose()
-                        }
+            if let card = viewModel.card {
+                if isShowingConversation {
+                    ConversationHistoryView(
+                        card: card,
+                        viewModel: conversationHistoryViewModel,
+                        onBack: { showCard() },
+                        onClose: onClose
                     )
+                    .transition(.scale.combined(with: .opacity))
+                } else {
+                    ZStack(alignment: .topTrailing) {
+                        CardView(card: card) {
+                            bottomActions
+                        }
+
+                        closeButton
+                            .padding([.top, .trailing], Spacing.spacing300)
+                    }
+                    .transition(.scale.combined(with: .opacity))
                 }
+            } else if viewModel.isLoading {
+                ProgressView()
+                    .tint(Color.colorWhite)
+            }
+        }
+        .task {
+            guard viewModel.card == nil else { return }
+            await viewModel.loadCard()
+        }
+        .alert(
+            viewModel.alertMessage ?? "",
+            isPresented: Binding(
+                get: { viewModel.alertMessage != nil },
+                set: { if !$0 { viewModel.alertMessage = nil } }
+            )
+        ) {
+            Button("다시 시도") {
+                let isLoadFailure = viewModel.isLoadFailureAlert
+                Task {
+                    if isLoadFailure {
+                        await viewModel.loadCard()
+                    }
+                }
+            }
+            if viewModel.isLoadFailureAlert {
+                Button("닫기", role: .cancel) { onClose() }
+            } else {
+                Button("확인", role: .cancel) {}
             }
         }
     }
@@ -111,7 +94,7 @@ struct CardDetailView: View {
     private var bottomActions: some View {
         HStack(spacing: Spacing.spacing050) {
             OutlineButton(title: "기록 버리기") {
-                isShredPresented = true
+                onDiscard()
             }
             .frame(width: 97)
 
@@ -154,6 +137,7 @@ struct CardDetailView: View {
                 cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
             )
         ),
-        onClose: {}
+        onClose: {},
+        onDiscard: {}
     )
 }

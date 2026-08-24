@@ -121,7 +121,6 @@ struct ConversationListView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .padding(.horizontal, Spacing.spacing400)
-            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(item: $selectedConversation) { conversation in
                 ChatView(
                     viewModel: ChatViewModel(
@@ -137,10 +136,9 @@ struct ConversationListView: View {
                         initialDate: conversation.createdAt
                     )
                 )
-                .toolbar(.hidden, for: .tabBar)
             }
             .navigationDestination(isPresented: $isSettingPresented) {
-                SettingView().toolbar(.hidden, for: .tabBar)
+                SettingView()
             }
             .onAppear {
                 Task { await viewModel.load() }
