@@ -111,6 +111,7 @@ struct ChatView: View {
             }
         }
         .animation(.easeOut(duration: 0.12), value: viewModel.createdCard?.id)
+        .hidesTabBar()
         .onChange(of: viewModel.riskDetection) { _, newValue in
             if newValue != nil { isInputFocused = false }
         }

@@ -69,6 +69,7 @@ struct NicknameEditView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 18)
         .padding(.bottom, 12)
+        .hidesTabBar()
     }
 }
 

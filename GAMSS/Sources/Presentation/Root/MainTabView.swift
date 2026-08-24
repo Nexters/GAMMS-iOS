@@ -75,7 +75,7 @@ struct MainTabView: View {
         }
     }
 
-    /// 탭별 NavigationStack. 네비게이션 바/탭 바 표시는 NavigationBarHider에서 처리한다.
+    /// 탭별 NavigationStack. 네비게이션 바 숨김은 NavigationBarHider에서 처리한다.
     private func tabNavigationStack<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         NavigationStack {
             content()

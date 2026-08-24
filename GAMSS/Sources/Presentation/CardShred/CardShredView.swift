@@ -56,6 +56,7 @@ struct CardShredView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.colorWhite)
+        .hidesTabBar()
         .alert(
             viewModel.alertMessage ?? "",
             isPresented: Binding(

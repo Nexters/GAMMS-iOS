@@ -7,9 +7,8 @@
 
 import SwiftUI
 
-/// NavigationStack 기준으로
-/// - 네비게이션 바: 항상 숨김
-/// - 탭 바: 루트에서만 표시, push된 화면에서는 숨김
+/// NavigationStack 안의 시스템 네비게이션 바를 항상 숨긴다.
+/// 탭 바는 SwiftUI `.toolbar(.hidden, for: .tabBar)`로 처리해야 레이아웃이 전체 높이로 확장된다.
 struct NavigationBarHider: UIViewControllerRepresentable {
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -52,7 +51,7 @@ struct NavigationBarHider: UIViewControllerRepresentable {
                     navigationController.delegate = self
                 }
 
-                self.applyChrome(for: navigationController)
+                self.hideNavigationBar(on: navigationController)
             }
         }
 
@@ -61,7 +60,7 @@ struct NavigationBarHider: UIViewControllerRepresentable {
             willShow viewController: UIViewController,
             animated: Bool
         ) {
-            applyChrome(for: navigationController)
+            hideNavigationBar(on: navigationController)
             originalDelegate?.navigationController?(
                 navigationController,
                 willShow: viewController,
@@ -74,7 +73,7 @@ struct NavigationBarHider: UIViewControllerRepresentable {
             didShow viewController: UIViewController,
             animated: Bool
         ) {
-            applyChrome(for: navigationController)
+            hideNavigationBar(on: navigationController)
             originalDelegate?.navigationController?(
                 navigationController,
                 didShow: viewController,
@@ -82,11 +81,19 @@ struct NavigationBarHider: UIViewControllerRepresentable {
             )
         }
 
-        private func applyChrome(for navigationController: UINavigationController) {
+        private func hideNavigationBar(on navigationController: UINavigationController) {
             navigationController.setNavigationBarHidden(true, animated: false)
-
-            let isRoot = navigationController.viewControllers.count <= 1
-            navigationController.tabBarController?.tabBar.isHidden = !isRoot
+            // UIKit으로 탭바를 숨기면 하단 여백이 남을 수 있어, 탭바는 SwiftUI toolbar로만 제어한다.
+            if navigationController.viewControllers.count <= 1 {
+                navigationController.tabBarController?.tabBar.isHidden = false
+            }
         }
+    }
+}
+
+extension View {
+    /// push된 화면에서 탭바를 숨기고 콘텐츠가 전체 높이를 쓰도록 한다.
+    func hidesTabBar() -> some View {
+        toolbar(.hidden, for: .tabBar)
     }
 }

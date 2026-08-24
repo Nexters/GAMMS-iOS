@@ -87,6 +87,7 @@ struct AccountView: View {
                 }
             }
         }
+        .hidesTabBar()
     }
     
     private var header: some View {

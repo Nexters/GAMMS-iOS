@@ -143,6 +143,7 @@ struct ArchiveDetailView: View {
             }
         }
         .animation(.easeOut(duration: 0.12), value: selectedNote?.id)
+        .hidesTabBar()
     }
 
     private func makeShredViewModel(for mode: CardShredMode) -> CardShredViewModel {
