@@ -30,77 +30,80 @@ struct CardDetailView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color.colorBlack.opacity(0.7)
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                Color.colorBlack.opacity(0.7)
+                    .ignoresSafeArea()
 
-            if let card = viewModel.card {
-                if isShowingConversation {
-                    ConversationHistoryView(
-                        card: card,
-                        viewModel: conversationHistoryViewModel,
-                        onBack: { showCard() },
-                        onClose: onClose
-                    )
-                    .transition(.scale.combined(with: .opacity))
-                } else {
-                    ZStack(alignment: .topTrailing) {
-                        CardView(card: card) {
-                            bottomActions
-                        }
-
-                        closeButton
-                            .padding([.top, .trailing], Spacing.spacing300)
-                    }
-                    .transition(.scale.combined(with: .opacity))
-                }
-            } else if viewModel.isLoading {
-                ProgressView()
-                    .tint(Color.colorWhite)
-            }
-        }
-        .task {
-            await viewModel.loadCard()
-        }
-        .alert(
-            viewModel.alertMessage ?? "",
-            isPresented: Binding(
-                get: { viewModel.alertMessage != nil },
-                set: { if !$0 { viewModel.alertMessage = nil } }
-            )
-        ) {
-            Button("다시 시도") {
-                let isLoadFailure = viewModel.isLoadFailureAlert
-                Task {
-                    if isLoadFailure {
-                        await viewModel.loadCard()
-                    }
-                }
-            }
-            if viewModel.isLoadFailureAlert {
-                Button("닫기", role: .cancel) { onClose() }
-            } else {
-                Button("확인", role: .cancel) {}
-            }
-        }
-        .fullScreenCover(isPresented: $isShredPresented) {
-            if let card = viewModel.card {
-                CardShredView(
-                    viewModel: CardShredViewModel(
-                        cardId: card.id,
-                        deleteCardUseCase: DeleteCardUseCase(
-                            cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
+                if let card = viewModel.card {
+                    if isShowingConversation {
+                        ConversationHistoryView(
+                            card: card,
+                            viewModel: conversationHistoryViewModel,
+                            onBack: { showCard() },
+                            onClose: onClose
                         )
-                    ),
-                    stripImageName: "noteStrip",
-                    onBack: {
-                        isShredPresented = false
-                    },
-                    onComplete: {
-                        isShredPresented = false
-                        onClose()
+                        .transition(.scale.combined(with: .opacity))
+                    } else {
+                        ZStack(alignment: .topTrailing) {
+                            CardView(card: card) {
+                                bottomActions
+                            }
+
+                            closeButton
+                                .padding([.top, .trailing], Spacing.spacing300)
+                        }
+                        .transition(.scale.combined(with: .opacity))
                     }
+                } else if viewModel.isLoading {
+                    ProgressView()
+                        .tint(Color.colorWhite)
+                }
+            }
+            .toolbar(.hidden, for: .navigationBar)
+            .task {
+                await viewModel.loadCard()
+            }
+            .alert(
+                viewModel.alertMessage ?? "",
+                isPresented: Binding(
+                    get: { viewModel.alertMessage != nil },
+                    set: { if !$0 { viewModel.alertMessage = nil } }
                 )
+            ) {
+                Button("다시 시도") {
+                    let isLoadFailure = viewModel.isLoadFailureAlert
+                    Task {
+                        if isLoadFailure {
+                            await viewModel.loadCard()
+                        }
+                    }
+                }
+                if viewModel.isLoadFailureAlert {
+                    Button("닫기", role: .cancel) { onClose() }
+                } else {
+                    Button("확인", role: .cancel) {}
+                }
+            }
+            .navigationDestination(isPresented: $isShredPresented) {
+                if let card = viewModel.card {
+                    CardShredView(
+                        viewModel: CardShredViewModel(
+                            cardId: card.id,
+                            deleteCardUseCase: DeleteCardUseCase(
+                                cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
+                            )
+                        ),
+                        stripImageName: "noteStrip",
+                        onBack: {
+                            isShredPresented = false
+                        },
+                        onComplete: {
+                            isShredPresented = false
+                            onClose()
+                        }
+                    )
+                }
             }
         }
     }

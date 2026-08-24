@@ -107,7 +107,7 @@ struct ArchiveDetailView: View {
                 )
                 .presentationBackground(.clear)
             }
-            .fullScreenCover(isPresented: $isShredPresented) {
+            .navigationDestination(isPresented: $isShredPresented) {
                 CardShredView(
                     viewModel: CardShredViewModel(
                         deleteAllCardUseCase: DefaultDeleteAllCardUseCase(
