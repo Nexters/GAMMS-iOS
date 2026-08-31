@@ -29,12 +29,18 @@ struct ArchiveDetailView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                header
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, Spacing.spacing400)
+                NavigationBarView(title: title, onBack: { dismiss() }) {
+                    Button {
+                        shredMode = .all
+                    } label: {
+                        Text("비우기")
+                            .typography(.body5Medium)
+                            .foregroundStyle(Color.colorGray900)
+                    }
+                }
                 
                 monthSelector
-                    .padding(.horizontal, 18)
+                    .padding(.horizontal, Spacing.spacing350)
                     .padding(.bottom, Spacing.spacing300)
                 
                 ZStack {
@@ -158,33 +164,6 @@ struct ArchiveDetailView: View {
             return CardShredViewModel(
                 deleteAllCardUseCase: DefaultDeleteAllCardUseCase(cardRepository: cardRepository)
             )
-        }
-    }
-    
-    private var header: some View {
-        HStack(spacing: Spacing.spacing200) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .foregroundStyle(Color.colorGray900)
-            }
-            
-            Text(title)
-                .typography(.subtitle2)
-                .foregroundStyle(Color.colorGray900)
-            
-            Spacer()
-            
-            Button {
-                shredMode = .all
-            } label: {
-                Text("비우기")
-                    .typography(.body5Medium)
-                    .foregroundStyle(Color.colorGray900)
-            }
-            .typography(.body5Medium)
-            .foregroundStyle(Color.colorGray900)
         }
     }
     

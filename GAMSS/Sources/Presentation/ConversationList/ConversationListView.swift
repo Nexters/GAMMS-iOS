@@ -32,95 +32,96 @@ struct ConversationListView: View {
                 }, onTappedSettingButton: {
                     isSettingPresented = true
                 })
-                .frame(height: 64)
                 
-                if viewModel.isSearching {
-                    ConversationSearchView(onTappedCancelButton: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            viewModel.stopSearching()
-                        }
-                    }, onTappedSearchButton: {
-                        Task {
-                            await viewModel.searchText()
-                        }
-                    }, editingText: $viewModel.editedText)
-                    .frame(height: 42)
-                    .transition(
-                        .move(edge: .top)
-                        .combined(with: .opacity)
-                    )
-                }
-                
-                dateHeader.padding(.vertical, Spacing.spacing150)
-                
-                if !viewModel.isLoading && viewModel.displayedConversations.isEmpty {
-                    ConversationListEmptyView()
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: Spacing.spacing100) {
-                            ForEach(viewModel.displayedConversations) { conversation in
-                                switch viewModel.currentMode {
-                                case .normal:
-                                    Button {
-                                        selectedConversation = conversation
-                                    } label: {
-                                        ConversationRowView(
-                                            currentMode: viewModel.currentMode,
-                                            conversation: conversation,
-                                            isSelected: false
-                                        )
-                                    }
-                                    .buttonStyle(.plain)
-                                    
-                                case .delete:
-                                    Button {
-                                        viewModel.selectConversation(id: conversation.id)
-                                    } label: {
-                                        ConversationRowView(
-                                            currentMode: viewModel.currentMode,
-                                            conversation: conversation,
-                                            isSelected: viewModel.isSelected(
-                                                id: conversation.id
+                Group {
+                    if viewModel.isSearching {
+                        ConversationSearchView(onTappedCancelButton: {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                viewModel.stopSearching()
+                            }
+                        }, onTappedSearchButton: {
+                            Task {
+                                await viewModel.searchText()
+                            }
+                        }, editingText: $viewModel.editedText)
+                        .frame(height: 42)
+                        .transition(
+                            .move(edge: .top)
+                            .combined(with: .opacity)
+                        )
+                    }
+                    
+                    dateHeader.padding(.vertical, Spacing.spacing150)
+                    
+                    if !viewModel.isLoading && viewModel.displayedConversations.isEmpty {
+                        ConversationListEmptyView()
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: Spacing.spacing100) {
+                                ForEach(viewModel.displayedConversations) { conversation in
+                                    switch viewModel.currentMode {
+                                    case .normal:
+                                        Button {
+                                            selectedConversation = conversation
+                                        } label: {
+                                            ConversationRowView(
+                                                currentMode: viewModel.currentMode,
+                                                conversation: conversation,
+                                                isSelected: false
                                             )
-                                        )
+                                        }
+                                        .buttonStyle(.plain)
+                                        
+                                    case .delete:
+                                        Button {
+                                            viewModel.selectConversation(id: conversation.id)
+                                        } label: {
+                                            ConversationRowView(
+                                                currentMode: viewModel.currentMode,
+                                                conversation: conversation,
+                                                isSelected: viewModel.isSelected(
+                                                    id: conversation.id
+                                                )
+                                            )
+                                        }
+                                        .buttonStyle(.plain)
                                     }
-                                    .buttonStyle(.plain)
                                 }
                             }
                         }
-                    }
-                    Spacer()
-                    if viewModel.currentMode == .delete {
-                        Button {
-                            Task {
-                                await viewModel.deleteConversations()
+                        Spacer()
+                        if viewModel.currentMode == .delete {
+                            Button {
+                                Task {
+                                    await viewModel.deleteConversations()
+                                }
+                            } label: {
+                                Text("삭제하기")
+                                    .typography(.body3Medium)
+                                    .foregroundStyle(
+                                        viewModel.isDeleteButtonEnabled
+                                        ? Color.colorWhite
+                                        : Color.colorGray300
+                                    )
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 52)
+                                    .background(
+                                        viewModel.isDeleteButtonEnabled
+                                        ? Color.colorRed
+                                        : Color.colorGray075
+                                    )
+                                    .clipShape(
+                                        RoundedRectangle(cornerRadius: 12)
+                                    )
                             }
-                        } label: {
-                            Text("삭제하기")
-                                .typography(.body3Medium)
-                                .foregroundStyle(
-                                    viewModel.isDeleteButtonEnabled
-                                    ? Color.colorWhite
-                                    : Color.colorGray300
-                                )
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 52)
-                                .background(
-                                    viewModel.isDeleteButtonEnabled
-                                    ? Color.colorRed
-                                    : Color.colorGray075
-                                )
-                                .clipShape(
-                                    RoundedRectangle(cornerRadius: 12)
-                                )
+                            .padding(.bottom, 10)
+                            .disabled(!viewModel.isDeleteButtonEnabled)
                         }
-                        .padding(.bottom, 10)
-                        .disabled(!viewModel.isDeleteButtonEnabled)
                     }
                 }
+                .padding(.horizontal, NavigationBarMetrics.horizontalPadding)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .padding(.horizontal, Spacing.spacing400)
             .navigationDestination(item: $selectedConversation) { conversation in
                 ChatView(
                     viewModel: ChatViewModel(

@@ -62,7 +62,6 @@ struct RootView: View {
         .environment(UserManager.shared)
     }
 
-    /// Firebase 세션으로 로그인 API를 다시 호출해 자동 로그인을 완료한다.
     private func performAutoLogin() async {
         do {
             try await loginUseCase.autoLogin()

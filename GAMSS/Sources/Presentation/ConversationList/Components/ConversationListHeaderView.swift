@@ -14,38 +14,29 @@ struct ConversationListHeaderView: View {
     var onTappedSettingButton: (() -> Void)?
     
     var body: some View {
-        HStack(spacing: Spacing.spacing200) {
-            switch currentMode {
-            case .normal:
-                Image("logoGamss")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 24)
-            case .delete:
+        NavigationBarView(
+            leading: currentMode == .normal ? .logo : .backButton,
+            onBack: { onTappedBackButton?() }
+        ) {
+            HStack(spacing: Spacing.spacing200) {
                 Button {
-                    onTappedBackButton?()
+                    onTappedSearchButton?()
                 } label: {
-                    Image(systemName: "chevron.left")
+                    Image(systemName: "magnifyingglass")
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(Color.colorGray900)
+                }
+                
+                Button {
+                    onTappedSettingButton?()
+                } label: {
+                    Image("gear")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
                         .foregroundStyle(Color.colorGray900)
                 }
             }
-            
-            Spacer()
-            
-            Button {
-                onTappedSearchButton?()
-            } label: {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(Color.colorGray900)
-            }
-            
-            Button {
-                onTappedSettingButton?()
-            } label: {
-                Image(.gear)
-                    .foregroundStyle(Color.colorGray900)
-            }
         }
-        .padding(.vertical, Spacing.spacing400)
     }
 }
