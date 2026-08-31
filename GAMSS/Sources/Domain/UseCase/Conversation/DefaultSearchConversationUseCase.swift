@@ -14,16 +14,15 @@ struct DefaultSearchConversationUseCase: SearchConversationUseCase {
         self.conversationRepository = conversationRepository
     }
     
-    func execute(_ text: String) async throws -> [ConversationSummary] {
+    func execute(_ text: String, page: Int, size: Int) async throws -> ConversationPage {
         guard text.count >= 2 else {
             throw ConversationError.invalidSearchKeyword
         }
         
-        let data = try await conversationRepository.searchConversations(text)
-        return data.content.map { ConversationSummary(
-            id: $0.conversationId,
-            title: $0.title,
-            createdAt: Date()
-        ) }
+        return try await conversationRepository.searchConversations(
+            text,
+            page: page,
+            size: size
+        )
     }
 }

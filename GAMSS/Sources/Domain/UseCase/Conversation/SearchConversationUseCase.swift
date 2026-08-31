@@ -8,5 +8,5 @@
 import Foundation
 
 protocol SearchConversationUseCase {
-    func execute(_ text: String) async throws -> [ConversationSummary]
+    func execute(_ text: String, page: Int, size: Int) async throws -> ConversationPage
 }
