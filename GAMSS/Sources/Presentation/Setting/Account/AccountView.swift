@@ -171,7 +171,7 @@ struct AccountView: View {
                 )
             )
         )
-        .environment(LoginSession())
+        .environment(LoginSession.shared)
         .environment(UserManager.shared)
     }
 }

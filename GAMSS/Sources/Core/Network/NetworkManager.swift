@@ -5,13 +5,24 @@
 //  Created by 이건준 on 7/19/26.
 //
 
+import FirebaseAuth
 import Foundation
 
 protocol NetworkRequesting {
     func request<T: Decodable & Sendable>(
         _ endpoint: Endpoint,
-        responseType: T.Type
+        responseType: T.Type,
+        isRetryAfterReissue: Bool
     ) async throws -> T
+}
+
+extension NetworkRequesting {
+    func request<T: Decodable & Sendable>(
+        _ endpoint: Endpoint,
+        responseType: T.Type
+    ) async throws -> T {
+        try await request(endpoint, responseType: responseType, isRetryAfterReissue: false)
+    }
 }
 
 final class NetworkManager: NetworkRequesting {
@@ -28,14 +39,7 @@ final class NetworkManager: NetworkRequesting {
         self.decoder = decoder
     }
     
-    func request<T: Decodable & Sendable>(
-        _ endpoint: Endpoint,
-        responseType: T.Type
-    ) async throws -> T {
-        try await request(endpoint, responseType: responseType, isRetryAfterReissue: false)
-    }
-
-    /// `isRetryAfterReissue`가 true면 이미 한 번 토큰을 재발급받고 재시도하는 중이라는 뜻 —
+    /// `isRetryAfterReissue`가 true면 이미 한 번 토큰을 재발급/자동로그인 후 재시도하는 중이라는 뜻 —
     /// 여기서 또 EXPIRED_TOKEN이 나도 다시 재발급을 시도하지 않는다(무한 루프 방지).
     func request<T: Decodable & Sendable>(
         _ endpoint: Endpoint,
@@ -70,12 +74,25 @@ final class NetworkManager: NetworkRequesting {
                 do {
                     try await TokenStorage.shared.reissueToken()
                 } catch {
-                    Log.error("Token reissue failed: \(error)")
-                    throw NetworkError.expiredToken
+                    Log.error("Token reissue failed, trying auto login: \(error)")
+                    do {
+                        try await DefaultAuthRepository(
+                            networkManager: NetworkManager.shared,
+                            tokenStorage: TokenStorage.shared
+                        ).autoLogin()
+                    } catch {
+                        Log.error("Auto login after reissue failed: \(error)")
+                        try? TokenStorage.shared.deleteTokens()
+                        try? Auth.auth().signOut()
+                        await MainActor.run {
+                            LoginSession.shared.updateFromStorage()
+                        }
+                        throw NetworkError.expiredToken
+                    }
                 }
 
-                // 재발급된 토큰은 HttpHeader가 요청을 다시 만들 때 Keychain에서 새로 읽어오므로,
-                // 원래 요청을 그대로 한 번 더 시도하면 된다.
+                // 재발급/자동로그인으로 갱신된 토큰은 HttpHeader가 요청을 다시 만들 때
+                // Keychain에서 새로 읽어오므로, 원래 요청을 그대로 한 번 더 시도하면 된다.
                 return try await request(endpoint, responseType: responseType, isRetryAfterReissue: true)
             }
 

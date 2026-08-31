@@ -25,4 +25,8 @@ final class DefaultLoginUseCase: LoginUseCase {
             nonce: nonce
         )
     }
+
+    func autoLogin() async throws {
+        try await authRepository.autoLogin()
+    }
 }

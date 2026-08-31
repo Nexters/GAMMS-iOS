@@ -14,11 +14,15 @@ final class TokenStorage {
     
     func reissueToken() async throws {
         guard let refreshToken = readToken(.refreshToken) else {
-            try TokenStorage.shared.deleteTokens()
-            return
+            try deleteTokens()
+            throw NetworkError.expiredToken
         }
         
-        let response = try await NetworkManager.shared.request(AuthEndpoint.reissueToken(.init(refreshToken: refreshToken)), responseType: APIResponse<ReissueTokenResponseDTO>.self, isRetryAfterReissue: true).data
+        let response = try await NetworkManager.shared.request(
+            AuthEndpoint.reissueToken(.init(refreshToken: refreshToken)),
+            responseType: APIResponse<ReissueTokenResponseDTO>.self,
+            isRetryAfterReissue: true
+        ).data
         try createTokens(accessToken: response.accessToken, refreshToken: response.refreshToken)
     }
     

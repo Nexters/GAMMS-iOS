@@ -13,4 +13,6 @@ protocol LoginUseCase {
         credential: ASAuthorizationAppleIDCredential,
         nonce: String
     ) async throws
+
+    func autoLogin() async throws
 }

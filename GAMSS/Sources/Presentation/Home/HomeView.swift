@@ -12,16 +12,10 @@ struct HomeView: View {
     @FocusState private var isInputFocused: Bool
     @State private var isSettingPresented = false
     @SwiftUI.Environment(UserManager.self) private var userManager
-    @State private var loginSession = LoginSession()
     @State private var isGreetingReady = false
 
     init(viewModel: HomeViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
-//        do {
-//         try? TokenStorage.shared.deleteTokens()
-//         loginSession.value = .current
-//        }
-        
     }
 
     var body: some View {
