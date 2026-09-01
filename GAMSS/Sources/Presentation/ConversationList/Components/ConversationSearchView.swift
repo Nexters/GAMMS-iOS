@@ -19,6 +19,8 @@ struct ConversationSearchView: View {
                     .typography(.body4Medium)
                     .foregroundStyle(Color.colorGray400)
             }
+            .typography(.body4Medium)
+            .foregroundStyle(Color.colorGray950)
             .padding(.vertical, 11)
             .padding(.horizontal, 16)
             .background(Color.colorGray075)
