@@ -5,7 +5,6 @@
 //  Created by 이건준 on 7/19/26.
 //
 
-import FirebaseAuth
 import Foundation
 
 protocol NetworkRequesting {
@@ -70,23 +69,14 @@ final class NetworkManager: NetworkRequesting {
 
             if response.statusCode == 401, !isRetryAfterReissue {
                 do {
-                    try await TokenStorage.shared.reissueToken()
+                    try await TokenStorage.shared.restoreSession()
                 } catch {
-                    Log.error("Token reissue failed, trying auto login: \(error)")
-                    do {
-                        try await DefaultAuthRepository(
-                            networkManager: NetworkManager.shared,
-                            tokenStorage: TokenStorage.shared
-                        ).autoLogin()
-                    } catch {
-                        Log.error("Auto login after reissue failed: \(error)")
-                        try? TokenStorage.shared.deleteTokens()
-                        try? Auth.auth().signOut()
-                        await MainActor.run {
-                            LoginSession.shared.updateFromStorage()
-                        }
-                        throw NetworkError.expiredToken
+                    Log.error("Session restore failed: \(error)")
+                    TokenStorage.shared.clearSession()
+                    await MainActor.run {
+                        LoginSession.shared.updateFromStorage()
                     }
+                    throw NetworkError.expiredToken
                 }
 
                 return try await request(endpoint, responseType: responseType, isRetryAfterReissue: true)

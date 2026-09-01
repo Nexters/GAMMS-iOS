@@ -5,7 +5,6 @@
 //  Created by 이건준 on 8/12/26.
 //
 
-import FirebaseAuth
 import SwiftUI
 
 struct RootView: View {
@@ -68,8 +67,7 @@ struct RootView: View {
             loginSession.value = .loggedIn
         } catch {
             Log.error("Auto login failed: \(error)")
-            try? TokenStorage.shared.deleteTokens()
-            try? Auth.auth().signOut()
+            TokenStorage.shared.clearSession()
             loginSession.value = .notLoggedIn
         }
     }
