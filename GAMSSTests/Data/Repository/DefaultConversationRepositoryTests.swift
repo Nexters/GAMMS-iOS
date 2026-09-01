@@ -14,7 +14,11 @@ private final class MockNetworkRequesting: NetworkRequesting {
     var stubbedError: Error?
     private(set) var lastEndpoint: Endpoint?
 
-    func request<T: Decodable & Sendable>(_ endpoint: Endpoint, responseType: T.Type) async throws -> T {
+    func request<T: Decodable & Sendable>(
+        _ endpoint: Endpoint,
+        responseType: T.Type,
+        isRetryAfterReissue: Bool
+    ) async throws -> T {
         lastEndpoint = endpoint
         if let stubbedError { throw stubbedError }
         guard let stubbedData else { fatalError("stubbedData not set") }

@@ -10,7 +10,7 @@ import Foundation
 enum LoginState {
     /// 로그인 안되어 있음
     case notLoggedIn
-    /// 자동 로그인 설정이 되어있음, accessToken 갱신 필요
+    /// 자동 로그인 대기
     case autoLoginPending
     /// 로그인 되어있음
     case loggedIn

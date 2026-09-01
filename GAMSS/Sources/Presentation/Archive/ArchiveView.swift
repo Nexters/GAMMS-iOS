@@ -17,8 +17,18 @@ struct ArchiveView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            header
-                .padding(.bottom, 32)
+            NavigationBarView(leading: .logo) {
+                Button {
+                    isSettingPresented = true
+                } label: {
+                    Image("gear")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(Color.colorGray900)
+                }
+            }
+            .padding(.bottom, 32)
             
             ScrollView {
                 VStack(alignment: .center, spacing: 34) {
@@ -40,29 +50,6 @@ struct ArchiveView: View {
 }
 
 private extension ArchiveView {
-    var header: some View {
-        HStack {
-            Image("logoGamss")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 24)
-            
-            Spacer()
-            
-            Button {
-                isSettingPresented = true
-            } label: {
-                Image("gear")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-                    .foregroundStyle(Color.colorGray900)
-            }
-        }
-        .frame(height: 64)
-        .padding(.horizontal, 18)
-    }
-    
     var trashCanGrid: some View {
         LazyVGrid(
             columns: [

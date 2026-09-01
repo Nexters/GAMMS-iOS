@@ -13,9 +13,7 @@ struct SettingView: View {
     
     var body: some View {
         VStack {
-            header
-                .padding(.horizontal, 18)
-                .padding(.vertical, Spacing.spacing400)
+            NavigationBarView(title: "설정", onBack: { dismiss() })
             
             ForEach(SettingSection.allCases) { section in
                 ForEach(section.items) { item in
@@ -36,21 +34,6 @@ struct SettingView: View {
         .sheet(item: $presentedWebPage) { page in
             SafariView(url: page.url)
                 .ignoresSafeArea()
-        }
-    }
-    
-    private var header: some View {
-        HStack(spacing: 12) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .foregroundStyle(Color.colorGray900)
-            }
-            Text("설정")
-                .typography(.subtitle2)
-                .foregroundStyle(Color.colorGray900)
-            Spacer()
         }
     }
     

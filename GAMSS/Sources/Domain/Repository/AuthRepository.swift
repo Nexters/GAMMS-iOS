@@ -13,6 +13,8 @@ protocol AuthRepository {
         credential: ASAuthorizationAppleIDCredential,
         nonce: String
     ) async throws
+
+    func autoLogin() async throws
     
     func logout() async throws
 }

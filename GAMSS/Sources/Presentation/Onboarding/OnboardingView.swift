@@ -14,9 +14,20 @@ struct OnboardingView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            header
-                .padding(.horizontal, 18)
-                .padding(.vertical, Spacing.spacing400)
+            NavigationBarView(
+                showsBackButton: currentPage.showsBackButton,
+                onBack: { goToPreviousPage() }
+            ) {
+                if currentPage.showsSkipButton {
+                    Button {
+                        onFinish()
+                    } label: {
+                        Text("건너뛰기")
+                            .typography(.body5Medium)
+                            .foregroundStyle(Color.colorGray500)
+                    }
+                }
+            }
             
             Spacer()
             
@@ -30,38 +41,12 @@ struct OnboardingView: View {
                 .padding(.bottom, Spacing.spacing400)
             
             actionButton
-                .padding(.horizontal, 18)
+                .padding(.horizontal, Spacing.spacing350)
                 .padding(.bottom, Spacing.spacing400)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.colorWhite)
         .animation(.easeInOut(duration: 0.25), value: currentPage)
-    }
-    
-    private var header: some View {
-        HStack {
-            if currentPage.showsBackButton {
-                Button {
-                    goToPreviousPage()
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .foregroundStyle(Color.colorGray900)
-                }
-            }
-            
-            Spacer()
-            
-            if currentPage.showsSkipButton {
-                Button {
-                    onFinish()
-                } label: {
-                    Text("건너뛰기")
-                        .typography(.body5Medium)
-                        .foregroundStyle(Color.colorGray500)
-                }
-            }
-        }
-        .frame(height: 24)
     }
     
     private func pageContent(_ page: OnboardingPage) -> some View {

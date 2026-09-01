@@ -64,14 +64,14 @@ final class DefaultConversationRepository: ConversationRepository {
         )
     }
 
-    func searchConversations(_ text: String) async throws -> SearchChatResponseDTO {
-        return try await networkManager.request(
+    func searchConversations(_ text: String, page: Int, size: Int) async throws -> ConversationPage {
+        try await networkManager.request(
             ChatEndpoint.searchChats(
                 keyword: text,
-                page: 0,
-                size: 20
+                page: page,
+                size: size
             ),
             responseType: APIResponse<SearchChatResponseDTO>.self
-        ).data
+        ).data.toDomain()
     }
 }

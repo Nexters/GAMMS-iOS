@@ -25,9 +25,7 @@ struct AccountView: View {
     var body: some View {
         ZStack {
             VStack(alignment: .leading, spacing: 0) {
-                header
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, Spacing.spacing400)
+                NavigationBarView(title: title, onBack: { dismiss() })
                 
                 ForEach(AccountItem.allCases) { item in
                     accountItem(item)
@@ -88,21 +86,6 @@ struct AccountView: View {
             }
         }
         .hidesTabBar()
-    }
-    
-    private var header: some View {
-        HStack(spacing: 12) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .foregroundStyle(Color.colorGray900)
-            }
-            Text(title)
-                .typography(.subtitle2)
-                .foregroundStyle(Color.colorGray900)
-            Spacer()
-        }
     }
     
     @ViewBuilder
@@ -171,7 +154,7 @@ struct AccountView: View {
                 )
             )
         )
-        .environment(LoginSession())
+        .environment(LoginSession.shared)
         .environment(UserManager.shared)
     }
 }

@@ -25,5 +25,5 @@ protocol ConversationRepository {
     func endConversation(conversationId: Int) async throws
 
     func deleteConversations(_ ids: [Int]) async throws
-    func searchConversations(_ text: String) async throws -> SearchChatResponseDTO
+    func searchConversations(_ text: String, page: Int, size: Int) async throws -> ConversationPage
 }

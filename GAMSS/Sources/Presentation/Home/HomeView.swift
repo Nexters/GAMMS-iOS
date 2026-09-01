@@ -12,16 +12,10 @@ struct HomeView: View {
     @FocusState private var isInputFocused: Bool
     @State private var isSettingPresented = false
     @SwiftUI.Environment(UserManager.self) private var userManager
-    @State private var loginSession = LoginSession()
     @State private var isGreetingReady = false
 
     init(viewModel: HomeViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
-//        do {
-//         try? TokenStorage.shared.deleteTokens()
-//         loginSession.value = .current
-//        }
-        
     }
 
     var body: some View {
@@ -48,29 +42,43 @@ struct HomeView: View {
                 }
 
             VStack(alignment: .leading, spacing: 0) {
-                header
-                    .padding(.bottom, 188) // Figma 지정값 — 로고와 인사말 사이 간격
+                NavigationBarView(leading: .logo) {
+                    Button {
+                        isInputFocused = false
+                        isSettingPresented = true
+                    } label: {
+                        Image("gear")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .foregroundStyle(Color.colorGray900)
+                    }
+                }
+                .padding(.bottom, 188 - (NavigationBarMetrics.height - 24) / 2)
 
-                greeting
-                    .padding(.bottom, Spacing.spacing500)
-                    .opacity(isGreetingReady ? 1 : 0)
+                VStack(alignment: .leading, spacing: 0) {
+                    greeting
+                        .padding(.bottom, Spacing.spacing500)
+                        .opacity(isGreetingReady ? 1 : 0)
 
-                MessageComposerView(
-                    input: $viewModel.input,
-                    selectedEmotions: viewModel.selectedEmotions,
-                    isEmotionPickerOpen: $viewModel.isEmotionPickerOpen,
-                    isSendDisabled: viewModel.isSendDisabled,
-                    onToggleEmotion: { viewModel.toggleEmotion($0) },
-                    onCommit: { viewModel.send() },
-                    onInputChange: { viewModel.updateInput($0) },
-                    isFocused: $isInputFocused,
-                    isDisabled: viewModel.isTokenExceeded,
-                    disabledPlaceholder: viewModel.composerDisabledPlaceholder
-                )
+                    MessageComposerView(
+                        input: $viewModel.input,
+                        selectedEmotions: viewModel.selectedEmotions,
+                        isEmotionPickerOpen: $viewModel.isEmotionPickerOpen,
+                        isSendDisabled: viewModel.isSendDisabled,
+                        onToggleEmotion: { viewModel.toggleEmotion($0) },
+                        onCommit: { viewModel.send() },
+                        onInputChange: { viewModel.updateInput($0) },
+                        isFocused: $isInputFocused,
+                        isDisabled: viewModel.isTokenExceeded,
+                        disabledPlaceholder: viewModel.composerDisabledPlaceholder
+                    )
 
-                Spacer()
+                    Spacer()
+                }
+                .padding(.horizontal, NavigationBarMetrics.horizontalPadding)
+                .padding(.bottom, Spacing.spacing400)
             }
-            .padding(Spacing.spacing400)
         }
         // 키보드가 올라오면 SwiftUI가 기본적으로 사용 가능한 영역을 줄이는데, 장식
         // 이미지가 GeometryReader의 상대 좌표(geo.size)로 위치를 잡고 있어서 그 영역이
@@ -114,28 +122,6 @@ struct HomeView: View {
             set: { if !$0 { viewModel.alertMessage = nil } }
         )) {
             Button("확인", role: .cancel) {}
-        }
-    }
-
-    private var header: some View {
-        HStack {
-            Image("logoGamss")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 24)
-
-            Spacer()
-
-            Button {
-                isInputFocused = false
-                isSettingPresented = true
-            } label: {
-                Image("gear")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-                    .foregroundStyle(Color.colorGray900)
-            }
         }
     }
 

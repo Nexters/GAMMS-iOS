@@ -252,40 +252,30 @@ struct ChatView: View {
         }
     }
 
-    /// 커스텀 상단 헤더: 뒤로가기 + 대화방 생성 날짜 + 우측 버튼 2개(종료, 토큰 사용량).
-    /// 시스템 네비게이션 바는 MainTabView의 NavigationStack에서 숨긴다.
     private var header: some View {
-        ZStack {
-            Text(headerDateText)
-                .typography(.subtitle3)
-                .foregroundStyle(Color.colorGray950)
-
-            HStack {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .foregroundStyle(Color.colorGray950)
+        NavigationBarView(
+            title: headerDateText,
+            titlePlacement: .center,
+            titleStyle: .subtitle3,
+            titleColor: .colorGray950,
+            onBack: { dismiss() },
+            horizontalPadding: Spacing.spacing400
+        ) {
+            HStack(spacing: Spacing.spacing400) {
+                Button(action: { viewModel.requestEndConversation() }) {
+                    Image("iconCardGenerate")
                 }
+                .disabled(!viewModel.canEndConversation)
+                .accessibilityLabel("대화 종료")
 
-                Spacer()
-
-                HStack(spacing: Spacing.spacing400) {
-                    Button(action: { viewModel.requestEndConversation() }) {
-                        Image("iconCardGenerate")
-                    }
-                    .disabled(!viewModel.canEndConversation)
-                    .accessibilityLabel("대화 종료")
-
-                    Button(action: {
-                        viewModel.isTokenUsagePopoverPresented.toggle()
-                    }) {
-                        Image("iconTokenUsage")
-                    }
-                    .accessibilityLabel("토큰 사용량")
+                Button(action: {
+                    viewModel.isTokenUsagePopoverPresented.toggle()
+                }) {
+                    Image("iconTokenUsage")
                 }
+                .accessibilityLabel("토큰 사용량")
             }
         }
-        .padding(.horizontal, Spacing.spacing400)
-        .padding(.vertical, Spacing.spacing400)
         .background(Color.colorWhite)
     }
 
