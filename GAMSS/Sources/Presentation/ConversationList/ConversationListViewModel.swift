@@ -30,6 +30,12 @@ final class ConversationListViewModel: ObservableObject {
         !selectedConversations.isEmpty
     }
     
+    private let pageSize = 10
+    private let loadMorePrefetchCount = 5
+    private var searchPage = 0
+    private var hasMoreSearchResults = false
+    private var searchQuery = ""
+    
     private let getIncompleteConversationsUseCase: GetIncompleteConversationsUseCase
     private let deleteConversationsUseCase: DeleteConversationsUseCase
     private let searchConversationUseCase: SearchConversationUseCase
@@ -100,7 +106,10 @@ final class ConversationListViewModel: ObservableObject {
         isSearching = false
         isSearchExecuted = false
         editedText = ""
+        searchQuery = ""
         searchResults.removeAll()
+        searchPage = 0
+        hasMoreSearchResults = false
     }
     
     func searchText() async {
@@ -110,8 +119,41 @@ final class ConversationListViewModel: ObservableObject {
         defer { isLoading = false }
         
         do {
-            searchResults = try await searchConversationUseCase.execute(query)
+            let page = try await searchConversationUseCase.execute(
+                query,
+                page: 0,
+                size: pageSize
+            )
+            searchQuery = query
+            searchPage = page.page
+            hasMoreSearchResults = page.hasNextPage
+            searchResults = page.items
             isSearchExecuted = true
+        } catch {
+            alertMessage = error.localizedDescription
+        }
+    }
+    
+    func loadMoreIfNeeded(at index: Int) async {
+        guard isSearchExecuted,
+              hasMoreSearchResults,
+              !isLoading,
+              index >= searchResults.count - loadMorePrefetchCount
+        else { return }
+        
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            let nextPage = searchPage + 1
+            let page = try await searchConversationUseCase.execute(
+                searchQuery,
+                page: nextPage,
+                size: pageSize
+            )
+            searchPage = page.page
+            hasMoreSearchResults = page.hasNextPage
+            searchResults.append(contentsOf: page.items)
         } catch {
             alertMessage = error.localizedDescription
         }

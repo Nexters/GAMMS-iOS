@@ -39,9 +39,7 @@ struct CardShredView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-                .padding(.horizontal, 18)
-                .padding(.vertical, Spacing.spacing400)
+            NavigationBarView(title: "비우기", onBack: onBack)
 
             powerToggle
 
@@ -56,7 +54,7 @@ struct CardShredView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.colorWhite)
-        .toolbar(.hidden, for: .navigationBar)
+        .hidesTabBar()
         .alert(
             viewModel.alertMessage ?? "",
             isPresented: Binding(
@@ -65,21 +63,6 @@ struct CardShredView: View {
             )
         ) {
             Button("확인", role: .cancel) {}
-        }
-    }
-
-    private var header: some View {
-        HStack(spacing: Spacing.spacing200) {
-            Button(action: onBack) {
-                Image(systemName: "chevron.left")
-                    .foregroundStyle(Color.colorGray900)
-            }
-
-            Text("비우기")
-                .typography(.subtitle2)
-                .foregroundStyle(Color.colorGray900)
-
-            Spacer()
         }
     }
 

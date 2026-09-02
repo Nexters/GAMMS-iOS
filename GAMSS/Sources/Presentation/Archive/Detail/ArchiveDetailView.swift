@@ -13,7 +13,7 @@ struct ArchiveDetailView: View {
     @StateObject private var viewModel: ArchiveDetailViewModel
     @State private var scene = DropStackScene()
     @State private var isMonthPickerPresented = false
-    @State private var isShredPresented = false
+    @State private var shredMode: CardShredMode?
     @State private var selectedNote: DropNote?
     
     private let title: String
@@ -29,12 +29,18 @@ struct ArchiveDetailView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                header
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, Spacing.spacing400)
+                NavigationBarView(title: title, onBack: { dismiss() }) {
+                    Button {
+                        shredMode = .all
+                    } label: {
+                        Text("비우기")
+                            .typography(.body5Medium)
+                            .foregroundStyle(Color.colorGray900)
+                    }
+                }
                 
                 monthSelector
-                    .padding(.horizontal, 18)
+                    .padding(.horizontal, Spacing.spacing350)
                     .padding(.bottom, Spacing.spacing300)
                 
                 ZStack {
@@ -51,7 +57,9 @@ struct ArchiveDetailView: View {
                                     scene.scaleMode = .resizeFill
                                     scene.updateSize(proxy.size)
                                     scene.onSelectNote = { note in
-                                        selectedNote = note
+                                        withAnimation(.easeOut(duration: 0.12)) {
+                                            selectedNote = note
+                                        }
                                     }
                                     scene.render(notes: viewModel.notes)
                                 }
@@ -62,7 +70,6 @@ struct ArchiveDetailView: View {
                     }
                 }
             }
-            .toolbar(.hidden, for: .navigationBar)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.colorWhite)
             .overlay {
@@ -92,7 +99,26 @@ struct ArchiveDetailView: View {
                     }
                 }
             }
-            .fullScreenCover(item: $selectedNote) { note in
+            .navigationDestination(item: $shredMode) { mode in
+                CardShredView(
+                    viewModel: makeShredViewModel(for: mode),
+                    stripImageName: "noteStrip",
+                    onBack: {
+                        if case .single(let cardId) = mode {
+                            selectedNote = viewModel.notes.first { $0.id == cardId }
+                        }
+                        shredMode = nil
+                    },
+                    onComplete: {
+                        shredMode = nil
+                        selectedNote = nil
+                        scene.clear()
+                        Task { await viewModel.load() }
+                    }
+                )
+            }
+
+            if let note = selectedNote {
                 CardDetailView(
                     viewModel: CardDetailViewModel(
                         cardId: note.id,
@@ -101,58 +127,42 @@ struct ArchiveDetailView: View {
                         )
                     ),
                     onClose: {
-                        selectedNote = nil
+                        withAnimation(.easeOut(duration: 0.12)) {
+                            selectedNote = nil
+                        }
                         Task { await viewModel.load() }
-                    }
-                )
-                .presentationBackground(.clear)
-            }
-            .fullScreenCover(isPresented: $isShredPresented) {
-                CardShredView(
-                    viewModel: CardShredViewModel(
-                        deleteAllCardUseCase: DefaultDeleteAllCardUseCase(
-                            cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
-                        )
-                    ),
-                    stripImageName: "noteStrip",
-                    onBack: {
-                        isShredPresented = false
                     },
-                    onComplete: {
-                        isShredPresented = false
-                        viewModel.clearNotes()
-                        scene.clear()
-                        Task { await viewModel.load() }
+                    onDiscard: {
+                        let cardId = note.id
+                        shredMode = .single(cardId: cardId)
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            selectedNote = nil
+                        }
                     }
                 )
+                .id(note.id)
+                .transition(.opacity)
+                .zIndex(1)
             }
         }
+        .animation(.easeOut(duration: 0.12), value: selectedNote?.id)
+        .hidesTabBar()
     }
-    
-    private var header: some View {
-        HStack(spacing: Spacing.spacing200) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .foregroundStyle(Color.colorGray900)
-            }
-            
-            Text(title)
-                .typography(.subtitle2)
-                .foregroundStyle(Color.colorGray900)
-            
-            Spacer()
-            
-            Button {
-                isShredPresented = true
-            } label: {
-                Text("비우기")
-                    .typography(.body5Medium)
-                    .foregroundStyle(Color.colorGray900)
-            }
-            .typography(.body5Medium)
-            .foregroundStyle(Color.colorGray900)
+
+    private func makeShredViewModel(for mode: CardShredMode) -> CardShredViewModel {
+        let cardRepository = DefaultCardRepository(networkManager: NetworkManager.shared)
+        switch mode {
+        case .single(let cardId):
+            return CardShredViewModel(
+                cardId: cardId,
+                deleteCardUseCase: DeleteCardUseCase(cardRepository: cardRepository)
+            )
+        case .all:
+            return CardShredViewModel(
+                deleteAllCardUseCase: DefaultDeleteAllCardUseCase(cardRepository: cardRepository)
+            )
         }
     }
     

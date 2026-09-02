@@ -12,7 +12,7 @@ import Foundation
 final class ArchiveDetailViewModel: ObservableObject {
     @Published var selectedMonth: Date
     @Published private(set) var notes: [DropNote] = []
-    @Published private(set) var isLoading = false
+    @Published private(set) var isLoading = true
     @Published var errorMessage: String?
 
     private let fetchCardsByDateUseCase: FetchCardsByDateUseCase

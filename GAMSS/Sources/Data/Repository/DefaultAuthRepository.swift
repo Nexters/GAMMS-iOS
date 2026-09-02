@@ -24,6 +24,22 @@ final class DefaultAuthRepository: AuthRepository {
     func logout() async throws {
         _ = try await networkManager.request(AuthEndpoint.logout, responseType: APIResponse<EmptyResponseDTO>.self)
         try tokenStorage.deleteTokens()
+        try? Auth.auth().signOut()
+    }
+
+    func autoLogin() async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw AuthError.missingFirebaseUser
+        }
+
+        let firebaseIdToken: String
+        do {
+            firebaseIdToken = try await user.getIDToken(forcingRefresh: true)
+        } catch {
+            throw AuthError.firebaseSignInFailed(error)
+        }
+
+        try await login(firebaseIdToken: firebaseIdToken)
     }
     
     func login(
@@ -91,7 +107,8 @@ final class DefaultAuthRepository: AuthRepository {
     ) async throws {
         let response = try await networkManager.request(
             AuthEndpoint.login(.init(idToken: firebaseIdToken)),
-            responseType: APIResponse<LoginResponseDTO>.self
+            responseType: APIResponse<LoginResponseDTO>.self,
+            isRetryAfterReissue: true
         )
         
         do {

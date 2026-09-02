@@ -16,54 +16,40 @@ struct ArchiveView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                header
-                    .padding(.bottom, 32)
-                
-                ScrollView {
-                    VStack(alignment: .center, spacing: 34) {
-                        Text("다시 보고 싶은 쓰레기통을 열어보세요")
-                            .typography(.body4Medium)
-                            .foregroundStyle(Color.colorGray950)
-                            .padding(.bottom, 2)
-                        
-                        trashCanGrid
-                    }
-                    .padding(.bottom, 33)
+        VStack(spacing: 0) {
+            NavigationBarView(leading: .logo) {
+                Button {
+                    isSettingPresented = true
+                } label: {
+                    Image("gear")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(Color.colorGray900)
                 }
             }
-            .background(Color.colorWhite)
-        }.navigationDestination(isPresented: $isSettingPresented) {
-            SettingView().toolbar(.hidden, for: .tabBar)
+            .padding(.bottom, 32)
+            
+            ScrollView {
+                VStack(alignment: .center, spacing: 34) {
+                    Text("다시 보고 싶은 쓰레기통을 열어보세요")
+                        .typography(.body4Medium)
+                        .foregroundStyle(Color.colorGray950)
+                        .padding(.bottom, 2)
+                    
+                    trashCanGrid
+                }
+                .padding(.bottom, 33)
+            }
+        }
+        .background(Color.colorWhite)
+        .navigationDestination(isPresented: $isSettingPresented) {
+            SettingView()
         }
     }
 }
 
 private extension ArchiveView {
-    var header: some View {
-        HStack {
-            Image("logoGamss")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 24)
-            
-            Spacer()
-            
-            Button {
-                isSettingPresented = true
-            } label: {
-                Image("gear")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-                    .foregroundStyle(Color.colorGray900)
-            }
-        }
-        .frame(height: 64)
-        .padding(.horizontal, 18)
-    }
-    
     var trashCanGrid: some View {
         LazyVGrid(
             columns: [

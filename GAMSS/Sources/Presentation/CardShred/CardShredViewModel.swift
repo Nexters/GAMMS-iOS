@@ -8,9 +8,11 @@
 import Combine
 import Foundation
 
-enum CardShredMode {
+enum CardShredMode: Hashable, Identifiable {
     case single(cardId: Int)
     case all
+
+    var id: Self { self }
 }
 
 @MainActor

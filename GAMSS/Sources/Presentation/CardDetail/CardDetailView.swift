@@ -9,16 +9,21 @@ import SwiftUI
 
 struct CardDetailView: View {
     let onClose: () -> Void
+    let onDiscard: () -> Void
 
     @StateObject private var viewModel: CardDetailViewModel
     @StateObject private var conversationHistoryViewModel: ConversationHistoryViewModel
     @State private var isShowingConversation = false
-    @State private var isShredPresented = false
 
     private let transitionDuration = 0.22
 
-    init(viewModel: CardDetailViewModel, onClose: @escaping () -> Void) {
+    init(
+        viewModel: CardDetailViewModel,
+        onClose: @escaping () -> Void,
+        onDiscard: @escaping () -> Void
+    ) {
         self.onClose = onClose
+        self.onDiscard = onDiscard
         _viewModel = StateObject(wrappedValue: viewModel)
         _conversationHistoryViewModel = StateObject(
             wrappedValue: ConversationHistoryViewModel(
@@ -60,6 +65,7 @@ struct CardDetailView: View {
             }
         }
         .task {
+            guard viewModel.card == nil else { return }
             await viewModel.loadCard()
         }
         .alert(
@@ -83,32 +89,12 @@ struct CardDetailView: View {
                 Button("확인", role: .cancel) {}
             }
         }
-        .fullScreenCover(isPresented: $isShredPresented) {
-            if let card = viewModel.card {
-                CardShredView(
-                    viewModel: CardShredViewModel(
-                        cardId: card.id,
-                        deleteCardUseCase: DeleteCardUseCase(
-                            cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
-                        )
-                    ),
-                    stripImageName: "noteStrip",
-                    onBack: {
-                        isShredPresented = false
-                    },
-                    onComplete: {
-                        isShredPresented = false
-                        onClose()
-                    }
-                )
-            }
-        }
     }
 
     private var bottomActions: some View {
         HStack(spacing: Spacing.spacing050) {
             OutlineButton(title: "기록 버리기") {
-                isShredPresented = true
+                onDiscard()
             }
             .frame(width: 97)
 
@@ -151,6 +137,7 @@ struct CardDetailView: View {
                 cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)
             )
         ),
-        onClose: {}
+        onClose: {},
+        onDiscard: {}
     )
 }

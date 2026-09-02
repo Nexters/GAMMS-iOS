@@ -5,6 +5,7 @@
 //  Created by 이건준 on 8/13/26.
 //
 
+import FirebaseAuth
 import Foundation
 
 final class DefaultMemberRepository: MemberRepository {
@@ -19,6 +20,7 @@ final class DefaultMemberRepository: MemberRepository {
     func deleteMember() async throws {
         _ = try await networkManager.request(MemberEndpoint.deleteAccount, responseType: APIResponse<EmptyResponseDTO>.self)
         try tokenStorage.deleteTokens()
+        try? Auth.auth().signOut()
     }
 
     func fetchMyProfile() async throws -> User {

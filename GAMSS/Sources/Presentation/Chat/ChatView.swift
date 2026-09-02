@@ -91,7 +91,27 @@ struct ChatView: View {
                     .tint(Color.colorWhite)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+
+            if let card = viewModel.createdCard {
+                CardResultView(
+                    card: card,
+                    viewModel: CardResultViewModel(),
+                    onComplete: {
+                        withAnimation(.easeOut(duration: 0.12)) {
+                            viewModel.dismissCard()
+                        }
+                        DispatchQueue.main.async {
+                            dismiss()
+                        }
+                    }
+                )
+                .id(card.id)
+                .transition(.opacity)
+                .zIndex(2)
+            }
         }
+        .animation(.easeOut(duration: 0.12), value: viewModel.createdCard?.id)
+        .hidesTabBar()
         .onChange(of: viewModel.riskDetection) { _, newValue in
             if newValue != nil { isInputFocused = false }
         }
@@ -209,7 +229,6 @@ struct ChatView: View {
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
         .task {
             await viewModel.start()
         }
@@ -231,59 +250,32 @@ struct ChatView: View {
             }
             Button("확인", role: .cancel) {}
         }
-        .fullScreenCover(item: Binding(
-            get: { viewModel.createdCard },
-            set: { if $0 == nil { viewModel.dismissCard() } }
-        )) { card in
-            CardResultView(
-                card: card,
-                viewModel: CardResultViewModel(),
-                onComplete: {
-                    viewModel.dismissCard()
-
-                    DispatchQueue.main.async {
-                        dismiss()
-                    }
-                }
-            )
-            .presentationBackground(.clear)
-        }
     }
 
-    /// 커스텀 상단 헤더: 뒤로가기 + 대화방 생성 날짜 + 우측 버튼 2개(종료, 토큰 사용량).
-    /// 시스템 네비게이션 바는 `.toolbar(.hidden, for: .navigationBar)`로 숨기고 이 헤더가 대신한다.
     private var header: some View {
-        ZStack {
-            Text(headerDateText)
-                .typography(.subtitle3)
-                .foregroundStyle(Color.colorGray950)
-
-            HStack {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .foregroundStyle(Color.colorGray950)
+        NavigationBarView(
+            title: headerDateText,
+            titlePlacement: .center,
+            titleStyle: .subtitle3,
+            titleColor: .colorGray950,
+            onBack: { dismiss() },
+            horizontalPadding: Spacing.spacing400
+        ) {
+            HStack(spacing: Spacing.spacing400) {
+                Button(action: { viewModel.requestEndConversation() }) {
+                    Image("iconCardGenerate")
                 }
+                .disabled(!viewModel.canEndConversation)
+                .accessibilityLabel("대화 종료")
 
-                Spacer()
-
-                HStack(spacing: Spacing.spacing400) {
-                    Button(action: { viewModel.requestEndConversation() }) {
-                        Image("iconCardGenerate")
-                    }
-                    .disabled(!viewModel.canEndConversation)
-                    .accessibilityLabel("대화 종료")
-
-                    Button(action: {
-                        viewModel.isTokenUsagePopoverPresented.toggle()
-                    }) {
-                        Image("iconTokenUsage")
-                    }
-                    .accessibilityLabel("토큰 사용량")
+                Button(action: {
+                    viewModel.isTokenUsagePopoverPresented.toggle()
+                }) {
+                    Image("iconTokenUsage")
                 }
+                .accessibilityLabel("토큰 사용량")
             }
         }
-        .padding(.horizontal, Spacing.spacing400)
-        .padding(.vertical, Spacing.spacing400)
         .background(Color.colorWhite)
     }
 

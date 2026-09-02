@@ -25,9 +25,7 @@ struct AccountView: View {
     var body: some View {
         ZStack {
             VStack(alignment: .leading, spacing: 0) {
-                header
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, Spacing.spacing400)
+                NavigationBarView(title: title, onBack: { dismiss() })
                 
                 ForEach(AccountItem.allCases) { item in
                     accountItem(item)
@@ -38,7 +36,6 @@ struct AccountView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(Color.colorWhite)
-            .toolbar(.hidden, for: .navigationBar)
             .alert(
                 viewModel.errorMessage ?? "",
                 isPresented: Binding(
@@ -88,21 +85,7 @@ struct AccountView: View {
                 }
             }
         }
-    }
-    
-    private var header: some View {
-        HStack(spacing: 12) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .foregroundStyle(Color.colorGray900)
-            }
-            Text(title)
-                .typography(.subtitle2)
-                .foregroundStyle(Color.colorGray900)
-            Spacer()
-        }
+        .hidesTabBar()
     }
     
     @ViewBuilder
@@ -117,7 +100,6 @@ struct AccountView: View {
         case .changeNickname:
             NavigationLink {
                 NicknameEditView(viewModel: NicknameEditViewModel(updateNicknameUseCase: DefaultUpdateNicknameUseCase(memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: TokenStorage.shared), userManager: UserManager.shared)))
-                    .toolbar(.hidden, for: .navigationBar)
             } label: {
                 row
             }
@@ -172,7 +154,7 @@ struct AccountView: View {
                 )
             )
         )
-        .environment(LoginSession())
+        .environment(LoginSession.shared)
         .environment(UserManager.shared)
     }
 }

@@ -17,6 +17,9 @@ enum AuthError: Error {
     
     /// Firebase 인증 실패
     case firebaseSignInFailed(Error)
+
+    /// Firebase 세션 없음
+    case missingFirebaseUser
     
     /// 서버 로그인 실패
     case serverLoginFailed(Error)

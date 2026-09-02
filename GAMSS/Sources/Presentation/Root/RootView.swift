@@ -7,14 +7,16 @@
 
 import SwiftUI
 
-@Observable
-final class LoginSession {
-    var value: LoginState = .current
-}
-
 struct RootView: View {
-    @State private var loginSession = LoginSession()
+    @State private var loginSession = LoginSession.shared
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+
+    private let loginUseCase: LoginUseCase = DefaultLoginUseCase(
+        authRepository: DefaultAuthRepository(
+            networkManager: NetworkManager.shared,
+            tokenStorage: TokenStorage.shared
+        )
+    )
     
     var body: some View {
         ZStack {
@@ -22,16 +24,19 @@ struct RootView: View {
             case .notLoggedIn:
                 LoginView(
                     viewModel: LoginViewModel(
-                        loginUseCase: DefaultLoginUseCase(
-                            authRepository: DefaultAuthRepository(
-                                networkManager: NetworkManager.shared,
-                                tokenStorage: TokenStorage.shared
-                            )
-                        )
+                        loginUseCase: loginUseCase
                     )
                 )
                 
-            case .autoLoginPending, .loggedIn:
+            case .autoLoginPending:
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.colorWhite)
+                    .task {
+                        await performAutoLogin()
+                    }
+                
+            case .loggedIn:
                 if hasCompletedOnboarding {
                     MainTabView()
                 } else {
@@ -54,6 +59,17 @@ struct RootView: View {
         )
         .environment(loginSession)
         .environment(UserManager.shared)
+    }
+
+    private func performAutoLogin() async {
+        do {
+            try await loginUseCase.autoLogin()
+            loginSession.value = .loggedIn
+        } catch {
+            Log.error("Auto login failed: \(error)")
+            TokenStorage.shared.clearSession()
+            loginSession.value = .notLoggedIn
+        }
     }
 }
 

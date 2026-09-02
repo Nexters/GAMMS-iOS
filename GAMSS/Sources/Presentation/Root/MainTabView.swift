@@ -33,12 +33,14 @@ struct MainTabView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            TabView(selection: $selectedTab) {
+        TabView(selection: $selectedTab) {
+            tabNavigationStack {
                 ArchiveView(viewModel: ArchiveViewModel())
-                    .tabItem { tabLabel(for: .archive) }
-                    .tag(MainTab.archive)
+            }
+            .tabItem { tabLabel(for: .archive) }
+            .tag(MainTab.archive)
 
+            tabNavigationStack {
                 HomeView(
                     viewModel: HomeViewModel(
                         fetchMyProfileUseCase: DefaultFetchMyProfileUseCase(
@@ -49,19 +51,35 @@ struct MainTabView: View {
                         )
                     )
                 )
-                .tabItem { tabLabel(for: .home) }
-                .tag(MainTab.home)
+            }
+            .tabItem { tabLabel(for: .home) }
+            .tag(MainTab.home)
 
+            tabNavigationStack {
                 ConversationListView(
                     viewModel: ConversationListViewModel(
                         getIncompleteConversationsUseCase: GetIncompleteConversationsUseCase(
                             conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
-                        ), deleteConversationsUseCase: DefaultDeleteConversationsUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)), searchConversationUseCase: DefaultSearchConversationUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared))
+                        ),
+                        deleteConversationsUseCase: DefaultDeleteConversationsUseCase(
+                            conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
+                        ),
+                        searchConversationUseCase: DefaultSearchConversationUseCase(
+                            conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)
+                        )
                     )
                 )
-                .tabItem { tabLabel(for: .chat) }
-                .tag(MainTab.chat)
             }
+            .tabItem { tabLabel(for: .chat) }
+            .tag(MainTab.chat)
+        }
+    }
+
+    /// 탭별 NavigationStack. 네비게이션 바 숨김은 NavigationBarHider에서 처리한다.
+    private func tabNavigationStack<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        NavigationStack {
+            content()
+                .background(NavigationBarHider())
         }
     }
 

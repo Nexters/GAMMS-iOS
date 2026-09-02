@@ -22,79 +22,68 @@ struct ConversationListView: View {
     }
 
     var body: some View {
-            VStack(alignment: .leading, spacing: 0) {
-                ConversationListHeaderView(currentMode: viewModel.currentMode, onTappedBackButton: {
-                    viewModel.updateMode(.normal)
-                }, onTappedSearchButton: {
+        VStack(alignment: .leading, spacing: 0) {
+            ConversationListHeaderView(
+                currentMode: viewModel.currentMode,
+                onTappedBackButton: { viewModel.updateMode(.normal) },
+                onTappedSearchButton: {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         viewModel.startSearching()
                     }
-                }, onTappedSettingButton: {
-                    isSettingPresented = true
-                })
-                .frame(height: 64)
-                
-                if viewModel.isSearching {
-                    ConversationSearchView(onTappedCancelButton: {
+                },
+                onTappedSettingButton: { isSettingPresented = true }
+            )
+
+            if viewModel.isSearching {
+                ConversationSearchView(
+                    onTappedCancelButton: {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             viewModel.stopSearching()
                         }
-                    }, onTappedSearchButton: {
-                        Task {
-                            await viewModel.searchText()
-                        }
-                    }, editingText: $viewModel.editedText)
-                    .frame(height: 42)
-                    .transition(
-                        .move(edge: .top)
-                        .combined(with: .opacity)
-                    )
-                }
-                
-                dateHeader.padding(.vertical, Spacing.spacing150)
-                
-                if !viewModel.isLoading && viewModel.displayedConversations.isEmpty {
-                    ConversationListEmptyView()
-                } else {
+                    },
+                    onTappedSearchButton: {
+                        Task { await viewModel.searchText() }
+                    },
+                    editingText: $viewModel.editedText
+                )
+                .frame(height: 42)
+                .padding(.horizontal, NavigationBarMetrics.horizontalPadding)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+
+            dateHeader
+                .padding(.vertical, Spacing.spacing150)
+                .padding(.horizontal, NavigationBarMetrics.horizontalPadding)
+
+            if !viewModel.isLoading && viewModel.displayedConversations.isEmpty {
+                ConversationListEmptyView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .padding(.horizontal, NavigationBarMetrics.horizontalPadding)
+            } else {
+                VStack(spacing: 0) {
                     ScrollView {
                         LazyVStack(spacing: Spacing.spacing100) {
-                            ForEach(viewModel.displayedConversations) { conversation in
-                                switch viewModel.currentMode {
-                                case .normal:
-                                    Button {
-                                        selectedConversation = conversation
-                                    } label: {
-                                        ConversationRowView(
-                                            currentMode: viewModel.currentMode,
-                                            conversation: conversation,
-                                            isSelected: false
-                                        )
+                            ForEach(Array(viewModel.displayedConversations.enumerated()), id: \.element.id) { index, conversation in
+                                conversationRow(for: conversation)
+                                    .onAppear {
+                                        Task {
+                                            await viewModel.loadMoreIfNeeded(at: index)
+                                        }
                                     }
-                                    .buttonStyle(.plain)
-                                    
-                                case .delete:
-                                    Button {
-                                        viewModel.selectConversation(id: conversation.id)
-                                    } label: {
-                                        ConversationRowView(
-                                            currentMode: viewModel.currentMode,
-                                            conversation: conversation,
-                                            isSelected: viewModel.isSelected(
-                                                id: conversation.id
-                                            )
-                                        )
-                                    }
-                                    .buttonStyle(.plain)
-                                }
+                            }
+
+                            if viewModel.isLoading && !viewModel.displayedConversations.isEmpty {
+                                ProgressView()
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, Spacing.spacing200)
                             }
                         }
                     }
-                    Spacer()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                     if viewModel.currentMode == .delete {
                         Button {
-                            Task {
-                                await viewModel.deleteConversations()
-                            }
+                            Task { await viewModel.deleteConversations() }
                         } label: {
                             Text("삭제하기")
                                 .typography(.body3Medium)
@@ -110,41 +99,41 @@ struct ConversationListView: View {
                                     ? Color.colorRed
                                     : Color.colorGray075
                                 )
-                                .clipShape(
-                                    RoundedRectangle(cornerRadius: 12)
-                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
+                        .padding(.top, Spacing.spacing200)
                         .padding(.bottom, 10)
                         .disabled(!viewModel.isDeleteButtonEnabled)
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding(.horizontal, NavigationBarMetrics.horizontalPadding)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .padding(.horizontal, Spacing.spacing400)
-            .toolbar(.hidden, for: .navigationBar)
-            .navigationDestination(item: $selectedConversation) { conversation in
-                ChatView(
-                    viewModel: ChatViewModel(
-                        sendMessageUseCase: SendMessageUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
-                        getMessagesUseCase: GetMessagesUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
-                        endConversationUseCase: EndConversationUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
-                        createCardUseCase: CreateCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)),
-                        getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)),
-                        updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
-                        detectRiskInTextUseCase: DetectRiskInTextUseCase(repository: DefaultRiskLexiconRepository()),
-                        summaryStore: LazyConversationSummaryStore(),
-                        conversationId: conversation.id,
-                        initialDate: conversation.createdAt
-                    )
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(Color.colorWhite)
+        .navigationDestination(item: $selectedConversation) { conversation in
+            ChatView(
+                viewModel: ChatViewModel(
+                    sendMessageUseCase: SendMessageUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
+                    getMessagesUseCase: GetMessagesUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
+                    endConversationUseCase: EndConversationUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
+                    createCardUseCase: CreateCardUseCase(cardRepository: DefaultCardRepository(networkManager: NetworkManager.shared)),
+                    getTokenUsageUseCase: GetTokenUsageUseCase(memberRepository: DefaultMemberRepository(networkManager: NetworkManager.shared, tokenStorage: .shared)),
+                    updateConversationTitleUseCase: UpdateConversationTitleUseCase(conversationRepository: DefaultConversationRepository(networkManager: NetworkManager.shared)),
+                    detectRiskInTextUseCase: DetectRiskInTextUseCase(repository: DefaultRiskLexiconRepository()),
+                    summaryStore: LazyConversationSummaryStore(),
+                    conversationId: conversation.id,
+                    initialDate: conversation.createdAt
                 )
-                .toolbar(.hidden, for: .tabBar)
-            }
-            .navigationDestination(isPresented: $isSettingPresented) {
-                SettingView().toolbar(.hidden, for: .tabBar)
-            }
-            .onAppear {
-                Task { await viewModel.load() }
-            }
+            )
+        }
+        .navigationDestination(isPresented: $isSettingPresented) {
+            SettingView()
+        }
+        .onAppear {
+            Task { await viewModel.load() }
+        }
         .alert(viewModel.alertMessage ?? "", isPresented: Binding(
             get: { viewModel.alertMessage != nil },
             set: { if !$0 { viewModel.alertMessage = nil } }
@@ -152,17 +141,15 @@ struct ConversationListView: View {
             Button("확인", role: .cancel) {}
         }
     }
-    
-    /// 오늘 날짜를 표시만 한다 — 목록이 "미완료 대화방"(fetchIncompleteChats) 기준이라 실제로는
-    /// 여러 날짜에 걸친 대화가 섞여 있을 수 있지만, 이 헤더는 조회 조건과 무관하게 항상 오늘 날짜 보여줌.
+
     private var dateHeader: some View {
         HStack {
             Text(ConversationListDateHeaderFormatter.string(from: Date()))
                 .typography(.body5Regular)
                 .foregroundStyle(Color.colorGray950)
-            
+
             Spacer()
-            
+
             Button {
                 viewModel.updateMode(.delete)
             } label: {
@@ -170,6 +157,35 @@ struct ConversationListView: View {
                     .typography(.body5Regular)
                     .foregroundStyle(Color.colorGray500)
             }
+        }
+    }
+
+    @ViewBuilder
+    private func conversationRow(for conversation: ConversationSummary) -> some View {
+        switch viewModel.currentMode {
+        case .normal:
+            Button {
+                selectedConversation = conversation
+            } label: {
+                ConversationRowView(
+                    currentMode: viewModel.currentMode,
+                    conversation: conversation,
+                    isSelected: false
+                )
+            }
+            .buttonStyle(.plain)
+
+        case .delete:
+            Button {
+                viewModel.selectConversation(id: conversation.id)
+            } label: {
+                ConversationRowView(
+                    currentMode: viewModel.currentMode,
+                    conversation: conversation,
+                    isSelected: viewModel.isSelected(id: conversation.id)
+                )
+            }
+            .buttonStyle(.plain)
         }
     }
 }
